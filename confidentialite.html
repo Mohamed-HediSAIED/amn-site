@@ -118,26 +118,42 @@
     <h2>Aucun cookie, aucun traceur</h2>
     <div class="prose">
       <p>Ce site ne dépose aucun cookie, n'utilise aucun outil de mesure d'audience, aucun pixel publicitaire et aucun bouton de réseau social. Il n'y a donc pas de bandeau de consentement à afficher : il n'y a rien à consentir.</p>
+      <details class="plus">
+        <summary><span class="plus-ferme">Le détail</span><span class="plus-ouvert">Replier</span><span class="plus-chev" aria-hidden="true"></span></summary>
+        <div class="plus-corps">
       <p>Les polices de caractères sont <strong>hébergées sur ce site</strong> et non chargées depuis un service tiers. Ouvrir une page ne transmet donc votre adresse IP à personne d'autre qu'à l'hébergeur du site.</p>
+      <p><strong>Une seule chose est écrite sur votre appareil</strong>, et autant la décrire précisément. La page d'accueil ouvre sur une courte animation&nbsp;; pour ne pas vous la rejouer à chaque page, le site note qu'elle a déjà été vue. Cette note vaut le caractère «&nbsp;1&nbsp;», elle vit dans le stockage de session de votre navigateur, elle disparaît à la fermeture de l'onglet, et elle ne contient aucun identifiant. Ce n'est pas un cookie&nbsp;: elle n'est envoyée à aucun serveur, ni au nôtre ni à personne. Si votre navigateur refuse ce stockage, l'animation se joue simplement à chaque fois.</p>
+        </div>
+      </details>
     </div>
 
     <h2>Le formulaire de demande d'accès</h2>
     <div class="prose">
       <p><strong>Ce qui est collecté :</strong> votre nom, le nom de votre structure, votre adresse email, et le texte que vous écrivez. Rien d'autre — le formulaire ne demande ni moyen de paiement, ni mot de passe, ni pièce jointe.</p>
+      <details class="plus">
+        <summary><span class="plus-ferme">Le détail</span><span class="plus-ouvert">Replier</span><span class="plus-chev" aria-hidden="true"></span></summary>
+        <div class="plus-corps">
       <p><strong>Pourquoi :</strong> pour vous répondre et, le cas échéant, préparer la suite. Base légale : l'exécution de mesures précontractuelles prises à votre demande (article 6.1.b du RGPD).</p>
       <p><strong>Qui le reçoit :</strong> nous, et personne d'autre. La demande nous est acheminée par notre prestataire d'envoi d'emails, <a href="https://resend.com/legal/privacy-policy" rel="noopener nofollow">Resend</a>, qui agit comme sous-traitant et n'en fait aucun autre usage. Vos informations ne sont ni vendues, ni louées, ni transmises à un partenaire commercial, sans exception.</p>
       <p><strong>Combien de temps :</strong> trois ans à compter de notre dernier échange si la discussion se poursuit, douze mois si elle n'aboutit pas. Au-delà, la demande est supprimée.</p>
+        </div>
+      </details>
     </div>
 
     <h2>Vos informations sortent-elles de l'Union européenne&nbsp;?</h2>
     <div class="prose">
       <p>Oui, et autant le dire clairement. Deux prestataires américains interviennent&nbsp;:</p>
+      <details class="plus">
+        <summary><span class="plus-ferme">Le détail</span><span class="plus-ouvert">Replier</span><span class="plus-chev" aria-hidden="true"></span></summary>
+        <div class="plus-corps">
       <ul>
         <li><strong>Resend Inc.</strong> achemine l'email qui nous transmet votre demande. Le contenu du formulaire passe donc par ses serveurs.</li>
         <li><strong>Vercel Inc.</strong> héberge ce site. Comme tout hébergeur, il tient des journaux techniques de connexion.</li>
       </ul>
       <p>Un transfert de données personnelles hors de l'Union européenne doit être encadré par les garanties prévues au chapitre V du RGPD — clauses contractuelles types de la Commission européenne, ou adhésion au cadre de protection des données UE–États-Unis.</p>
       <p><span class="todo">à compléter</span> — mentionner ici la garantie retenue pour chacun des deux prestataires, telle qu'elle figure dans leur contrat de sous-traitance. Tant que ce n'est pas vérifié et écrit, cette page décrit un transfert sans nommer son fondement.</p>
+        </div>
+      </details>
     </div>
 
     <h2>Aucune décision automatisée</h2>
@@ -148,8 +164,13 @@
     <h2>Protection contre les envois automatisés</h2>
     <div class="prose">
       <p>Pour empêcher qu'un script inonde le formulaire, le serveur compte les envois récents provenant d'une même origine. Pour cela, votre adresse IP est transformée à la volée en une empreinte non réversible, gardée en mémoire vive quelques minutes puis effacée.</p>
+      <details class="plus">
+        <summary><span class="plus-ferme">Le détail</span><span class="plus-ouvert">Replier</span><span class="plus-chev" aria-hidden="true"></span></summary>
+        <div class="plus-corps">
       <p>Votre adresse IP elle-même n'est ni enregistrée sur disque, ni jointe au message qui nous parvient, ni transmise à qui que ce soit. L'hébergeur, lui, tient ses propres journaux techniques, comme tout hébergeur.</p>
       <p>Aucun CAPTCHA n'est utilisé : ces dispositifs transmettent des informations sur votre navigateur à un tiers, et pénalisent surtout les personnes qui utilisent des outils d'accessibilité.</p>
+        </div>
+      </details>
     </div>
 
     <h2>Vos droits</h2>
@@ -207,6 +228,37 @@
     </div>
   </div>
 </footer>
+
+<!-- ==================================================================
+     ASSISTANT À RÉPONSES PRÉPARÉES
+     ==================================================================
+     Aucun modèle de langage derrière, aucun appel réseau, aucun coût.
+     Des réponses écrites à la main dans site.js, choisies par mots-
+     clés. Ce qui n'est pas prévu renvoie au formulaire — jamais une
+     réponse improvisée qui ressemblerait à un engagement sur un prix,
+     un délai ou une garantie.
+
+     Sans JavaScript, le formulaire part vers /contact et un message le
+     dit. On ne laisse pas un champ qui a l'air de marcher.
+     ================================================================== -->
+<details class="ajm">
+  <summary>
+    <span class="ajm-led" aria-hidden="true"></span>
+    Questions fréquentes
+  </summary>
+  <div class="ajm-panel">
+    <p class="ajm-tete">Réponses écrites à l'avance, pas une intelligence artificielle. Si votre question sort de ce qui est prévu, je vous envoie vers le formulaire.</p>
+    <div class="ajm-fil" role="log" aria-live="polite" aria-label="Conversation">
+      <p class="ajm-bulle ajm-bulle--lui">Bonjour. Je peux répondre sur les prix, les délais, ce qu'on surveille, les données personnelles et la marche à suivre pour demander un accès.</p>
+    </div>
+    <form class="ajm-form" action="/contact" method="get">
+      <label class="hp" for="ajm-q">Votre question</label>
+      <input type="text" id="ajm-q" name="q" autocomplete="off" placeholder="Votre question…" maxlength="300">
+      <button type="submit">Demander</button>
+    </form>
+    <p class="ajm-sansjs">Sans JavaScript, ce champ vous emmène simplement au <a href="/contact">formulaire de demande d'accès</a>.</p>
+  </div>
+</details>
 
 <script src="/site.js" defer></script>
 </body>

@@ -17,7 +17,7 @@
      node scripts/verifier-navigateur.mjs
    ------------------------------------------------------------------ */
 import { createServer } from 'node:http';
-import { readdirSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
@@ -79,6 +79,16 @@ const PAGES = readdirSync(RACINE)
   .sort();
 
 const LARGEURS = [320, 390, 768, 1024, 1440];
+
+/* La séquence d'ouverture recouvre l'accueil pendant 2,15 s. Les
+   contrôles qui ne la visent pas doivent l'écarter d'abord, sinon
+   c'est elle qui reçoit leurs clics. */
+const sansSequence = (page) =>
+  page.evaluate(() => {
+    const s = document.querySelector('.seq');
+    if (s) s.classList.add('seq--vue');
+    try { sessionStorage.setItem('amn-seq', '1'); } catch (e) { /* stockage refusé */ }
+  });
 
 /* ================= 1. Pages × largeurs ================= */
 
@@ -148,6 +158,7 @@ console.log('2. Accessibilité');
 {
   const page = await navigateur.newPage({ viewport: { width: 1440, height: 900 } });
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  await sansSequence(page);
 
   await page.keyboard.press('Tab');
   const premierFocus = await page.evaluate(() => {
@@ -386,6 +397,7 @@ for (const largeur of [390, 1440]) {
   });
   const page = await ctx.newPage();
   await page.goto(BASE + '/', { waitUntil: 'load' });
+  await page.waitForTimeout(3200);   /* sans JS : 2,15 s d'attente + 0,75 s de sortie, plus une marge */
   await page.locator('.console > summary').click();
   t('Sans JavaScript : la console s\'ouvre', await page.locator('.plaque[href="/service"]').isVisible());
   /* Pas de page.evaluate ici : sans JavaScript il n'y a rien pour
@@ -408,6 +420,7 @@ for (const largeur of [390, 1440]) {
   page.on('console', (m) => m.type() === 'error' && erreurs.push(m.text()));
   page.on('pageerror', (e) => erreurs.push(String(e)));
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  await sansSequence(page);
   await page.locator('.console > summary').click();
   await page.mouse.move(1360, 180);
   await page.waitForTimeout(250);
@@ -453,6 +466,7 @@ for (const largeur of [390, 1440]) {
   const ctx = await navigateur.newContext({ reducedMotion: 'reduce', viewport: { width: 1440, height: 900 } });
   const page = await ctx.newPage();
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  await sansSequence(page);
   const duree = await page.evaluate(() =>
     getComputedStyle(document.querySelector('.btn-primary')).transitionDuration
   );
@@ -474,6 +488,7 @@ for (const largeur of [390, 1440]) {
 {
   const page = await navigateur.newPage({ viewport: { width: 1440, height: 900 } });
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  await sansSequence(page);
   await page.locator('.console > summary').click();
   await page.waitForTimeout(500);
   const mesures = await page.evaluate(() => {
@@ -524,6 +539,7 @@ for (const largeur of [390, 1440]) {
 {
   const page = await navigateur.newPage({ viewport: { width: 1440, height: 900 } });
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  await sansSequence(page);
   t('Règle de section affichée sur grand écran', await page.locator('.rail').isVisible());
 
   const ancres = await page.evaluate(() =>
@@ -560,6 +576,235 @@ for (const largeur of [390, 1440]) {
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
   t('Règle de section absente sous 1320 px', !(await page.locator('.rail').isVisible()));
   await page.close();
+}
+
+/* ================= 2 ter. v4 ================= */
+
+console.log('2 ter. Séquence, dépliables, assistant');
+
+/* ---- La séquence d'ouverture ---- */
+{
+  /* Elle doit tenir sa promesse : ce qu'elle AFFICHE doit être vrai.
+     Le compte d'en-têtes de sécurité écrit dans le HTML est comparé à
+     ce que le serveur envoie réellement. Si quelqu'un touche à
+     vercel.json sans corriger l'accueil, ça casse ici. */
+  const r = await fetch(BASE + '/');
+  const html = await r.text();
+  const annonce = Number((html.match(/data-seq-entetes>(\d+)\s*\/\s*(\d+)</) || [])[1]);
+
+  /* La référence est vercel.json, pas la réponse locale : l'affirmation
+     de l'accueil porte sur le site DÉPLOYÉ, et c'est ce fichier qui
+     décide de ce que la production envoie. Le serveur local, lui,
+     retire volontairement Strict-Transport-Security — il n'a aucun sens
+     en HTTP et ferait basculer tout localhost en HTTPS. Comparer à la
+     réponse locale ferait donc échouer une affirmation vraie. */
+  const vercel = JSON.parse(readFileSync(join(RACINE, 'vercel.json'), 'utf8'));
+  const declares = vercel.headers.find((h) => h.source === '/(.*)').headers.map((h) => h.key);
+  t("Séquence : le nombre d'en-têtes annoncé est celui que vercel.json déploie",
+    annonce === declares.length, `annoncé ${annonce}, déclarés ${declares.length}`);
+
+  const manquants = declares.filter((h) => !r.headers.get(h) && h !== 'Strict-Transport-Security');
+  t('Séquence : le serveur local envoie tous ces en-têtes (HSTS mis à part)',
+    manquants.length === 0, manquants.join(', '));
+  t('Séquence : les valeurs affichées sont dans le HTML servi',
+    html.includes('Appels à des tiers') && html.includes('Cookies déposés'));
+}
+{
+  const ctx = await navigateur.newContext({ viewport: { width: 1280, height: 800 } });
+  const page = await ctx.newPage();
+  const erreurs = [];
+  page.on('pageerror', (e) => erreurs.push(String(e)));
+  await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
+
+  t('Séquence : visible au premier chargement',
+    await page.locator('.seq').isVisible());
+  /* Le titre est peint SOUS la séquence, pas caché derrière elle : sans
+     ça le plus grand contenu affiché serait mesuré à 2,2 s. */
+  t('Séquence : le titre est déjà rendu dessous',
+    await page.evaluate(() => {
+      const h = document.querySelector('h1');
+      return h.getBoundingClientRect().height > 0 && getComputedStyle(h).visibility === 'visible';
+    }));
+
+  await page.waitForTimeout(1400);
+  const mesures = await page.evaluate(() =>
+    [...document.querySelectorAll('[data-mesure]')].map((e) => e.dataset.mesure + '=' + e.textContent)
+  );
+  t('Séquence : les valeurs sont mesurées à l\'exécution',
+    mesures.indexOf('tiers=0') > -1 && mesures.indexOf('cookies=0') > -1, mesures.join(' '));
+
+  await page.waitForTimeout(1400);
+  t('Séquence : elle s\'efface toute seule',
+    await page.evaluate(() => {
+      const s = document.querySelector('.seq');
+      const cs = getComputedStyle(s);
+      const r = s.getBoundingClientRect();
+      /* Effacée, ou sortie du cadre : les deux comptent. */
+      return cs.display === 'none' || cs.visibility === 'hidden' ||
+             cs.opacity === '0' || r.bottom <= 0;
+    }));
+  t('Séquence : la page redevient cliquable',
+    await page.evaluate(() => {
+      const b = document.querySelector('.hero .btn-primary').getBoundingClientRect();
+      const el = document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2);
+      return !!(el && el.closest('.btn-primary'));
+    }));
+
+  /* Une seule fois par visite : on navigue vraiment, puis on revient. */
+  await page.goto(BASE + '/service', { waitUntil: 'domcontentloaded' });
+  await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(250);
+  t('Séquence : pas rejouée ailleurs dans la même visite',
+    await page.evaluate(() => document.querySelector('.seq').classList.contains('seq--vue')));
+  t('Séquence : aucune erreur', erreurs.length === 0, erreurs.join(' | '));
+  await ctx.close();
+}
+{
+  /* Sans JavaScript, elle doit se jouer ET se retirer d'elle-même :
+     c'est le CSS qui la termine, pas le script. */
+  const ctx = await navigateur.newContext({ javaScriptEnabled: false, viewport: { width: 1280, height: 800 } });
+  const page = await ctx.newPage();
+  await page.goto(BASE + '/', { waitUntil: 'load' });
+  await page.waitForTimeout(3200);
+  t('Séquence : sans JavaScript, elle se retire seule',
+    await page.evaluate(() => {
+      const s = document.querySelector('.seq');
+      const cs = getComputedStyle(s);
+      return cs.visibility === 'hidden' || cs.opacity === '0' ||
+             s.getBoundingClientRect().bottom <= 0;
+    }));
+  await ctx.close();
+}
+{
+  const ctx = await navigateur.newContext({ reducedMotion: 'reduce', viewport: { width: 1280, height: 800 } });
+  const page = await ctx.newPage();
+  await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
+  t('Séquence : supprimée si le système demande moins de mouvement',
+    (await page.evaluate(() => getComputedStyle(document.querySelector('.seq')).display)) === 'none');
+  await ctx.close();
+}
+
+/* ---- Le contenu dépliable ---- */
+for (const chemin of ['/service', '/methode', '/confidentialite']) {
+  const r = await fetch(BASE + chemin);
+  const html = await r.text();
+  t(`${chemin} — le détail replié est bien dans le HTML servi (indexable)`,
+    html.includes('plus-corps') && html.indexOf('<div class="plus-corps">') < html.indexOf('</body>'));
+
+  const page = await navigateur.newPage({ viewport: { width: 1280, height: 900 } });
+  await page.goto(BASE + chemin, { waitUntil: 'networkidle' });
+  const n = await page.locator('details.plus').count();
+  t(`${chemin} — au moins un bloc dépliable`, n >= 1, `trouvé ${n}`);
+  t(`${chemin} — replié au chargement`,
+    !(await page.locator('details.plus').first().evaluate((d) => d.open)));
+  t(`${chemin} — le détail est masqué tant que c'est replié`,
+    !(await page.locator('.plus-corps').first().isVisible()));
+  await page.locator('details.plus summary').first().click();
+  t(`${chemin} — le détail apparaît au clic`,
+    await page.locator('.plus-corps').first().isVisible());
+  await page.close();
+
+  const ctx = await navigateur.newContext({ javaScriptEnabled: false, viewport: { width: 1280, height: 900 } });
+  const p2 = await ctx.newPage();
+  await p2.goto(BASE + chemin, { waitUntil: 'load' });
+  await p2.locator('details.plus summary').first().click();
+  t(`${chemin} — le dépliage fonctionne sans JavaScript`,
+    await p2.locator('.plus-corps').first().isVisible());
+  await ctx.close();
+}
+
+/* ---- L'assistant à réponses préparées ---- */
+{
+  const page = await navigateur.newPage({ viewport: { width: 1280, height: 900 } });
+  const externes = [];
+  const erreurs = [];
+  page.on('request', (r) => {
+    if (!r.url().startsWith(BASE) && !r.url().startsWith('data:')) externes.push(r.url());
+  });
+  page.on('pageerror', (e) => erreurs.push(String(e)));
+  await page.goto(BASE + '/prix', { waitUntil: 'networkidle' });
+
+  t('Assistant : replié au chargement', !(await page.locator('.ajm').evaluate((d) => d.open)));
+  await page.locator('.ajm > summary').click();
+  /* L'événement `toggle` d'un <details> est mis en file d'attente : le
+     focus n'a pas encore bougé au retour du clic. On attend l'état, on
+     ne dort pas un délai au hasard. */
+  let focusChamp = true;
+  await page
+    .waitForFunction(() => document.activeElement && document.activeElement.id === 'ajm-q', null, { timeout: 3000 })
+    .catch(() => (focusChamp = false));
+  t('Assistant : le champ prend le focus à l\'ouverture', focusChamp);
+
+  const demander = async (q) => {
+    try { await page.fill('#ajm-q', q, { timeout: 4000 }); }
+    catch (e) {
+      const etat = await page.evaluate(() => {
+        const d = document.querySelector('.ajm');
+        const i = document.querySelector('#ajm-q');
+        const r = i ? i.getBoundingClientRect() : null;
+        return { open: d.open, rect: r ? [Math.round(r.x), Math.round(r.y), Math.round(r.width), Math.round(r.height)] : null,
+                 fenetre: [innerWidth, innerHeight], bulles: document.querySelectorAll('.ajm-bulle').length };
+      });
+      throw new Error('fill impossible sur « ' + q + ' » — ' + JSON.stringify(etat));
+    }
+    await page.locator('.ajm-form button[type="submit"]').click();
+    await page.waitForTimeout(360);
+    return page.evaluate(() => {
+      const b = [...document.querySelectorAll('.ajm-bulle--lui')];
+      return b[b.length - 1].textContent;
+    });
+  };
+
+  /* Plusieurs formulations pour le même sujet doivent tomber au même
+     endroit — c'est tout l'intérêt d'une reconnaissance par mots-clés
+     plutôt que par phrase exacte. */
+  for (const q of ['combien ça coûte ?', "c'est quoi vos tarifs", 'PRIX ?', 'quel est le cout']) {
+    t(`Assistant : « ${q} » → les prix`, /35 €/.test(await demander(q)));
+  }
+  for (const q of ['vous surveillez quoi', 'la supervision porte sur quoi ?', 'vous controlez les certificats ?']) {
+    t(`Assistant : « ${q} » → la supervision`, /disponibilit/i.test(await demander(q)));
+  }
+
+  const nature = await demander('es-tu une vraie IA ?');
+  t('Assistant : honnête sur sa nature',
+    /pr[ée]par[ée]/i.test(nature) && /(pas un mod|invente)/i.test(nature), nature.slice(0, 90));
+
+  const inconnu = await demander('quelle est la capitale de la Mongolie');
+  t('Assistant : renvoie au formulaire quand il ne sait pas',
+    /Demander un acc/i.test(inconnu) && /invent/i.test(inconnu), inconnu.slice(0, 90));
+
+  /* Le point le plus important : ne JAMAIS improviser un engagement. */
+  for (const q of ['y a-t-il un essai gratuit', 'quelle durée d\'engagement', 'je peux résilier quand ?']) {
+    const rep = await demander(q);
+    t(`Assistant : aucun engagement inventé sur « ${q} »`,
+      /pas de r[ée]ponse pr[ée]par|Demander un acc/i.test(rep), rep.slice(0, 90));
+  }
+
+  const injection = await demander('<img src=x onerror=alert(1)>');
+  t('Assistant : la question du visiteur n\'est pas interprétée comme du balisage',
+    await page.evaluate(() => !document.querySelector('.ajm-fil img')), injection.slice(0, 60));
+
+  t('Assistant : aucun appel réseau sortant', externes.length === 0, externes.join(' | '));
+  t('Assistant : aucun cookie déposé',
+    (await page.evaluate(() => document.cookie)) === '');
+  t('Assistant : aucune erreur', erreurs.length === 0, erreurs.join(' | '));
+
+  await page.keyboard.press('Escape');
+  t('Assistant : Échap referme', !(await page.locator('.ajm').evaluate((d) => d.open)));
+  await page.close();
+}
+{
+  const ctx = await navigateur.newContext({ javaScriptEnabled: false, viewport: { width: 1280, height: 900 } });
+  const page = await ctx.newPage();
+  await page.goto(BASE + '/prix', { waitUntil: 'load' });
+  await page.locator('.ajm > summary').click();
+  t('Assistant : sans JavaScript, il annonce la couleur',
+    await page.locator('.ajm-sansjs').isVisible());
+  await page.fill('#ajm-q', 'combien ça coûte');
+  await Promise.all([page.waitForNavigation({ timeout: 5000 }), page.locator('.ajm-form button[type="submit"]').click()]);
+  t('Assistant : sans JavaScript, le champ mène au formulaire',
+    new URL(page.url()).pathname === '/contact', page.url());
+  await ctx.close();
 }
 
 /* ================= 3. Formulaire ================= */

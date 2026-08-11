@@ -222,6 +222,37 @@
   </div>
 </footer>
 
+<!-- ==================================================================
+     ASSISTANT À RÉPONSES PRÉPARÉES
+     ==================================================================
+     Aucun modèle de langage derrière, aucun appel réseau, aucun coût.
+     Des réponses écrites à la main dans site.js, choisies par mots-
+     clés. Ce qui n'est pas prévu renvoie au formulaire — jamais une
+     réponse improvisée qui ressemblerait à un engagement sur un prix,
+     un délai ou une garantie.
+
+     Sans JavaScript, le formulaire part vers /contact et un message le
+     dit. On ne laisse pas un champ qui a l'air de marcher.
+     ================================================================== -->
+<details class="ajm">
+  <summary>
+    <span class="ajm-led" aria-hidden="true"></span>
+    Questions fréquentes
+  </summary>
+  <div class="ajm-panel">
+    <p class="ajm-tete">Réponses écrites à l'avance, pas une intelligence artificielle. Si votre question sort de ce qui est prévu, je vous envoie vers le formulaire.</p>
+    <div class="ajm-fil" role="log" aria-live="polite" aria-label="Conversation">
+      <p class="ajm-bulle ajm-bulle--lui">Bonjour. Je peux répondre sur les prix, les délais, ce qu'on surveille, les données personnelles et la marche à suivre pour demander un accès.</p>
+    </div>
+    <form class="ajm-form" action="/contact" method="get">
+      <label class="hp" for="ajm-q">Votre question</label>
+      <input type="text" id="ajm-q" name="q" autocomplete="off" placeholder="Votre question…" maxlength="300">
+      <button type="submit">Demander</button>
+    </form>
+    <p class="ajm-sansjs">Sans JavaScript, ce champ vous emmène simplement au <a href="/contact">formulaire de demande d'accès</a>.</p>
+  </div>
+</details>
+
 <script src="/site.js" defer></script>
 </body>
 </html>

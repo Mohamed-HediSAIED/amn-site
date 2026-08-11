@@ -156,25 +156,48 @@ main { flex: 1 0 auto; }
 
 /* ---------- Typographie ---------- */
 
+/* ── L'ÉCHELLE ──────────────────────────────────────────────────────
+   Mesuré sur la v3 : 58,7 % du texte du site était en graisse 500, et
+   0,8 % en 600. Le titre de la page et une étiquette de 11 px avaient
+   donc exactement le même poids. C'est le défaut qui trahit le plus
+   sûrement une page composée sans direction : tout au même niveau.
+
+   Trois niveaux, et ils se distinguent sur TROIS axes à la fois, pas
+   un seul — graisse, largeur, taille. Archivo est variable sur les
+   deux premiers, ça ne coûte pas un octet de plus.
+
+     600 / 118 %  les titres de page      ← le seul poids lourd
+     600 / 112 %  les titres de section
+     500 / 100 %  les titres de bloc, les étiquettes mono
+     400 / 100 %  le texte courant
+
+   La largeur qui REDESCEND à 100 % sur un h3 est volontaire : un titre
+   de carte n'a pas à concurrencer le titre de la page. C'est là que se
+   crée la tension, pas dans deux points de graisse. */
 h1, h2, h3, h4 {
-  font-weight: 500;
-  font-stretch: var(--large);
   line-height: 1.08;
   letter-spacing: -.03em;
   text-wrap: balance;
 }
 
 h1 {
+  font-weight: 600;
+  font-stretch: var(--large);
   font-size: clamp(2.05rem, 1.15rem + 3.9vw, 3.9rem);
-  letter-spacing: -.04em;
-  line-height: 1.02;
+  letter-spacing: -.045em;
+  line-height: 1.01;
 }
 
 h2 {
+  font-weight: 600;
+  font-stretch: 112%;
   font-size: clamp(1.5rem, 1.1rem + 1.8vw, 2.3rem);
+  letter-spacing: -.032em;
 }
 
 h3 {
+  font-weight: 500;
+  font-stretch: 100%;
   font-size: 1.1rem;
   letter-spacing: -.015em;
   line-height: 1.3;
@@ -637,6 +660,24 @@ html:has(.console[open]) { overflow: hidden; }
 }
 .btn:active { transform: translateY(1px); transition-duration: .08s; }
 
+/* Tout ce qui est actionnable accuse réception de l'appui. Repris du
+   produit, y compris le dosage : 1,5 % d'échelle, assez pour se sentir,
+   trop peu pour se voir comme une animation. Sans ça, un clic qui met
+   200 ms à produire un résultat donne l'impression de n'avoir rien
+   fait — et c'est précisément ce détail-là qui sépare une interface
+   finie d'une maquette. */
+.plaque:active,
+.console > summary:active,
+.rail a:active,
+.ftr a:active,
+.mod-lien:active { transform: scale(.985); }
+.plaque:active { transform: translateZ(34px) scale(.985); }
+
+@media (prefers-reduced-motion: reduce) {
+  .plaque:active, .console > summary:active, .rail a:active,
+  .ftr a:active, .mod-lien:active { transform: none; }
+}
+
 .btn-primary { background: var(--accent); color: var(--accent-ink); }
 .btn-primary:hover { background: #ffc04a; }
 
@@ -649,6 +690,44 @@ html:has(.console[open]) { overflow: hidden; }
 
 /* Respiration entre deux blocs d'une même section */
 .more { margin-top: clamp(26px, 3.5vw, 40px); }
+
+/* ---------- Élévation ----------
+   Portée du produit (amn-desktop, .elev-*), avec sa raison d'être :
+   sur un fond quasi noir, une ombre portée seule est invisible. Chaque
+   niveau associe donc l'ombre à un FILET CLAIR d'un pixel en haut —
+   c'est ce qu'une plaque physique reçoit de la lumière ambiante, et
+   c'est ce qui fait qu'une surface se lit comme un objet posé plutôt
+   que comme un rectangle détouré.
+
+   La v3 n'avait qu'UN élément avec une ombre sur 1 102. Tout était en
+   filet de 1 px : lisible, mais plat comme un fil de fer.
+
+   Trois niveaux, pas quatre. Et le premier ne porte QUE le filet
+   clair : le site est fait de « surfaces plates, arêtes dures, aucune
+   lueur » depuis la v1, on ne va pas coller un halo sous chaque carte
+   au moment où on essaie de faire plus sérieux. Les ombres portées
+   sont réservées à ce qui flotte réellement au-dessus de la page. */
+
+.elev-1 { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .045); }
+.elev-2 {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .05),
+    0 8px 24px -8px rgba(0, 0, 0, .7),
+    0 2px 6px rgba(0, 0, 0, .45);
+}
+.elev-3 {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .06),
+    0 24px 60px -12px rgba(0, 0, 0, .85),
+    0 8px 20px rgba(0, 0, 0, .5);
+}
+
+/* Les surfaces au repos. `clip-path` (le coin coupé) découpe aussi les
+   ombres : sur ces blocs-là seul le filet intérieur survit — et il se
+   coupe net à l'angle, ce qui donne exactement le biseau attendu. */
+.panel, .card, .mod, .tarif, .cta, .split, .aside-panel, .steps .aside, .option {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .045);
+}
 
 /* ---------- Blocs ---------- */
 
@@ -1179,6 +1258,22 @@ section[id] { scroll-margin-top: 84px; }
 }
 .ftr-bottom p { font-family: var(--f-mono); font-size: .66rem; letter-spacing: .01em; color: var(--text-3); }
 
+/* ---------- Alignements optiques ----------
+   Un texte en capitales interlettré traîne un blanc APRÈS sa dernière
+   lettre. Centré, il paraît donc décalé vers la gauche de la moitié de
+   cet interlettrage — mathématiquement centré, visuellement faux. On
+   rend l'espace au début. C'est quelques dixièmes de pixel ; c'est
+   aussi la différence entre « aligné » et « aligné correctement ». */
+.btn { text-indent: .035em; }
+.console-tag { text-indent: .04em; }
+.console-pied { text-indent: .01em; }
+.tarif-prix span { text-indent: .02em; }
+
+/* Les puces des listes « ce qu'on ne fait pas » sont des tirets posés
+   sur la hauteur d'x, pas sur la ligne de base : calé à l'œil sur le
+   corps réellement rendu. */
+.nots li::before { margin-top: .68em; }
+
 /* ---------- Mouvement réduit ---------- */
 
 @media (prefers-reduced-motion: reduce) {
@@ -1411,3 +1506,426 @@ section[id] { scroll-margin-top: 84px; }
 @media (min-width: 860px) { .tarifs-pied { grid-template-columns: 1fr 1fr; gap: 14px 34px; } }
 .tarifs-pied p { font-size: .9rem; line-height: 1.55; color: var(--text-3); }
 .tarifs-pied b { color: var(--text-2); font-weight: 500; }
+
+/* ==================================================================
+   v4 — LA SÉQUENCE D'OUVERTURE
+   ==================================================================
+   Elle est écrite EN CSS de bout en bout, et son animation se termine
+   en l'effaçant (`forwards` + `visibility: hidden`). Conséquence : elle
+   se déroule et disparaît toute seule, même si JavaScript ne s'exécute
+   jamais. C'est la même règle que la console de navigation — le script
+   n'ajoute que du confort, il n'est jamais nécessaire.
+
+   Elle est posée PAR-DESSUS la page, qui est rendue normalement en
+   dessous. Le titre h1 est donc peint dès le premier rendu : la
+   séquence ne retarde pas la mesure de plus grand contenu affiché.
+   Une séquence qui masquerait le titre puis le révélerait à 2,2 s
+   ferait passer le LCP de 0,4 s à 2,2 s, et le chantier aurait gagné
+   un effet en perdant la performance.
+   ================================================================== */
+
+.seq {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: var(--bg);
+  display: grid;
+  /* `place-items` centre DANS la rangée ; sans `align-content` les
+     rangées restent tassées en haut de la fenêtre. */
+  align-content: center;
+  justify-items: center;
+  gap: 20px;
+  grid-auto-rows: max-content;
+  /* DEUX animations, et c'est délibéré. Le fondu ne touche QUE
+     l'opacité : il reste donc composité, c'est-à-dire calculé hors du
+     fil principal. La première version mettait `visibility` et
+     `pointer-events` dans le même jeu d'images — deux propriétés que le
+     compositeur ne sait pas prendre en charge — et Chrome recalculait
+     alors le style de tout l'écran à chaque image. Mesuré : 278 ms de
+     style et mise en page, et la note de performance de l'accueil qui
+     tombait de 100 à 92 pendant que les autres pages restaient à 100.
+
+     Le retrait, lui, est une bascule unique posée à la fin. Une seule
+     recalculation, au lieu de vingt-cinq. */
+  animation: seq-sortie .75s cubic-bezier(.4, 0, .2, 1) 2.15s forwards;
+}
+/* `opacity` et `transform`, RIEN D'AUTRE — les deux seules propriétés
+   que le compositeur sait animer sans réveiller le fil principal.
+
+   La première version mettait `visibility` et `pointer-events` dans le
+   jeu d'images pour que le panneau cesse de capter les clics à la fin.
+   Chrome refuse alors de composer l'animation et recalcule le style de
+   tout l'écran à chaque image : 278 ms de style et mise en page, et la
+   note de performance de l'accueil qui tombait à 92 pendant que les
+   autres pages restaient à 100.
+
+   Le panneau s'efface donc d'abord, puis SORT du cadre. Une fois
+   au-dessus de la fenêtre il ne recouvre plus rien et ne capte plus
+   rien — le même résultat, obtenu par une propriété que la carte
+   graphique sait traiter toute seule. */
+@keyframes seq-sortie {
+  0%   { opacity: 1; transform: translateY(0); }
+  55%  { opacity: 0; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-101vh); }
+}
+
+.seq-cadre {
+  width: min(420px, calc(100vw - 2 * var(--gutter)));
+  padding: 22px 24px 26px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .06),
+    0 24px 60px -12px rgba(0, 0, 0, .85);
+  animation: seq-cadre-in .34s cubic-bezier(.2, .7, .3, 1) both;
+}
+@keyframes seq-cadre-in {
+  from { opacity: 0; transform: translateY(10px) scale(.985); }
+}
+
+.seq-tag {
+  font-family: var(--f-mono);
+  font-size: .62rem;
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 4px;
+}
+
+.seq-liste { list-style: none; display: grid; }
+.seq-liste li {
+  display: grid;
+  grid-template-columns: 15px 1fr auto;
+  align-items: baseline;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: .84rem;
+  /* `backwards` et pas `both` : après la séquence, la ligne reprend
+     ses styles normaux au lieu de rester figée sur l'image finale. */
+  animation: seq-ligne .3s ease backwards;
+}
+/* La coche. Deux traits, dessinés par une rotation — pas une image. */
+.seq-liste li::before {
+  content: '';
+  width: 9px; height: 5px;
+  border-left: 1.5px solid var(--accent);
+  border-bottom: 1.5px solid var(--accent);
+  transform: rotate(-45deg);
+  align-self: center;
+  animation: seq-coche .22s cubic-bezier(.2, .8, .3, 1) backwards;
+}
+.seq-nom { color: var(--text-2); }
+.seq-val {
+  font-family: var(--f-mono);
+  font-size: .74rem;
+  font-weight: 500;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes seq-ligne { from { opacity: 0; transform: translateX(-5px); } }
+@keyframes seq-coche { from { opacity: 0; transform: rotate(-45deg) scale(.4); } }
+
+/* Le décalage ligne par ligne. En `nth-child` et non en style en
+   ligne : la CSP du site interdit les attributs `style=`. */
+.seq-liste li:nth-child(1) { animation-delay: .22s } .seq-liste li:nth-child(1)::before { animation-delay: .34s }
+.seq-liste li:nth-child(2) { animation-delay: .38s } .seq-liste li:nth-child(2)::before { animation-delay: .50s }
+.seq-liste li:nth-child(3) { animation-delay: .54s } .seq-liste li:nth-child(3)::before { animation-delay: .66s }
+.seq-liste li:nth-child(4) { animation-delay: .70s } .seq-liste li:nth-child(4)::before { animation-delay: .82s }
+.seq-liste li:nth-child(5) { animation-delay: .86s } .seq-liste li:nth-child(5)::before { animation-delay: .98s }
+
+.seq-fin {
+  margin-top: 16px;
+  font-family: var(--f-mono);
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--accent);
+  animation: seq-ligne .3s ease 1.18s backwards;
+}
+
+/* Le contrôle est passé, la marque signe en bas du relevé — comme une
+   signature au bas d'un rapport. Sa place est RÉSERVÉE dès le départ
+   (l'animation est en `backwards`, l'élément occupe déjà sa hauteur) :
+   le panneau ne se réajuste pas quand le logo arrive. Le filet au-
+   dessus fait lire ce blanc comme un cartouche plutôt que comme un
+   trou en attente.
+   Il vient de /assets/logo.svg : le jour où le vrai logo remplace le
+   gabarit, la séquence le reprend sans qu'on y touche. */
+.seq-logo {
+  height: 30px;
+  width: auto;
+  margin: 18px auto 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  box-sizing: content-box;
+  animation: seq-logo 1.5s cubic-bezier(.2, .7, .3, 1) 1.42s backwards;
+}
+@keyframes seq-logo {
+  from { opacity: 0; transform: translateY(6px); }
+  22%  { opacity: 1; transform: none; }
+  to   { opacity: 1; transform: none; }
+}
+
+.seq-passer {
+  font-family: var(--f-mono);
+  font-size: .62rem;
+  letter-spacing: .02em;
+  color: var(--text-4);
+  animation: seq-ligne .3s ease .75s backwards;
+}
+
+/* Déjà vue dans cette visite : site.js pose la classe et il ne se
+   passe rien du tout. Pas d'animation à interrompre, pas d'image
+   peinte pour rien. */
+.seq--vue { display: none; }
+
+/* Mouvement réduit : la séquence n'existe pas. Elle est spectaculaire,
+   elle n'est pas informative — la même chose est écrite sur /service.
+   Rien ne se perd à la supprimer, et c'est plus honnête que de la
+   jouer en 1 ms. */
+@media (prefers-reduced-motion: reduce) {
+  .seq { display: none; }
+}
+
+/* ==================================================================
+   v4 — CONTENU DÉPLIABLE
+   ==================================================================
+   Beaucoup de texte, et personne ne lit tout. Un résumé reste visible,
+   le détail se déplie. Même méthode que la console de navigation : un
+   <details> natif. Le contenu complet est dans le HTML servi, donc
+   indexé par les moteurs — on replie l'affichage, on ne charge rien à
+   la demande. Et ça s'ouvre sans JavaScript, comme le reste.
+   ================================================================== */
+
+.plus { margin-top: 18px; }
+
+.plus > summary {
+  list-style: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 13px;
+  border: 1px solid var(--line-strong);
+  font-family: var(--f-mono);
+  font-size: .64rem;
+  font-weight: 500;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  transition: background-color .16s ease, border-color .16s ease, color .16s ease;
+}
+.plus > summary::-webkit-details-marker { display: none; }
+.plus > summary::marker { content: ''; }
+.plus > summary:hover { background: var(--surface-hi); border-color: var(--text-4); color: var(--text); }
+.plus > summary:active { transform: scale(.985); }
+
+.plus-chev {
+  width: 6px; height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform .16s ease;
+}
+.plus[open] > summary .plus-chev { transform: translateY(1px) rotate(-135deg); }
+
+/* Le libellé change d'état — « Le détail » / « Replier ». Deux <span>
+   plutôt qu'un texte réécrit en JavaScript : ça marche sans script. */
+.plus[open] > summary .plus-ferme,
+.plus:not([open]) > summary .plus-ouvert { display: none; }
+
+.plus-corps {
+  margin-top: 20px;
+  padding-left: 18px;
+  border-left: 1px solid var(--line);
+}
+.plus-corps > * + * { margin-top: 1em; }
+
+@media (prefers-reduced-motion: reduce) {
+  .plus > summary:active { transform: none; }
+}
+
+/* ==================================================================
+   v4 — L'ASSISTANT AUX RÉPONSES PRÉPARÉES
+   ==================================================================
+   Volontairement PAS une bulle ronde en bas à droite avec une frimousse
+   dedans : c'est le signe extérieur du gabarit, et ce chantier a
+   justement pour but de ne pas en avoir l'air. C'est un onglet mono,
+   discret, qui dit ce qu'il est avant même qu'on l'ouvre.
+
+   Aucun modèle derrière. Des réponses écrites à la main, choisies par
+   mots-clés. Le nom du composant le dit, l'assistant le redit si on le
+   lui demande, et tout ce qui n'est pas prévu renvoie au formulaire
+   plutôt que d'improviser un engagement.
+   ================================================================== */
+
+.ajm {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  z-index: 40;              /* sous la console (300) et son panneau */
+  max-width: 100vw;
+}
+@media (max-width: 719px) { .ajm { left: 0; right: 0; } }
+
+.ajm > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-left: auto;
+  width: max-content;
+  max-width: 100%;
+  padding: 10px 15px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-right: 0;
+  border-bottom: 0;
+  font-family: var(--f-mono);
+  font-size: .62rem;
+  font-weight: 500;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05);
+  transition: background-color .16s ease, color .16s ease;
+}
+.ajm > summary::-webkit-details-marker { display: none; }
+.ajm > summary::marker { content: ''; }
+.ajm > summary:hover { background: var(--surface-hi); color: var(--text); }
+.ajm > summary:active { transform: scale(.985); }
+.ajm[open] > summary { color: var(--text); background: var(--surface-hi); }
+
+/* Le point ambre : le témoin d'un appareil sous tension. Fixe — rien
+   ne clignote sur ce site. */
+.ajm-led { width: 6px; height: 6px; background: var(--accent); flex: none; }
+
+.ajm-panel {
+  width: min(360px, 100vw);
+  margin-left: auto;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-right: 0;
+  border-bottom: 0;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .06),
+    0 24px 60px -12px rgba(0, 0, 0, .85),
+    0 8px 20px rgba(0, 0, 0, .5);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  max-height: min(460px, 70vh);
+}
+
+.ajm-tete {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--f-mono);
+  font-size: .6rem;
+  letter-spacing: .02em;
+  color: var(--text-3);
+  line-height: 1.5;
+}
+
+.ajm-fil {
+  padding: 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: grid;
+  gap: 11px;
+  align-content: start;
+}
+
+.ajm-bulle {
+  font-size: .88rem;
+  line-height: 1.5;
+  padding: 11px 13px;
+  max-width: 92%;
+}
+.ajm-bulle--lui {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--text-2);
+  justify-self: start;
+}
+.ajm-bulle--lui b { color: var(--text); font-weight: 500; }
+.ajm-bulle--lui a { color: var(--text); }
+.ajm-bulle--moi {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-line);
+  color: var(--text);
+  justify-self: end;
+  text-align: right;
+}
+
+.ajm-sugg { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.ajm-sugg button {
+  font-family: var(--f-mono);
+  font-size: .6rem;
+  letter-spacing: .01em;
+  color: var(--text-2);
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  padding: 6px 9px;
+  cursor: pointer;
+  transition: background-color .16s ease, color .16s ease, border-color .16s ease;
+}
+.ajm-sugg button:hover { background: var(--surface-hi); color: var(--text); border-color: var(--text-4); }
+
+.ajm-form { display: flex; border-top: 1px solid var(--line); }
+.ajm-form input {
+  flex: 1 1 auto;
+  min-width: 0;
+  background: var(--bg);
+  border: 0;
+  color: var(--text);
+  font-family: var(--f-sans);
+  font-size: .9rem;
+  padding: 13px 14px;
+}
+.ajm-form input::placeholder { color: var(--text-4); }
+.ajm-form input:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent-line); }
+.ajm-form button[type='submit'] {
+  flex: none;
+  background: transparent;
+  border: 0;
+  border-left: 1px solid var(--line);
+  color: var(--accent);
+  font-family: var(--f-mono);
+  font-size: .62rem;
+  font-weight: 500;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  padding: 0 15px;
+  cursor: pointer;
+  transition: background-color .16s ease;
+}
+.ajm-form button[type='submit']:hover { background: var(--surface-hi); }
+
+/* Sans JavaScript, la conversation n'a pas lieu : le formulaire part
+   simplement vers /contact. On le dit, plutôt que de laisser un champ
+   qui a l'air de marcher. */
+.ajm-sansjs {
+  padding: 13px 16px;
+  border-top: 1px solid var(--line);
+  font-size: .8rem;
+  line-height: 1.5;
+  color: var(--text-3);
+}
+.ajm--vif .ajm-sansjs { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ajm > summary:active { transform: none; }
+}
+
+/* À l'impression, ni l'onglet ni la séquence n'ont de sens. */
+@media print {
+  .ajm, .seq, .rail { display: none !important; }
+}

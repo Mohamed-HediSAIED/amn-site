@@ -35,6 +35,47 @@
 <body>
 <a class="skip" href="#main">Aller au contenu</a>
 
+<!-- ==================================================================
+     LA SÉQUENCE D'OUVERTURE
+     ==================================================================
+     Un contrôle de supervision qui tourne, et qui se coche. Le même
+     genre que ceux décrits sur /service (disponibilité, certificats,
+     accès, hygiène) — mais celui-ci porte sur LA PAGE QU'ON REGARDE,
+     et ses résultats sont vrais. C'est une démonstration, pas une
+     illustration : rien n'y est inventé.
+
+     Deux valeurs sont MESURÉES au chargement par site.js (traceurs
+     tiers réellement appelés, cookies réellement déposés) et
+     réécrites dans le document. Sans JavaScript, les valeurs écrites
+     ici restent affichées — elles sont vraies aussi, elles sont juste
+     constatées à l'avance plutôt qu'à l'instant.
+
+     Le compte d'en-têtes de sécurité est vérifié par
+     scripts/verifier-navigateur.mjs contre ce que le serveur envoie
+     vraiment : si quelqu'un touche à vercel.json sans corriger ici,
+     la vérification échoue.
+
+     TOUT EST EN CSS. L'animation se termine en effaçant le panneau,
+     donc la séquence se déroule et disparaît même sans JavaScript.
+     site.js n'ajoute que le confort : passer d'une touche ou d'un
+     clic, et ne pas la rejouer à chaque page de la même visite.
+     ================================================================== -->
+<div class="seq" aria-hidden="true">
+  <div class="seq-cadre notch">
+    <p class="seq-tag">Contrôle — cette page, maintenant</p>
+    <ul class="seq-liste">
+      <li><span class="seq-nom">Appels à des tiers</span><b class="seq-val" data-mesure="tiers">0</b></li>
+      <li><span class="seq-nom">Cookies déposés</span><b class="seq-val" data-mesure="cookies">0</b></li>
+      <li><span class="seq-nom">En-têtes de sécurité</span><b class="seq-val" data-seq-entetes>7 / 7</b></li>
+      <li><span class="seq-nom">Polices</span><b class="seq-val">servies d'ici</b></li>
+      <li><span class="seq-nom">Journal d'accès</span><b class="seq-val">côté serveur</b></li>
+    </ul>
+    <p class="seq-fin">Rien à signaler</p>
+    <img class="seq-logo" src="/assets/logo.svg" alt="" width="104" height="40">
+  </div>
+  <span class="seq-passer">Une touche ou un clic pour passer</span>
+</div>
+
 <header class="hdr">
   <div class="wrap hdr-in">
     <a class="logo" href="/" aria-label="AMN DevSec — accueil">
@@ -280,6 +321,37 @@
     </div>
   </div>
 </footer>
+
+<!-- ==================================================================
+     ASSISTANT À RÉPONSES PRÉPARÉES
+     ==================================================================
+     Aucun modèle de langage derrière, aucun appel réseau, aucun coût.
+     Des réponses écrites à la main dans site.js, choisies par mots-
+     clés. Ce qui n'est pas prévu renvoie au formulaire — jamais une
+     réponse improvisée qui ressemblerait à un engagement sur un prix,
+     un délai ou une garantie.
+
+     Sans JavaScript, le formulaire part vers /contact et un message le
+     dit. On ne laisse pas un champ qui a l'air de marcher.
+     ================================================================== -->
+<details class="ajm">
+  <summary>
+    <span class="ajm-led" aria-hidden="true"></span>
+    Questions fréquentes
+  </summary>
+  <div class="ajm-panel">
+    <p class="ajm-tete">Réponses écrites à l'avance, pas une intelligence artificielle. Si votre question sort de ce qui est prévu, je vous envoie vers le formulaire.</p>
+    <div class="ajm-fil" role="log" aria-live="polite" aria-label="Conversation">
+      <p class="ajm-bulle ajm-bulle--lui">Bonjour. Je peux répondre sur les prix, les délais, ce qu'on surveille, les données personnelles et la marche à suivre pour demander un accès.</p>
+    </div>
+    <form class="ajm-form" action="/contact" method="get">
+      <label class="hp" for="ajm-q">Votre question</label>
+      <input type="text" id="ajm-q" name="q" autocomplete="off" placeholder="Votre question…" maxlength="300">
+      <button type="submit">Demander</button>
+    </form>
+    <p class="ajm-sansjs">Sans JavaScript, ce champ vous emmène simplement au <a href="/contact">formulaire de demande d'accès</a>.</p>
+  </div>
+</details>
 
 <script src="/site.js" defer></script>
 </body>

@@ -242,8 +242,13 @@
 
     <div class="prose">
       <p>Les outils de sécurité qu'on utilise pour vous ne sont pas dans votre espace. Pas grisés, pas rangés dans un menu d'administration : <strong>absents du logiciel</strong> qu'on vous livre. Ce qui n'est pas installé chez vous ne peut pas fuiter par chez vous. C'est bête, mais c'est la seule garantie qui tienne.</p>
+      <details class="plus">
+        <summary><span class="plus-ferme">Pourquoi ce choix</span><span class="plus-ouvert">Replier</span><span class="plus-chev" aria-hidden="true"></span></summary>
+        <div class="plus-corps">
       <p>C'est une décision de construction, pas un réglage. Elle a un coût pour nous et un intérêt pour vous : votre espace ne contient rien qui concerne un autre client, ni rien qui concerne notre infrastructure.</p>
       <p>Elle a aussi une conséquence à connaître : <strong>ces outils ne sont pas vendus séparément</strong>, ni en accès direct, ni en abonnement. Ils sont opérés par nous, pour les organisations qu'on supervise. C'est ce qu'on vend — pas une licence.</p>
+        </div>
+      </details>
     </div>
   </section>
 
@@ -294,6 +299,37 @@
     </div>
   </div>
 </footer>
+
+<!-- ==================================================================
+     ASSISTANT À RÉPONSES PRÉPARÉES
+     ==================================================================
+     Aucun modèle de langage derrière, aucun appel réseau, aucun coût.
+     Des réponses écrites à la main dans site.js, choisies par mots-
+     clés. Ce qui n'est pas prévu renvoie au formulaire — jamais une
+     réponse improvisée qui ressemblerait à un engagement sur un prix,
+     un délai ou une garantie.
+
+     Sans JavaScript, le formulaire part vers /contact et un message le
+     dit. On ne laisse pas un champ qui a l'air de marcher.
+     ================================================================== -->
+<details class="ajm">
+  <summary>
+    <span class="ajm-led" aria-hidden="true"></span>
+    Questions fréquentes
+  </summary>
+  <div class="ajm-panel">
+    <p class="ajm-tete">Réponses écrites à l'avance, pas une intelligence artificielle. Si votre question sort de ce qui est prévu, je vous envoie vers le formulaire.</p>
+    <div class="ajm-fil" role="log" aria-live="polite" aria-label="Conversation">
+      <p class="ajm-bulle ajm-bulle--lui">Bonjour. Je peux répondre sur les prix, les délais, ce qu'on surveille, les données personnelles et la marche à suivre pour demander un accès.</p>
+    </div>
+    <form class="ajm-form" action="/contact" method="get">
+      <label class="hp" for="ajm-q">Votre question</label>
+      <input type="text" id="ajm-q" name="q" autocomplete="off" placeholder="Votre question…" maxlength="300">
+      <button type="submit">Demander</button>
+    </form>
+    <p class="ajm-sansjs">Sans JavaScript, ce champ vous emmène simplement au <a href="/contact">formulaire de demande d'accès</a>.</p>
+  </div>
+</details>
 
 <script src="/site.js" defer></script>
 </body>

@@ -17,6 +17,11 @@ de navigation est du CSS et une centaine de lignes dans `site.js`.
 > **La typographie, le ton des textes, les prix et le RGPD** ont été repris en
 > v3 : **`docs/direction-v3.md`** — dont le tableau qui explique pourquoi
 > chaque prix vaut ce qu'il vaut, et la liste de ce qui reste à compléter.
+>
+> **La hiérarchie visuelle, la séquence d'ouverture, le contenu dépliable et
+> l'assistant** sont en v4 : **`docs/direction-v4.md`**. À lire avant de
+> toucher à l'échelle typographique ou à la séquence — les deux ont des
+> raisons chiffrées.
 
 ### Les polices
 
@@ -63,7 +68,7 @@ node scripts/verifier-avant-mise-en-ligne.mjs   # 1 s, sans dépendance
 node scripts/verifier-navigateur.mjs            # ~3 min, Chromium réel
 ```
 
-Le second lance **372 contrôles** : 9 pages × 5 largeurs (console du
+Le second lance **423 contrôles** : 9 pages × 5 largeurs (console du
 navigateur, requêtes en échec, débordement horizontal, appels à des tiers),
 accessibilité (lien d'évitement, focus, contrastes calculés sur les couleurs
 réellement rendues, y compris sur la page prix), **la console de navigation** (chaque destination répond
@@ -104,12 +109,18 @@ l'inclinaison au pointeur. Une image au-delà de 32 ms est une image sautée.
 Chaque geste est joué trois fois et toutes les images sont mises en commun :
 sur une seule passe, la pire image varie du simple au double.
 
-Derniers relevés — voir `docs/direction-v2.md` pour ce qu'ils veulent dire :
+Derniers relevés (v4, serveur compressé comme en production) :
 
-| | Perf | A11y | Bonnes pratiques | SEO | TBT | CLS |
-| --- | --- | --- | --- | --- | --- | --- |
-| Mobile, 6 pages | 100 | 100 | 100 | 100 | 0 ms | 0 |
-| Ordinateur, 6 pages | 100 | 100 | 100 | 100 | 0 ms | 0 |
+| | Perf | A11y | Bonnes pratiques | SEO | CLS |
+| --- | --- | --- | --- | --- | --- |
+| Mobile, 6 pages | **99–100** | 100 | 100 | 100 | 0 |
+| Ordinateur, 6 pages | **99–100** | 100 | 100 | 100 | 0 |
+
+Le 99 est toujours l'accueil, et toujours pour la même raison : ~56 ms
+d'analyse de `site.js`, qui a grossi. Les cinq autres pages sont à 100.
+LCP mobile 1,51 s, identique à la v3 malgré la séquence d'ouverture —
+comparaison faite avec le même serveur et la même compression, voir
+`docs/direction-v4.md` §7.
 
 ### Regénérer les images
 
@@ -325,6 +336,17 @@ pas de texte laissé en police) avant de remplacer le fichier.
   couleur d'accent : l'ambre. Elle ne prend toute la place qu'à **un seul
   endroit par page**, le bloc d'appel de fin (`.cta--ambre`) — c'est ce qui
   fait qu'elle accentue encore quelque chose.
+- **L'assistant ne répond jamais autre chose que ce qui est écrit dans
+  `site.js`.** Pas de modèle, pas d'appel réseau. Tout sujet non tranché
+  (essai, engagement, résiliation, remboursement) a une entrée qui dit qu'on
+  ne sait pas et renvoie au formulaire — sans elle, ces questions tomberaient
+  dans une réponse voisine et le composant prendrait un engagement.
+- **Les animations n'utilisent QUE `transform` et `opacity`.** Ajouter
+  `visibility` ou `pointer-events` à un jeu d'images empêche le compositeur de
+  prendre l'animation en charge : mesuré à 278 ms de style et mise en page sur
+  l'accueil, et la note de performance tombée de 100 à 92.
+- **Le serveur local compresse comme Vercel** (`scripts/serveur-local.mjs`).
+  Sans ça, toute mesure faite en local est fausse d'environ 100 Ko par page.
 - **Aucun bouton de paiement, nulle part**, page prix comprise. Le site
   informe ; l'entrée en relation passe par « Demander un accès ». C'est une
   décision produit, pas une étape qui manque.

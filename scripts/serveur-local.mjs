@@ -11,6 +11,7 @@
      node scripts/serveur-local.mjs [port]      → http://localhost:4173
    ------------------------------------------------------------------ */
 import { createServer } from 'node:http';
+import { brotliCompressSync, gzipSync, constants as zlibConstants } from 'node:zlib';
 import { readFile, stat } from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
 import { join, extname, dirname, resolve } from 'node:path';
@@ -18,6 +19,28 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createRequire } from 'node:module';
 
 const RACINE = join(dirname(fileURLToPath(import.meta.url)), '..');
+
+/* Vercel compresse ce qu'il sert. Le serveur local doit le faire aussi,
+   sinon toute mesure faite ici est fausse : site.css pèse 65 Ko en clair
+   et 16 Ko en brotli, et Lighthouse comptait les 65. On ne mesurait pas
+   le site, on mesurait l'absence de compression du serveur de test.
+
+   Rien n'est ajouté au dépôt pour ça : zlib est dans Node. */
+const COMPRESSIBLE = /^(text\/|application\/(json|xml|javascript)|image\/svg)/;
+
+function compresser(corps, type, accept) {
+  if (!COMPRESSIBLE.test(type) || corps.length < 512) return null;
+  if (/\bbr\b/.test(accept)) {
+    return {
+      encodage: 'br',
+      corps: brotliCompressSync(corps, {
+        params: { [zlibConstants.BROTLI_PARAM_QUALITY]: 5 }
+      })
+    };
+  }
+  if (/\bgzip\b/.test(accept)) return { encodage: 'gzip', corps: gzipSync(corps, { level: 6 }) };
+  return null;
+}
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -110,7 +133,17 @@ export function demarrer({ port = 4173, racine = RACINE, silencieux = false } = 
       return res.end(notFound);
     }
 
-    res.writeHead(200, { 'Content-Type': TYPES[extname(fichier)] || 'application/octet-stream' });
+    const type = TYPES[extname(fichier)] || 'application/octet-stream';
+    const comprime = compresser(corps, type, req.headers['accept-encoding'] || '');
+    if (comprime) {
+      res.writeHead(200, {
+        'Content-Type': type,
+        'Content-Encoding': comprime.encodage,
+        Vary: 'Accept-Encoding'
+      });
+      return res.end(comprime.corps);
+    }
+    res.writeHead(200, { 'Content-Type': type });
     res.end(corps);
   });
 
