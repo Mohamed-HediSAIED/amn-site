@@ -7,7 +7,12 @@ produit, pas des manques à combler plus tard.
 
 HTML statique + une fonction serverless. **Aucune dépendance npm, aucun
 `package.json`, aucune étape de construction.** Ce qui est dans le dépôt est
-exactement ce qui est servi.
+exactement ce qui est servi. La v2 n'a rien ajouté à cette liste : la console
+de navigation est du CSS et une centaine de lignes dans `site.js`.
+
+> **La navigation ne ressemble pas à celle d'un site ordinaire.** Pourquoi,
+> comment elle se dégrade, ce qu'elle coûte et ce qu'on a accepté de perdre :
+> **`docs/direction-v2.md`**. À lire avant d'y toucher.
 
 ```
 amn-site/
@@ -37,13 +42,18 @@ pour recharger la fonction à chaque appel pendant qu'on l'édite.
 
 ```sh
 node scripts/verifier-avant-mise-en-ligne.mjs   # 1 s, sans dépendance
-node scripts/verifier-navigateur.mjs            # ~2 min, Chromium réel
+node scripts/verifier-navigateur.mjs            # ~3 min, Chromium réel
 ```
 
-Le second lance 257 contrôles : 8 pages × 5 largeurs (console, requêtes en
-échec, débordement horizontal, appels à des tiers), accessibilité (lien
-d'évitement, focus, menu sans JavaScript, contrastes calculés sur les couleurs
-réellement rendues), **le formulaire réellement envoyé** (cas nominal, sans
+Le second lance **328 contrôles** : 8 pages × 5 largeurs (console du
+navigateur, requêtes en échec, débordement horizontal, appels à des tiers),
+accessibilité (lien d'évitement, focus, contrastes calculés sur les couleurs
+réellement rendues), **la console de navigation** (chaque destination répond
+seule par son URL, ouverture au clic et au clavier, Échap, retour du focus,
+reste de la page rendu inerte, défilement bloqué puis rendu, fonctionnement
+sans JavaScript jusqu'à la navigation effective, parallaxe absente sur écran
+tactile, mouvement réduit respecté, contrastes dans le panneau ouvert), la
+règle de section, **le formulaire réellement envoyé** (cas nominal, sans
 JavaScript, piège à robots, piège temporel, champ manquant, limite de
 fréquence, origine étrangère, corps démesuré, injection HTML), et les en-têtes
 de sécurité tels qu'ils sortent du serveur.
@@ -53,6 +63,35 @@ Il a besoin de Playwright. S'il n'est pas déjà là :
 ```sh
 npm i -D playwright && npx playwright install chromium
 ```
+
+### Mesurer la performance pour de vrai
+
+Deux mesures, deux questions différentes. Aucune des deux n'ajoute quoi que ce
+soit au dépôt : Lighthouse est appelé depuis une installation à part.
+
+```sh
+npm i --no-save --prefix /tmp/lh lighthouse
+node scripts/mesurer-lighthouse.mjs     # 5 pages × mobile et ordinateur
+node scripts/mesurer-fluidite.mjs       # processeur bridé ×6
+```
+
+`mesurer-lighthouse` répond à « combien coûte la page qui se charge ». Elle
+mesure donc la console **fermée**, ce qui est le bon chiffre : c'est l'état
+dans lequel arrive un visiteur.
+
+`mesurer-fluidite` répond à « est-ce que ça rame quand on s'en sert ». Elle
+bride le processeur ×6 (Lighthouse mobile se contente de ×4), puis mesure
+l'intervalle entre images pendant le défilement, l'ouverture de la console et
+l'inclinaison au pointeur. Une image au-delà de 32 ms est une image sautée.
+Chaque geste est joué trois fois et toutes les images sont mises en commun :
+sur une seule passe, la pire image varie du simple au double.
+
+Derniers relevés — voir `docs/direction-v2.md` pour ce qu'ils veulent dire :
+
+| | Perf | A11y | Bonnes pratiques | SEO | TBT | CLS |
+| --- | --- | --- | --- | --- | --- | --- |
+| Mobile, 5 pages | 100 | 100 | 100 | 100 | 0 ms | 0 |
+| Ordinateur, 5 pages | 100 | 100 | 100 | 100 | 0 ms | 0 |
 
 ### Regénérer les images
 
@@ -212,11 +251,58 @@ et sort en code 2 tant qu'il en reste.
 
 ---
 
+## 6 bis. Le logo
+
+Le logo vit dans **un seul fichier : `assets/logo.svg`**. Il est posé en `<img
+class="logo-mark">` dans l'en-tête et le pied de page des huit pages, plus la
+page de confirmation servie par `api/contact.js`.
+
+**Pour poser le vrai logo : remplacer ce fichier, et rien d'autre.** Sa hauteur
+est imposée par `.logo-mark` dans `site.css` (21 px, 24 px au-dessus de 720 px,
+26 px dans le pied de page) et la largeur suit toute seule. Aucune page, aucune
+règle CSS ne connaît le contenu du fichier.
+
+Ce qui est là aujourd'hui est un **gabarit**, pas la marque : les lettres AMN
+en traits fins avec le dégradé graphite → blanc, dessinées en chemins SVG pour
+ne dépendre d'aucune police installée.
+
+Deux points à connaître avant de remplacer :
+
+- Les attributs `width="104" height="40"` sur les balises `<img>` ne servent
+  qu'à réserver la place avant le chargement — c'est ce qui tient le CLS à 0.
+  **Si le nouveau logo n'a pas le même rapport largeur/hauteur, il faut les
+  mettre à jour** (une recherche-remplacement sur `class="logo-mark"`), sinon
+  la mise en page sautera au chargement.
+- Le mot **« DEVSEC » n'est pas dans le logo** : c'est du texte (`.logo-sub`),
+  volontairement, pour rester net à toute densité d'écran et lisible par un
+  lecteur d'écran. Si le logo officiel contient déjà « DEVSEC », retirer ce
+  `<span class="logo-sub">DEVSEC</span>` des pages.
+
+Un PDF n'est pas utilisable tel quel : l'exporter en SVG (chemins vectorisés,
+pas de texte laissé en police) avant de remplacer le fichier.
+
+---
+
 ## 7. Règles à ne pas casser
 
-- **Aucune animation déclenchée au défilement.** C'est un choix : un site qui se
-  révèle bloc par bloc est devenu la signature des pages produites à la chaîne.
-  Seuls survol, appui et focus bougent, en 160 ms.
+- **Aucun bloc ne se révèle au défilement.** C'est un choix : un site qui
+  apparaît morceau par morceau en descendant est devenu la signature des pages
+  produites à la chaîne. En dehors de la console, seuls survol, appui et focus
+  bougent, en 160 ms. La règle de section (`.rail`) suit la descente, mais elle
+  ne fait *apparaître* rien : elle change une couleur et allonge un tiret.
+- **La console est la navigation, et elle doit rester un `<details>`.** Cinq
+  `<a href>` dans le HTML servi, ouverts par un `<summary>`. Tout ce que fait
+  `site.js` autour (Échap, clic à côté, focus, `inert`, parallaxe) est du
+  confort : si on le retire, la navigation marche encore. Ne pas la
+  transformer en panneau piloté par JavaScript.
+- **Rien ne tourne en boucle.** L'ouverture de la console est une séquence
+  finie. Une animation infinie, même minuscule, tient le compositeur éveillé
+  et vide la batterie. Seuls `transform` et `opacity` sont animés — jamais
+  `filter`, `box-shadow` ou `backdrop-filter`.
+- **Pas de `backdrop-filter` sur l'en-tête.** Il se recalcule à chaque image
+  pendant le défilement, et il ferait du bandeau le bloc conteneur de ses
+  descendants `position: fixed` — le panneau de la console se retrouverait
+  dimensionné sur les 64 px du bandeau au lieu de la fenêtre.
 - **Le rouge est réservé aux alertes** (`--alert`), jamais décoratif. Une seule
   couleur d'accent : l'ambre.
 - **Aucun script écrit dans les pages**, en dehors du JSON-LD. La CSP n'autorise
