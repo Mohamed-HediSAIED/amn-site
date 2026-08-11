@@ -1,0 +1,721 @@
+/* ==================================================================
+   AMN DevSec — site vitrine
+   ==================================================================
+   Identité reprise du produit (amn-desktop, src/index.css) : noir et
+   gris neutres sans dominante bleue, Space Grotesk pour le texte,
+   JetBrains Mono pour les repères, surfaces plates, arêtes dures,
+   « lift » minimal au survol, aucune lueur.
+
+   UNE SEULE couleur : l'ambre. C'est la couleur de marque du site.
+   Côté produit l'accent devient configurable par organisation cliente,
+   raison de plus pour que la marque, elle, ne bouge pas.
+
+   Le ROUGE (--alert) est réservé aux alertes. Il n'apparaît nulle part
+   en décoration — même valeur que le `danger` du produit.
+
+   Aucune animation déclenchée au défilement : c'est un choix. Un site
+   qui se révèle bloc par bloc est devenu la signature des pages
+   générées à la chaîne, et ça ne va pas avec ce qu'on vend.
+   ================================================================== */
+
+/* Les @font-face vivent dans assets/fonts.css, chargée par un <link> à part :
+   un @import ici ajouterait un aller-retour réseau en série avant le premier
+   rendu. */
+
+:root {
+  /* Surfaces — noir et gris neutres, aucune dominante bleue */
+  --bg:          #0a0a0a;
+  --surface:     #131313;
+  --surface-hi:  #1a1a1a;
+  --line:        #262626;
+  --line-strong: #3a3a3a;
+
+  /* Texte */
+  --text:   #f2f2f0;
+  --text-2: #9a9a97;  /* 7,0:1 sur le fond — texte courant secondaire */
+  /* Plancher pour tout texte porteur de sens. Calé pour tenir 4,5:1
+     AUSSI sur --surface (#131313), pas seulement sur le fond : c'est
+     là-dessus que la première version tombait à 4,32:1. */
+  --text-3: #858583;
+  --text-4: #616160;  /* décoratif uniquement, ne doit jamais porter de sens */
+
+  /* Accent unique */
+  --accent:      #ffb224;      /* ambre — 10,7:1 sur le fond */
+  --accent-ink:  #0a0a0a;      /* texte posé SUR l'ambre */
+  --accent-soft: rgba(255, 178, 36, .10);
+  --accent-line: rgba(255, 178, 36, .32);
+
+  /* Réservé aux alertes. Ne pas utiliser en décoration. */
+  --alert: #ff4230;
+
+  --f-sans: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --f-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --max: 1120px;
+  --gutter: 20px;
+  --notch: 14px;   /* profondeur du coin coupé, comme .corner-cut du produit */
+}
+
+@media (min-width: 720px) { :root { --gutter: 32px; } }
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Pas de `scroll-behavior: smooth` : le seul saut interne du site est le
+   lien d'évitement, où l'instantané est meilleur pour tout le monde. Un
+   défilement animé rendait aussi les boutons « instables » pour un
+   pilote de navigateur, donc le formulaire intestable. */
+html { -webkit-text-size-adjust: 100%; }
+
+html, body { overflow-x: hidden; }   /* filet anti-débordement */
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  color-scheme: dark;
+  font-family: var(--f-sans);
+  font-size: 17px;
+  line-height: 1.6;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+@media (min-width: 900px) { body { font-size: 18px; } }
+
+img, svg { max-width: 100%; display: block; }
+
+/* Un lien non stylé retombe sur le bleu par défaut du navigateur — la
+   seule autre couleur du site, et celle qu'on n'a pas choisie. */
+a {
+  color: var(--text);
+  text-decoration-color: var(--accent-line);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color .16s ease;
+}
+a:hover { text-decoration-color: var(--accent); }
+
+::selection { background: var(--accent); color: var(--accent-ink); }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ---------- Structure ---------- */
+
+.wrap {
+  width: 100%;
+  max-width: var(--max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+main { flex: 1 0 auto; }
+
+.skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 12px 18px;
+  font-family: var(--f-mono);
+  font-size: 13px;
+  font-weight: 500;
+}
+.skip:focus { left: 0; }
+
+/* ---------- Typographie ---------- */
+
+h1, h2, h3, h4 {
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -.03em;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: clamp(2.05rem, 1.15rem + 3.9vw, 3.9rem);
+  letter-spacing: -.04em;
+  line-height: 1.02;
+}
+
+h2 {
+  font-size: clamp(1.5rem, 1.1rem + 1.8vw, 2.3rem);
+}
+
+h3 {
+  font-size: 1.1rem;
+  letter-spacing: -.015em;
+  line-height: 1.3;
+}
+
+p { text-wrap: pretty; }
+p + p { margin-top: 1em; }
+
+.lead {
+  font-size: clamp(1.03rem, .96rem + .45vw, 1.28rem);
+  line-height: 1.5;
+  color: var(--text-2);
+  max-width: 62ch;
+}
+
+.prose { max-width: 68ch; color: var(--text-2); }
+.prose strong { color: var(--text); font-weight: 500; }
+.prose a { color: var(--text); text-decoration-color: var(--accent-line); }
+
+/* Repère mono — l'équivalent des libellés techniques du produit */
+.mono {
+  font-family: var(--f-mono);
+  font-size: .78rem;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.mono-sm { font-family: var(--f-mono); font-size: .74rem; letter-spacing: .06em; color: var(--text-3); }
+
+/* Le seul emploi « inline » de l'ambre : souligner UN mot. */
+.mark {
+  color: var(--accent);
+  box-shadow: inset 0 -2px 0 var(--accent-line);
+}
+
+/* ---------- En-tête ---------- */
+
+.hdr {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(10, 10, 10, .88);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: saturate(160%) blur(12px);
+  -webkit-backdrop-filter: saturate(160%) blur(12px);
+}
+
+.hdr-in {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 64px;
+}
+
+/* Logo : reconstruit en HTML avec la typo du site, mais le dégradé
+   graphite → blanc et le « DEVSEC » traqué en dessous sont ceux de la
+   marque (src/components/Logo.tsx du produit). */
+.logo {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1px;
+  text-decoration: none;
+  line-height: 1;
+  padding: 4px 2px;
+  margin-right: auto;
+}
+.logo-word {
+  font-size: 1.42rem;
+  font-weight: 700;
+  letter-spacing: -.055em;
+  color: #ffffff;
+  /* Le dégradé de la marque part de #616160 côté produit. À 23 px, cette
+     valeur rendait le « A » quasi illisible sur le fond : le départ est
+     remonté, le balayage graphite → blanc reste le même. */
+  background: linear-gradient(90deg, #8f8f8c 0%, #d2d2cf 52%, #ffffff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+  .logo-word { color: #f2f2f0; -webkit-text-fill-color: currentColor; }
+}
+.logo-sub {
+  font-family: var(--f-mono);
+  font-size: .55rem;
+  font-weight: 500;
+  letter-spacing: .46em;
+  color: var(--text-4);
+  padding-left: 2px;
+}
+
+.nav { display: none; }
+@media (min-width: 940px) {
+  .nav { display: flex; align-items: center; gap: 4px; }
+}
+
+.nav a {
+  display: block;
+  padding: 8px 12px;
+  font-size: .95rem;
+  color: var(--text-2);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: color .16s ease, border-color .16s ease;
+}
+.nav a:hover { color: var(--text); border-bottom-color: var(--line-strong); }
+.nav a[aria-current='page'] { color: var(--text); border-bottom-color: var(--accent); }
+
+/* Menu mobile — <details>, donc fonctionnel sans JavaScript. */
+.menu { position: relative; }
+@media (min-width: 940px) { .menu { display: none; } }
+
+.menu > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 13px;
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  font-family: var(--f-mono);
+  font-size: .74rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  transition: background-color .16s ease, border-color .16s ease;
+}
+.menu > summary::-webkit-details-marker { display: none; }
+.menu > summary:hover { background: var(--surface-hi); border-color: var(--text-4); }
+.menu[open] > summary { background: var(--surface-hi); }
+
+.menu-bars { width: 15px; height: 9px; position: relative; flex: none; }
+.menu-bars::before, .menu-bars::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 1.5px;
+  background: currentColor;
+}
+.menu-bars::before { top: 0; }
+.menu-bars::after { bottom: 0; }
+
+.menu-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  min-width: 236px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  padding: 6px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .55);
+}
+.menu-panel a {
+  display: block;
+  padding: 11px 13px;
+  color: var(--text-2);
+  text-decoration: none;
+  font-size: .98rem;
+  border-left: 2px solid transparent;
+  transition: background-color .16s ease, color .16s ease;
+}
+.menu-panel a:hover { background: var(--surface-hi); color: var(--text); }
+.menu-panel a[aria-current='page'] { color: var(--text); border-left-color: var(--accent); }
+
+/* Sous 560 px, le bouton du bandeau serrerait le logo contre « Menu » —
+   où il figure de toute façon. Sélecteur préfixé par .hdr : sans ça
+   `.btn { display: inline-flex }`, déclaré plus bas, l'emporterait. */
+.hdr .hdr-cta { display: none; }
+@media (min-width: 560px) { .hdr .hdr-cta { display: inline-flex; } }
+
+/* ---------- Boutons ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 13px 22px;
+  font-family: var(--f-mono);
+  font-size: .8rem;
+  font-weight: 500;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color .16s ease, border-color .16s ease, transform .16s ease, color .16s ease;
+}
+.btn:active { transform: translateY(1px); transition-duration: .08s; }
+
+.btn-primary { background: var(--accent); color: var(--accent-ink); }
+.btn-primary:hover { background: #ffc04a; }
+
+.btn-ghost { border-color: var(--line-strong); color: var(--text); background: transparent; }
+.btn-ghost:hover { background: var(--surface-hi); border-color: var(--text-4); }
+
+.btn-sm { padding: 9px 15px; font-size: .72rem; }
+
+.btn-row { display: flex; flex-wrap: wrap; gap: 12px; }
+
+/* Respiration entre deux blocs d'une même section */
+.more { margin-top: clamp(26px, 3.5vw, 40px); }
+
+/* ---------- Blocs ---------- */
+
+/* Coin coupé — signature directe du produit (.corner-cut) */
+.notch {
+  clip-path: polygon(0 0, calc(100% - var(--notch)) 0, 100% var(--notch), 100% 100%, 0 100%);
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 24px;
+}
+@media (min-width: 720px) { .panel { padding: 30px; } }
+
+.section { padding-block: clamp(56px, 9vw, 104px); }
+.section + .section { border-top: 1px solid var(--line); }
+/* Le bandeau a déjà sa propre marge basse : sans ça, les pages
+   intérieures ouvrent sur un grand vide entre le titre et le contenu. */
+.hero + .section { padding-top: clamp(18px, 2.5vw, 34px); }
+
+/* Titre de section : un filet, un index mono, un titre. */
+.sec-head { margin-bottom: clamp(28px, 4vw, 44px); }
+.sec-head .mono { display: block; margin-bottom: 14px; }
+.sec-head .mono b { color: var(--accent); font-weight: 500; }
+.sec-head p { margin-top: 16px; }
+
+/* ---------- Accueil : le bandeau ---------- */
+
+.hero { padding-top: clamp(48px, 8vw, 92px); padding-bottom: clamp(28px, 3.5vw, 44px); }
+.hero h1 { margin-top: 18px; max-width: 17ch; }
+.hero .lead { margin-top: 22px; }
+.hero .btn-row { margin-top: 32px; }
+.hero-note { margin-top: 18px; max-width: 64ch; }
+
+/* Le bloc « deux côtés » — c'est le positionnement, rendu en mise en page. */
+.split {
+  margin-top: clamp(40px, 6vw, 68px);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  display: grid;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 860px) { .split { grid-template-columns: 1.15fr 1fr; } }
+
+.split-col { padding: 24px; }
+@media (min-width: 720px) { .split-col { padding: 30px; } }
+.split-col + .split-col { border-top: 1px solid var(--line); }
+@media (min-width: 860px) {
+  .split-col + .split-col { border-top: 0; border-left: 1px solid var(--line); }
+}
+
+.split-col + .split-col { background: linear-gradient(180deg, var(--accent-soft), transparent 180px); }
+
+.split h2 { font-size: 1.02rem; letter-spacing: -.01em; }
+.split-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 20px; }
+.split-head .mono { color: var(--text-3); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.chip {
+  font-family: var(--f-mono);
+  font-size: .76rem;
+  letter-spacing: .02em;
+  color: var(--text-2);
+  border: 1px solid var(--line-strong);
+  padding: 6px 10px;
+  background: var(--bg);
+}
+
+.watch { list-style: none; display: grid; gap: 12px; }
+.watch li {
+  padding-left: 16px;
+  border-left: 2px solid var(--accent-line);
+  font-size: .96rem;
+  color: var(--text-2);
+  line-height: 1.4;
+}
+.watch li b { display: block; color: var(--text); font-weight: 500; }
+
+.split-note {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--line-strong);
+  font-size: .86rem;
+  line-height: 1.5;
+  color: var(--text-3);
+}
+
+/* ---------- Grilles de cartes ---------- */
+
+.duo { display: grid; gap: 18px; }
+@media (min-width: 860px) { .duo { grid-template-columns: 1fr 1fr; gap: 22px; } }
+
+.card { background: var(--surface); border: 1px solid var(--line); padding: 24px; }
+@media (min-width: 720px) { .card { padding: 30px; } }
+.card h3 { margin-bottom: 12px; }
+.card p { color: var(--text-2); font-size: .97rem; }
+.card .mono { display: block; margin-bottom: 16px; }
+
+/* Liste de modules : ce que le client ouvre réellement. */
+.mods { list-style: none; display: grid; gap: 0; margin-top: 4px; }
+.mods li {
+  display: grid;
+  grid-template-columns: minmax(96px, 26%) 1fr;
+  gap: 8px 18px;
+  padding: 13px 0;
+  border-top: 1px solid var(--line);
+  align-items: baseline;
+}
+.mods li:last-child { border-bottom: 1px solid var(--line); }
+.mods dt, .mods b {
+  font-family: var(--f-mono);
+  font-size: .8rem;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--text);
+  font-weight: 500;
+}
+.mods span { color: var(--text-2); font-size: .95rem; line-height: 1.45; }
+@media (max-width: 560px) {
+  .mods li { grid-template-columns: 1fr; gap: 4px; }
+}
+
+/* Étapes numérotées */
+.steps { list-style: none; display: grid; gap: 0; counter-reset: step; }
+.steps > li {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  padding: 26px 0;
+  border-top: 1px solid var(--line);
+}
+.steps > li:last-child { border-bottom: 1px solid var(--line); }
+@media (min-width: 780px) {
+  .steps > li { grid-template-columns: 84px 1fr; gap: 8px 28px; align-items: start; }
+}
+.steps .n {
+  font-family: var(--f-mono);
+  font-size: .8rem;
+  font-weight: 500;
+  letter-spacing: .1em;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  padding-top: 3px;
+}
+.steps h3 { margin-bottom: 8px; }
+.steps p { color: var(--text-2); font-size: .97rem; max-width: 64ch; }
+.steps .aside {
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  font-size: .88rem;
+  color: var(--text-3);
+  max-width: 64ch;
+}
+.steps .aside b { color: var(--text-2); font-weight: 500; }
+
+/* Bloc « ce qu'on ne fait pas » — l'honnêteté comme argument. */
+.nots { list-style: none; display: grid; gap: 14px; margin-top: 6px; }
+@media (min-width: 780px) { .nots { grid-template-columns: 1fr 1fr; gap: 16px 34px; } }
+.nots li {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 12px;
+  align-items: start;
+  font-size: .97rem;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+.nots li::before {
+  content: '';
+  width: 13px;
+  height: 1.5px;
+  background: var(--text-4);
+  margin-top: .72em;
+}
+.nots b { color: var(--text); font-weight: 500; }
+
+/* Appel à l'action de bas de page */
+.cta {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: clamp(28px, 5vw, 52px);
+  display: grid;
+  gap: 22px;
+  align-items: center;
+}
+@media (min-width: 860px) { .cta { grid-template-columns: 1.4fr auto; gap: 40px; } }
+.cta h2 { font-size: clamp(1.4rem, 1.1rem + 1.4vw, 2rem); }
+.cta p { color: var(--text-2); margin-top: 12px; max-width: 52ch; font-size: .97rem; }
+
+/* ---------- Formulaire ---------- */
+
+.form-grid { display: grid; gap: 34px; align-items: start; }
+@media (min-width: 900px) { .form-grid { grid-template-columns: 1.35fr 1fr; gap: 46px; } }
+
+.field { display: block; margin-bottom: 20px; }
+.field > .lbl {
+  display: block;
+  font-family: var(--f-mono);
+  font-size: .74rem;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  margin-bottom: 8px;
+}
+.field .hint { font-family: var(--f-sans); font-size: .84rem; letter-spacing: 0; text-transform: none; color: var(--text-3); display: block; margin-top: 4px; }
+
+.field input, .field textarea {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  font-family: var(--f-sans);
+  font-size: 1rem;
+  line-height: 1.5;
+  padding: 12px 14px;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.field textarea { min-height: 148px; resize: vertical; }
+.field input::placeholder, .field textarea::placeholder { color: var(--text-4); }
+.field input:focus, .field textarea:focus {
+  outline: none;
+  border-color: var(--text-4);
+  box-shadow: 0 0 0 3px rgba(255, 178, 36, .18);
+}
+.field input:focus-visible, .field textarea:focus-visible { outline: none; }
+
+/* Piège à robots : jamais affiché, jamais atteint au clavier. */
+.hp {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.form-foot { margin-top: 26px; display: grid; gap: 16px; }
+.form-foot .mono-sm { max-width: 68ch; line-height: 1.7; }
+
+/* États de réponse */
+.msg {
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  padding: 18px 20px;
+  font-size: .96rem;
+  line-height: 1.55;
+}
+.msg h3 { margin-bottom: 8px; }
+.msg p { color: var(--text-2); }
+.msg-ok { border-left: 3px solid var(--accent); }
+.msg-err { border-left: 3px solid var(--alert); }   /* rouge = alerte, seul emploi */
+.msg[hidden] { display: none; }
+
+.aside-panel { background: var(--surface); border: 1px solid var(--line); padding: 24px; }
+.aside-panel + .aside-panel { margin-top: 18px; }
+.aside-panel h2 { font-size: 1rem; letter-spacing: -.01em; margin-bottom: 16px; }
+.aside-panel ol { list-style: none; counter-reset: a; display: grid; gap: 14px; }
+.aside-panel ol li {
+  counter-increment: a;
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  gap: 12px;
+  font-size: .92rem;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+.aside-panel ol li::before {
+  content: counter(a, decimal-leading-zero);
+  font-family: var(--f-mono);
+  font-size: .74rem;
+  color: var(--accent);
+  padding-top: .25em;
+}
+.aside-panel ul { list-style: none; display: grid; gap: 11px; }
+.aside-panel ul li {
+  font-size: .92rem;
+  color: var(--text-2);
+  line-height: 1.5;
+  padding-left: 16px;
+  border-left: 1px solid var(--line-strong);
+}
+
+/* ---------- Pages légales ---------- */
+
+.legal { padding-block: clamp(44px, 7vw, 76px); }
+.legal h1 { font-size: clamp(1.8rem, 1.3rem + 2vw, 2.6rem); }
+.legal h2 {
+  font-size: 1.12rem;
+  margin-top: 44px;
+  margin-bottom: 12px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.legal p, .legal li { color: var(--text-2); font-size: .97rem; }
+.legal ul { margin: 12px 0 0 0; padding-left: 20px; display: grid; gap: 8px; }
+.legal dl { display: grid; gap: 10px; margin-top: 14px; }
+@media (min-width: 620px) { .legal dl { grid-template-columns: minmax(150px, 25%) 1fr; gap: 10px 20px; } }
+.legal dt { font-family: var(--f-mono); font-size: .76rem; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); padding-top: 3px; }
+.legal dd { color: var(--text-2); font-size: .97rem; }
+.legal .prose { max-width: 72ch; }
+
+/* Mention à compléter : visible, pas discrète — un gabarit qui part en
+   production est le premier signal de négligence. */
+.todo {
+  font-family: var(--f-mono);
+  font-size: .8rem;
+  color: var(--accent);
+  border: 1px dashed var(--accent-line);
+  padding: 2px 8px;
+  display: inline-block;
+}
+
+/* ---------- 404 ---------- */
+
+.four04 { padding-block: clamp(70px, 12vw, 140px); text-align: left; }
+.four04 .code {
+  font-family: var(--f-mono);
+  font-size: clamp(3.4rem, 2rem + 7vw, 6rem);
+  font-weight: 500;
+  color: var(--text-4);   /* 3,17:1 — suffisant pour du très grand texte */
+  letter-spacing: -.04em;
+  line-height: 1;
+  margin-bottom: 18px;
+}
+.four04 .lead { margin-top: 20px; }
+
+/* ---------- Pied de page ---------- */
+
+.ftr {
+  border-top: 1px solid var(--line);
+  padding-block: 44px 34px;
+  margin-top: auto;
+}
+.ftr-grid { display: grid; gap: 30px; }
+@media (min-width: 780px) { .ftr-grid { grid-template-columns: 1.5fr 1fr 1fr; gap: 40px; } }
+.ftr h2 { font-size: .74rem; font-family: var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); margin-bottom: 14px; font-weight: 500; }
+.ftr ul { list-style: none; display: grid; gap: 9px; }
+.ftr a { color: var(--text-2); text-decoration: none; font-size: .94rem; transition: color .16s ease; }
+.ftr a:hover { color: var(--text); }
+.ftr-about p { color: var(--text-3); font-size: .9rem; max-width: 42ch; margin-top: 12px; line-height: 1.55; }
+.ftr-bottom {
+  margin-top: 36px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  justify-content: space-between;
+  align-items: center;
+}
+.ftr-bottom p { font-family: var(--f-mono); font-size: .72rem; letter-spacing: .06em; color: var(--text-3); }
+
+/* ---------- Mouvement réduit ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}
