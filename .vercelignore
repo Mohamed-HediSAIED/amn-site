@@ -1,6 +1,8 @@
 # Outillage de développement : ne part pas en production.
 # Le README nomme les variables d'environnement — inutile de le servir
-# publiquement sur le site d'un studio qui vend de la rigueur.
+# publiquement sur le site d'un studio qui vend de la rigueur. Idem pour
+# docs/, qui explique les compromis de conception.
 scripts
 scratchpad
+docs
 README.md

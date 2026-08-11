@@ -13,9 +13,19 @@
    Le ROUGE (--alert) est réservé aux alertes. Il n'apparaît nulle part
    en décoration — même valeur que le `danger` du produit.
 
-   Aucune animation déclenchée au défilement : c'est un choix. Un site
-   qui se révèle bloc par bloc est devenu la signature des pages
-   générées à la chaîne, et ça ne va pas avec ce qu'on vend.
+   Aucun bloc ne se RÉVÈLE au défilement : c'est un choix. Un site qui
+   apparaît morceau par morceau en descendant est devenu la signature
+   des pages générées à la chaîne, et ça ne va pas avec ce qu'on vend.
+   La règle de section (.rail) marque la position courante pendant la
+   descente — c'est un indicateur d'état, pas une apparition : rien ne
+   surgit, rien ne se déplace, une bordure change de couleur.
+
+   v2 — la console de navigation (.console). Tout ce qui est coûteux y
+   est enfermé, et un <details> fermé n'est pas rendu : la page qui se
+   charge ne porte ni quadrillé, ni halo, ni plaques. Une fois ouverte,
+   la console n'anime que `transform` et `opacity`, et son ouverture est
+   une séquence FINIE — aucune animation ne tourne en boucle, nulle
+   part, à aucun moment. Voir docs/direction-v2.md.
    ================================================================== */
 
 /* Les @font-face vivent dans assets/fonts.css, chargée par un <link> à part :
@@ -189,132 +199,401 @@ p + p { margin-top: 1em; }
 
 /* ---------- En-tête ---------- */
 
+/* Fond OPAQUE, sans `backdrop-filter`. Deux raisons, et les deux
+   comptent. Un flou d'arrière-plan sur un bandeau collant se recalcule
+   à chaque image pendant le défilement : c'est le poste le plus cher de
+   la v1 sur téléphone d'entrée de gamme. Et `backdrop-filter` fait de
+   l'en-tête le bloc conteneur de ses descendants `position: fixed` —
+   le panneau de la console, ancré dans le bandeau, se serait retrouvé
+   dimensionné sur les 64 px du bandeau au lieu de la fenêtre. */
 .hdr {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(10, 10, 10, .88);
+  background: var(--bg);
   border-bottom: 1px solid var(--line);
-  backdrop-filter: saturate(160%) blur(12px);
-  -webkit-backdrop-filter: saturate(160%) blur(12px);
 }
 
 .hdr-in {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   min-height: 64px;
 }
+@media (min-width: 720px) { .hdr-in { gap: 16px; } }
 
-/* Logo : reconstruit en HTML avec la typo du site, mais le dégradé
-   graphite → blanc et le « DEVSEC » traqué en dessous sont ceux de la
-   marque (src/components/Logo.tsx du produit). */
+/* Le panneau de la console est un enfant du bandeau et couvre la
+   fenêtre entière. Ces trois-là doivent rester AU-DESSUS de lui : le
+   logo pour l'ancrage, le témoin pour pouvoir refermer sans JavaScript,
+   le bouton parce qu'il reste l'action principale du site. */
+.hdr .logo,
+.hdr .hdr-cta,
+.console > summary { position: relative; z-index: 2; }
+
+/* Logo — UN SEUL fichier, /assets/logo.svg, posé en <img>.
+   La hauteur est imposée ici, la largeur suit : remplacer le fichier
+   suffit à changer le logo partout, sans toucher au CSS ni au HTML.
+   Le « DEVSEC » traqué en dessous n'appartient pas au logo, c'est un
+   élément de mise en page — il reste du texte, donc sélectionnable,
+   lisible par un lecteur d'écran et net à toute densité d'écran. */
 .logo {
   display: inline-flex;
   flex-direction: column;
-  gap: 1px;
+  align-items: flex-start;
+  gap: 4px;
   text-decoration: none;
   line-height: 1;
   padding: 4px 2px;
   margin-right: auto;
 }
-.logo-word {
-  font-size: 1.42rem;
-  font-weight: 700;
-  letter-spacing: -.055em;
-  color: #ffffff;
-  /* Le dégradé de la marque part de #616160 côté produit. À 23 px, cette
-     valeur rendait le « A » quasi illisible sur le fond : le départ est
-     remonté, le balayage graphite → blanc reste le même. */
-  background: linear-gradient(90deg, #8f8f8c 0%, #d2d2cf 52%, #ffffff 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+.logo-mark {
+  height: 21px;
+  width: auto;
+  /* Le gabarit est en traits de 1,9 px sur une hauteur de 40 : réduit à
+     21 px il tomberait sous le pixel. Le rendu vectoriel s'en occupe,
+     mais autant ne pas descendre plus bas. */
 }
-@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
-  .logo-word { color: #f2f2f0; -webkit-text-fill-color: currentColor; }
-}
+@media (min-width: 720px) { .logo-mark { height: 24px; } }
 .logo-sub {
   font-family: var(--f-mono);
   font-size: .55rem;
   font-weight: 500;
   letter-spacing: .46em;
-  color: var(--text-4);
+  /* --text-4 tombait à 3,19:1. « DEVSEC » fait partie du nom de la
+     marque : c'est du texte porteur de sens, pas de la décoration, donc
+     le plancher --text-3 s'applique comme partout ailleurs. */
+  color: var(--text-3);
   padding-left: 2px;
 }
+/* Pied de page : le logo y est plus grand, il tient la colonne. */
+.ftr-about .logo-mark { height: 26px; }
 
-.nav { display: none; }
-@media (min-width: 940px) {
-  .nav { display: flex; align-items: center; gap: 4px; }
-}
+/* ==================================================================
+   LA CONSOLE — la navigation de la v2
+   ==================================================================
+   Un <details> : le témoin est le <summary>, les cinq destinations
+   sont cinq <a href> ordinaires. Sans JavaScript on clique, ça
+   s'ouvre, on choisit. Au clavier, Tab puis Entrée. Pour un lecteur
+   d'écran, un groupe repliable contenant une liste de liens — ce qui
+   est exactement ce que c'est. Le JavaScript n'ajoute que du confort
+   (Échap, clic à côté, retour du focus, parallaxe).
 
-.nav a {
-  display: block;
-  padding: 8px 12px;
-  font-size: .95rem;
-  color: var(--text-2);
-  text-decoration: none;
-  border-bottom: 2px solid transparent;
-  transition: color .16s ease, border-color .16s ease;
-}
-.nav a:hover { color: var(--text); border-bottom-color: var(--line-strong); }
-.nav a[aria-current='page'] { color: var(--text); border-bottom-color: var(--accent); }
+   Fermée, elle ne coûte RIEN : le contenu d'un <details> fermé n'est
+   pas rendu. C'est toute la raison de cette forme. ================== */
 
-/* Menu mobile — <details>, donc fonctionnel sans JavaScript. */
-.menu { position: relative; }
-@media (min-width: 940px) { .menu { display: none; } }
+.console { margin-left: auto; }
 
-.menu > summary {
+/* ---- Le témoin : il dit où on est, pas où on peut aller ---- */
+
+.console > summary {
   list-style: none;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 9px 13px;
+  gap: 9px;
+  padding: 8px 12px;
   border: 1px solid var(--line-strong);
   color: var(--text);
   font-family: var(--f-mono);
-  font-size: .74rem;
+  font-size: .72rem;
+  font-weight: 500;
   letter-spacing: .1em;
   text-transform: uppercase;
+  white-space: nowrap;
   transition: background-color .16s ease, border-color .16s ease;
 }
-.menu > summary::-webkit-details-marker { display: none; }
-.menu > summary:hover { background: var(--surface-hi); border-color: var(--text-4); }
-.menu[open] > summary { background: var(--surface-hi); }
+.console > summary::-webkit-details-marker { display: none; }
+.console > summary::marker { content: ''; }
+.console > summary:hover { background: var(--surface-hi); border-color: var(--text-4); }
+.console[open] > summary { background: var(--surface-hi); border-color: var(--accent-line); }
 
-.menu-bars { width: 15px; height: 9px; position: relative; flex: none; }
-.menu-bars::before, .menu-bars::after {
+/* Le glyphe : la table vue de biais — un trapèze — et le repère ambre
+   de la position courante posé dessus. Surtout PAS trois barres
+   horizontales : c'est le pictogramme du menu classique, exactement ce
+   dont on cherche à sortir. */
+.console-glyph { width: 15px; height: 11px; position: relative; flex: none; }
+.console-glyph::before {
   content: '';
   position: absolute;
-  left: 0; right: 0;
-  height: 1.5px;
+  inset: 0;
   background: currentColor;
+  opacity: .3;
+  clip-path: polygon(27% 0, 73% 0, 100% 100%, 0 100%);
+  transition: opacity .16s ease;
 }
-.menu-bars::before { top: 0; }
-.menu-bars::after { bottom: 0; }
-
-.menu-panel {
+.console-glyph i {
   position: absolute;
-  right: 0;
-  top: calc(100% + 10px);
-  min-width: 236px;
-  background: var(--surface);
-  border: 1px solid var(--line-strong);
-  padding: 6px;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, .55);
+  left: 50%; top: 54%;
+  width: 4px; height: 4px;
+  margin: -2px 0 0 -2px;
+  background: var(--accent);
+  transition: transform .16s ease;
 }
-.menu-panel a {
+.console > summary:hover .console-glyph::before,
+.console[open] > summary .console-glyph::before { opacity: .55; }
+.console > summary:hover .console-glyph i,
+.console[open] > summary .console-glyph i { transform: translateY(-3px); }
+
+.console-val-mini { display: none; }
+@media (max-width: 599px) {
+  .console-val { display: none; }
+  .console-val-mini { display: inline; }
+}
+
+.console-chev {
+  width: 7px; height: 7px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+  flex: none;
+  transition: transform .16s ease;
+  color: var(--text-3);
+}
+.console[open] > summary .console-chev { transform: translateY(1px) rotate(-135deg); }
+
+/* ---- Le panneau ---- */
+
+.console-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 1;                /* sous le logo / le témoin / le bouton */
+  /* OPAQUE. Un fond translucide laissait le titre de la page transparaître
+     derrière les plaques : joli en capture, illisible en vrai, et le
+     contraste du texte n'est plus garanti dès qu'on ne maîtrise plus ce
+     qu'il y a dessous. */
+  background: #060606;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* 950 px : assez court pour que le soulèvement d'une plaque se voie
+     (≈ 5 % d'agrandissement), assez long pour que l'inclinaison de la
+     scène ne déforme pas les titres sur les côtés. */
+  perspective: 950px;
+  display: grid;
+  align-content: center;
+  animation: console-fond .2s ease both;
+}
+@keyframes console-fond { from { opacity: 0; } to { opacity: 1; } }
+
+/* Le défilement de la page est bloqué tant que la console est ouverte.
+   En CSS seul : pas de JavaScript à écrire, donc rien à désynchroniser
+   si le <details> est fermé autrement qu'on l'avait prévu. */
+html:has(.console[open]) { overflow: hidden; }
+
+/* Le sol quadrillé. STATIQUE — un grand dégradé qu'on anime est
+   exactement ce qui fait chuter un téléphone d'entrée de gamme. La
+   profondeur vient de la perspective, pas d'une dérive. */
+.console-sol {
+  position: absolute;
+  left: 50%;
+  bottom: -8vh;
+  width: 300%;
+  height: 68vh;
+  transform: translateX(-50%) rotateX(70deg);
+  transform-origin: 50% 100%;
+  background:
+    repeating-linear-gradient(90deg, var(--accent-line) 0 1px, transparent 1px 72px),
+    repeating-linear-gradient(0deg,  var(--accent-line) 0 1px, transparent 1px 72px);
+  -webkit-mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, .5) 46%, transparent 90%);
+  mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, .5) 46%, transparent 90%);
+  opacity: .9;
+  pointer-events: none;
+}
+
+/* L'horizon. Un dégradé radial peint une fois, jamais retouché. */
+.console-halo {
+  position: absolute;
+  left: 50%;
+  bottom: -14vh;
+  width: 140vw;
+  height: 56vh;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at 50% 100%, rgba(255, 178, 36, .15), transparent 64%);
+  pointer-events: none;
+}
+
+/* Le balayage : UNE passe, à l'ouverture, puis plus rien. Un balayage
+   en boucle tiendrait le compositeur éveillé et la batterie avec — pour
+   un effet qu'on ne regarde de toute façon que les deux premières
+   secondes. */
+.console-balai {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 0;
+  height: 42vh;
+  pointer-events: none;
+  background: linear-gradient(to top, transparent, rgba(255, 178, 36, .22) 46%, transparent);
+  animation: console-balai 1.15s cubic-bezier(.3, .5, .2, 1) both;
+}
+@keyframes console-balai {
+  from { transform: translate3d(0, 40vh, 0); opacity: 0; }
+  35%  { opacity: 1; }
+  to   { transform: translate3d(0, -34vh, 0); opacity: 0; }
+}
+
+/* ---- La scène : c'est elle qui s'incline au pointeur ---- */
+
+.console-scene {
+  position: relative;
+  width: 100%;
+  /* Bas plus généreux que le haut : le bloc de plaques remonte au-dessus
+     de l'horizon du quadrillé, et se pose sur la table au lieu de
+     flotter au milieu de l'écran. */
+  padding: 20px var(--gutter) 128px;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  /* La transition sert d'amortisseur : la parallaxe est posée une fois
+     par image, chaque nouvelle valeur relance une interpolation courte.
+     C'est ce léger retard qui rend le mouvement fluide plutôt que
+     nerveux — et ça ne coûte rien, `transform` est composité. */
+  transition: transform .18s ease-out;
+}
+
+.console-tag {
   display: block;
-  padding: 11px 13px;
-  color: var(--text-2);
-  text-decoration: none;
-  font-size: .98rem;
-  border-left: 2px solid transparent;
-  transition: background-color .16s ease, color .16s ease;
+  text-align: center;
+  color: var(--text-3);
+  margin-bottom: 22px;
 }
-.menu-panel a:hover { background: var(--surface-hi); color: var(--text); }
-.menu-panel a[aria-current='page'] { color: var(--text); border-left-color: var(--accent); }
+.console-tag b { color: var(--accent); font-weight: 500; }
+
+/* ---- Les plaques ---- */
+
+.plaques {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  max-width: 792px;         /* 3 plaques par rang, puis 2 centrées */
+  margin-inline: auto;
+  transform-style: preserve-3d;
+}
+/* `preserve-3d` ICI AUSSI, sinon rien ne se soulève. Un <li> laissé à
+   `flat` aplatit ses enfants dans son propre plan : le `translateZ` de
+   la plaque est bien calculé, il n'a simplement plus aucun effet
+   visible. C'est le genre de panne qui ne fait pas d'erreur. */
+.plaques > li {
+  display: flex;
+  flex: 0 1 248px;
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+/* Le halo au sol appartient à la TABLE, pas à la plaque : il reste en
+   place pendant que la plaque s'élève au-dessus. Il est porté par le
+   <li> et non par la plaque, dont le coin coupé (clip-path) découperait
+   aussi son pseudo-élément. */
+.plaques > li::after {
+  content: '';
+  position: absolute;
+  left: 6%; right: 6%;
+  bottom: -13px;
+  height: 13px;
+  background: radial-gradient(ellipse at 50% 0, rgba(255, 178, 36, .45), transparent 72%);
+  opacity: 0;
+  transition: opacity .18s ease;
+  pointer-events: none;
+}
+.plaques > li:has(.plaque:hover)::after,
+.plaques > li:has(.plaque:focus-visible)::after { opacity: 1; }
+
+.plaque {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 100%;
+  padding: 18px 18px 20px;
+  /* La couleur de fond est posée SÉPARÉMENT du dégradé : un élément qui
+     n'a qu'un `background-image` renvoie « transparent » comme couleur
+     calculée, et le contrôle de contraste irait alors chercher le fond
+     du panneau — plus sombre, donc un rapport flatteur et faux. */
+  background-color: var(--surface-hi);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, .022), transparent 62%);
+  border: 1px solid var(--line-strong);
+  text-decoration: none;
+  transform: translateZ(0);
+  transition: transform .18s ease, border-color .18s ease, background-color .18s ease;
+}
+.plaque:hover,
+.plaque:focus-visible {
+  transform: translateZ(46px);
+  border-color: var(--accent);
+}
+.plaque-n {
+  font-family: var(--f-mono);
+  font-size: .7rem;
+  font-weight: 500;
+  letter-spacing: .14em;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+  transition: color .18s ease;
+}
+.plaque:hover .plaque-n,
+.plaque:focus-visible .plaque-n { color: var(--accent); }
+
+.plaque-nom {
+  font-size: 1.06rem;
+  font-weight: 500;
+  letter-spacing: -.02em;
+  line-height: 1.2;
+  color: var(--text);
+}
+.plaque-txt { font-size: .87rem; line-height: 1.45; color: var(--text-2); }
+
+/* La destination où on se trouve déjà : marquée, et légèrement
+   au-dessus des autres même au repos. */
+.plaque[aria-current='page'] {
+  border-color: var(--accent-line);
+  background-image: linear-gradient(180deg, rgba(255, 178, 36, .09), transparent 70%);
+  transform: translateZ(14px);
+}
+.plaque[aria-current='page'] .plaque-n { color: var(--accent); }
+
+/* Arrivée décalée à l'ouverture. `backwards` et non `both` : après la
+   séquence, la plaque reprend ses styles normaux — avec `both` l'état
+   final de l'animation resterait appliqué et écraserait le survol. */
+@keyframes plaque-in {
+  from { opacity: 0; transform: translate3d(0, 14px, -60px); }
+}
+.console[open] .plaque { animation: plaque-in .34s cubic-bezier(.2, .7, .3, 1) backwards; }
+.console[open] li:nth-child(1) .plaque { animation-delay: .10s; }
+.console[open] li:nth-child(2) .plaque { animation-delay: .16s; }
+.console[open] li:nth-child(3) .plaque { animation-delay: .22s; }
+.console[open] li:nth-child(4) .plaque { animation-delay: .28s; }
+.console[open] li:nth-child(5) .plaque { animation-delay: .34s; }
+
+.console-pied {
+  display: block;
+  text-align: center;
+  margin-top: 26px;
+  color: var(--text-3);
+}
+.console-pied kbd {
+  font-family: var(--f-mono);
+  font-size: .7rem;
+  border: 1px solid var(--line-strong);
+  padding: 1px 6px;
+  color: var(--text-3);
+}
+
+/* ---- Téléphone : l'ambition baisse d'elle-même ----
+   Rien à survoler, donc pas de parallaxe (le JavaScript ne l'installe
+   même pas). Pas de balayage. Sol raccourci, plaques en une colonne,
+   relief au survol supprimé. Ce qui reste — le fond qui s'efface, la
+   fuite du quadrillé, l'arrivée décalée — suffit et ne coûte rien. */
+@media (max-width: 719px) {
+  .console-panel { align-content: start; }
+  .console-scene { padding-top: 84px; padding-bottom: 48px; }
+  .console-sol { height: 32vh; width: 340%; }
+  .console-balai { display: none; }
+  .plaques { gap: 10px; }
+  .plaques > li { flex: 1 1 100%; }
+  .plaque { padding: 14px 16px 15px; }
+  .plaque:hover { transform: translateZ(0); }
+  .plaque-nom { font-size: 1rem; }
+  .plaque-txt { font-size: .84rem; }
+}
 
 /* Sous 560 px, le bouton du bandeau serrerait le logo contre « Menu » —
    où il figure de toute façon. Sélecteur préfixé par .hdr : sans ça
@@ -369,7 +648,10 @@ p + p { margin-top: 1em; }
 }
 @media (min-width: 720px) { .panel { padding: 30px; } }
 
-.section { padding-block: clamp(56px, 9vw, 104px); }
+/* v2 : resserré (104 → 84 px sur grand écran). Sur l'accueil, les
+   marges de section pesaient à elles seules près d'un quart de la
+   hauteur totale de la page. */
+.section { padding-block: clamp(52px, 7vw, 84px); }
 .section + .section { border-top: 1px solid var(--line); }
 /* Le bandeau a déjà sa propre marge basse : sans ça, les pages
    intérieures ouvrent sur un grand vide entre le titre et le contenu. */
@@ -399,8 +681,12 @@ p + p { margin-top: 1em; }
 }
 @media (min-width: 860px) { .split { grid-template-columns: 1.15fr 1fr; } }
 
-.split-col { padding: 24px; }
+/* En colonne flexible pour que la note de bas de bloc soit poussée en
+   bas : les deux colonnes ayant la même hauteur, la plus courte
+   laissait sinon un grand vide sous son contenu. */
+.split-col { padding: 24px; display: flex; flex-direction: column; }
 @media (min-width: 720px) { .split-col { padding: 30px; } }
+.split-col > .split-note { margin-top: auto; }
 .split-col + .split-col { border-top: 1px solid var(--line); }
 @media (min-width: 860px) {
   .split-col + .split-col { border-top: 0; border-left: 1px solid var(--line); }
@@ -453,28 +739,89 @@ p + p { margin-top: 1em; }
 .card p { color: var(--text-2); font-size: .97rem; }
 .card .mono { display: block; margin-bottom: 16px; }
 
-/* Liste de modules : ce que le client ouvre réellement. */
-.mods { list-style: none; display: grid; gap: 0; margin-top: 4px; }
-.mods li {
+/* ---------- Mosaïque de modules ----------
+   « Ce qu'on fait » ne montre plus une liste : il montre la grille de
+   modules telle que la cliente l'ouvrira. La densité vient du contenu,
+   pas d'un remplissage — et le format dit déjà ce que la page raconte. */
+
+.grille-mod {
+  list-style: none;
   display: grid;
-  grid-template-columns: minmax(96px, 26%) 1fr;
-  gap: 8px 18px;
-  padding: 13px 0;
-  border-top: 1px solid var(--line);
-  align-items: baseline;
+  gap: 9px;
+  grid-template-columns: repeat(2, 1fr);
 }
-.mods li:last-child { border-bottom: 1px solid var(--line); }
-.mods dt, .mods b {
+@media (min-width: 700px)  { .grille-mod { grid-template-columns: repeat(3, 1fr); gap: 11px; } }
+@media (min-width: 1000px) { .grille-mod { grid-template-columns: repeat(4, 1fr); } }
+
+.mod {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 15px 16px 17px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+/* Les deux modules les plus ouverts prennent deux colonnes — le rythme
+   vient de là. Sous 700 px la grille n'a que deux colonnes : une tuile
+   double y ferait une ligne à elle seule, donc elle redevient simple. */
+@media (min-width: 700px) { .mod--large { grid-column: span 2; } }
+
+.mod-n {
   font-family: var(--f-mono);
-  font-size: .8rem;
+  font-size: .68rem;
+  font-weight: 500;
+  letter-spacing: .14em;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.mod-nom {
+  font-family: var(--f-mono);
+  font-size: .82rem;
+  font-weight: 500;
   letter-spacing: .05em;
   text-transform: uppercase;
   color: var(--text);
-  font-weight: 500;
 }
-.mods span { color: var(--text-2); font-size: .95rem; line-height: 1.45; }
-@media (max-width: 560px) {
-  .mods li { grid-template-columns: 1fr; gap: 4px; }
+.mod-txt { font-size: .89rem; line-height: 1.45; color: var(--text-2); }
+
+/* ---------- Cadrans de supervision ----------
+   Volontairement d'un AUTRE rythme que la mosaïque : deux listes
+   identiques l'une sous l'autre, c'est le défaut qu'on corrige. */
+
+.instruments {
+  list-style: none;
+  display: grid;
+  border-top: 1px solid var(--line);
+}
+@media (min-width: 900px) { .instruments { grid-template-columns: 1fr 1fr; column-gap: 34px; } }
+
+.instr {
+  display: grid;
+  grid-template-columns: 10px 1fr;
+  gap: 4px 13px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+  align-items: start;
+}
+.instr-led {
+  width: 7px;
+  height: 7px;
+  background: var(--accent);
+  margin-top: .45em;
+}
+.instr b {
+  font-family: var(--f-mono);
+  font-size: .8rem;
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.instr b + span {
+  grid-column: 2;
+  font-size: .92rem;
+  line-height: 1.45;
+  color: var(--text-2);
 }
 
 /* Étapes numérotées */
@@ -511,6 +858,112 @@ p + p { margin-top: 1em; }
   max-width: 64ch;
 }
 .steps .aside b { color: var(--text-2); font-weight: 500; }
+
+/* Étapes EN LIGNE — la variante de l'accueil. Quatre étapes empilées,
+   c'était un écran et demi de défilement pour quatre paragraphes courts
+   qui se lisent très bien côte à côte. Le détail long reste sur
+   /methode, qui est la page faite pour ça. */
+@media (min-width: 900px) {
+  .steps--rang { grid-template-columns: repeat(4, 1fr); }
+  .steps--rang > li {
+    grid-template-columns: 1fr;
+    /* Sans ça, les quatre colonnes n'ont pas leurs titres à la même
+       hauteur : les <li> d'un même rang sont étirés à la hauteur du
+       plus grand, et `align-content` valant `stretch` par défaut, la
+       rallonge est répartie ENTRE les lignes de chaque <li> — donc
+       d'autant plus bas que la colonne est courte. */
+    align-content: start;
+    gap: 10px;
+    padding: 22px 22px 26px;
+    border-bottom: 1px solid var(--line);
+    border-left: 1px solid var(--line);
+  }
+  .steps--rang > li:first-child { border-left: 0; padding-left: 0; }
+  .steps--rang > li:last-child { padding-right: 0; }
+  .steps--rang .n { padding-top: 0; }
+  .steps--rang h3 { margin-bottom: 0; }
+  .steps--rang p { font-size: .92rem; }
+}
+
+/* ---------- Règle de section ----------
+   La réponse à « trop de défilement dans un onglet » : on voit combien
+   il reste, où on en est, et on peut sauter. Ce sont des ancres
+   ordinaires — sans JavaScript elles fonctionnent, il manque seulement
+   le repère de position. N'existe pas sous 1320 px : en dessous, la
+   marge extérieure ne suffit pas et elle mordrait sur le texte. */
+
+.rail { display: none; }
+
+@media (min-width: 1320px) {
+  .rail {
+    display: block;
+    position: fixed;
+    top: 50%;
+    left: calc((100vw - var(--max)) / 2 - 60px);
+    transform: translateY(-50%);
+    z-index: 30;
+  }
+  .rail ol { list-style: none; display: grid; gap: 1px; }
+  .rail a {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 4px;
+    text-decoration: none;
+    color: var(--text-3);
+    font-family: var(--f-mono);
+    font-size: .67rem;
+    font-weight: 500;
+    letter-spacing: .1em;
+    font-variant-numeric: tabular-nums;
+    transition: color .16s ease;
+  }
+  /* Le tiret s'allonge par `scaleX` et non par `width` : une largeur
+     qu'on anime repasse par la mise en page à chaque image. */
+  .rail a::before {
+    content: '';
+    width: 22px;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(.55);
+    transform-origin: left center;
+    transition: transform .16s ease;
+  }
+  .rail a:hover { color: var(--text-2); }
+  .rail a[aria-current='true'] { color: var(--accent); }
+  .rail a[aria-current='true']::before { transform: scaleX(1); }
+
+  /* Le nom de la section. `opacity: 0` et non `display: none` : il
+     reste dans l'arbre d'accessibilité, donc c'est lui qui donne son
+     nom au lien — un lien qui s'appellerait « 02 » ne servirait à rien
+     au lecteur d'écran. */
+  .rail-lbl {
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    margin-left: 8px;
+    transform: translateY(-50%);
+    white-space: nowrap;
+    background: var(--surface-hi);
+    border: 1px solid var(--line-strong);
+    color: var(--text);
+    padding: 5px 10px;
+    font-family: var(--f-sans);
+    font-size: .72rem;
+    letter-spacing: 0;
+    text-transform: none;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .16s ease;
+  }
+  .rail a:hover .rail-lbl,
+  .rail a:focus-visible .rail-lbl { opacity: 1; }
+}
+
+/* Le bandeau est collant : sans ça, une ancre place le titre de section
+   DERRIÈRE lui. */
+section[id] { scroll-margin-top: 84px; }
 
 /* Bloc « ce qu'on ne fait pas » — l'honnêteté comme argument. */
 .nots { list-style: none; display: grid; gap: 14px; margin-top: 6px; }
@@ -718,4 +1171,10 @@ p + p { margin-top: 1em; }
     animation-iteration-count: 1 !important;
     transition-duration: .001ms !important;
   }
+  /* La parallaxe est aussi coupée côté JavaScript (site.js ne l'installe
+     pas). Cette règle couvre le cas où le réglage change alors que la
+     page est déjà ouverte : la scène se remet d'aplomb, sans mouvement,
+     et la console reste entièrement utilisable. */
+  .console-scene { transform: none !important; }
+  .console-balai { display: none; }
 }

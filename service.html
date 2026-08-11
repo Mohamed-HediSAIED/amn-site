@@ -32,55 +32,138 @@
 <header class="hdr">
   <div class="wrap hdr-in">
     <a class="logo" href="/" aria-label="AMN DevSec — accueil">
-      <span class="logo-word">AMN</span>
+      <img class="logo-mark" src="/assets/logo.svg" alt="" width="104" height="40">
       <span class="logo-sub">DEVSEC</span>
     </a>
-    <nav class="nav" aria-label="Navigation principale">
-      <a href="/">Accueil</a>
-      <a href="/service" aria-current="page">Ce qu'on fait</a>
-      <a href="/methode">Comment ça se passe</a>
-      <a href="/a-propos">À propos</a>
-    </nav>
-    <a class="btn btn-primary btn-sm hdr-cta" href="/contact">Demander un accès</a>
-    <details class="menu">
-      <summary aria-label="Ouvrir le menu"><span class="menu-bars" aria-hidden="true"></span>Menu</summary>
-      <div class="menu-panel">
-        <a href="/">Accueil</a>
-        <a href="/service" aria-current="page">Ce qu'on fait</a>
-        <a href="/methode">Comment ça se passe</a>
-        <a href="/a-propos">À propos</a>
-        <a href="/contact">Demander un accès</a>
+
+    <details class="console">
+      <summary aria-label="Ouvrir la navigation. Vous êtes sur : Service — Ce qu'on fait">
+        <span class="console-glyph" aria-hidden="true"><i></i></span>
+        <span class="console-val">Ce qu'on fait</span>
+        <span class="console-val-mini">Service</span>
+        <span class="console-chev" aria-hidden="true"></span>
+      </summary>
+      <div class="console-panel">
+        <span class="console-sol" aria-hidden="true"></span>
+        <span class="console-halo" aria-hidden="true"></span>
+        <span class="console-balai" aria-hidden="true"></span>
+        <div class="console-scene">
+          <p class="console-tag mono">Un endroit où aller ?</p>
+          <ul class="plaques">
+          <li><a class="plaque notch" href="/">
+            <span class="plaque-n">01</span>
+            <span class="plaque-nom">Accueil</span>
+            <span class="plaque-txt">Le poste de travail et la supervision, en une page.</span>
+          </a></li>
+          <li><a class="plaque notch" href="/service" aria-current="page">
+            <span class="plaque-n">02</span>
+            <span class="plaque-nom">Ce qu'on fait</span>
+            <span class="plaque-txt">Les dix modules livrés, et ce qu’on surveille derrière.</span>
+          </a></li>
+          <li><a class="plaque notch" href="/methode">
+            <span class="plaque-n">03</span>
+            <span class="plaque-nom">Comment ça se passe</span>
+            <span class="plaque-txt">De votre message à votre premier jour de travail.</span>
+          </a></li>
+          <li><a class="plaque notch" href="/a-propos">
+            <span class="plaque-n">04</span>
+            <span class="plaque-nom">À propos</span>
+            <span class="plaque-txt">Qui opère, avec quelles limites annoncées.</span>
+          </a></li>
+          <li><a class="plaque notch" href="/contact">
+            <span class="plaque-n">05</span>
+            <span class="plaque-nom">Demander un accès</span>
+            <span class="plaque-txt">Quatre champs. Une réponse écrite sous 48 h ouvrées.</span>
+          </a></li>
+          </ul>
+          <p class="console-pied mono-sm"><kbd>Échap</kbd> pour fermer</p>
+        </div>
       </div>
     </details>
+
+    <a class="btn btn-primary btn-sm hdr-cta" href="/contact">Demander un accès</a>
   </div>
 </header>
 
 <main id="main">
 
-  <section class="wrap hero">
+  <nav class="rail" aria-label="Sections de cette page">
+    <ol>
+      <li><a href="#debut">01<span class="rail-lbl">Le sujet</span></a></li>
+      <li><a href="#poste">02<span class="rail-lbl">Le poste de travail</span></a></li>
+      <li><a href="#supervision">03<span class="rail-lbl">La supervision</span></a></li>
+      <li><a href="#absent">04<span class="rail-lbl">Ce qui n'y est pas</span></a></li>
+      <li><a href="#acces">05<span class="rail-lbl">Demander un accès</span></a></li>
+    </ol>
+  </nav>
+
+  <section class="wrap hero" id="debut">
     <p class="mono">Ce qu'on fait</p>
     <h1>Deux choses, et elles vont ensemble</h1>
     <p class="lead">Un poste de travail où votre activité tient en entier. Et, derrière, une supervision que nous opérons — parce qu'un outil livré puis oublié n'est pas un service, c'est une vente.</p>
   </section>
 
-  <section class="wrap section">
+  <section class="wrap section" id="poste">
     <div class="sec-head">
       <span class="mono"><b>01</b> — Le poste de travail</span>
       <h2>Ce que vous ouvrez tous les jours</h2>
       <p class="lead">Un espace, un compte. Ce qui suit est la liste complète de ce que contient votre espace — pas une sélection commerciale.</p>
     </div>
 
-    <ul class="mods">
-      <li><b>Accueil</b><span>Votre journée en une page : ce qui arrive, ce qui traîne, ce qui vient d'être ajouté.</span></li>
-      <li><b>Agenda</b><span>Rendez-vous et disponibilités. C'est le module qu'on ouvre le plus, il est à un clic dès la première ouverture.</span></li>
-      <li><b>Clients</b><span>Fiches clients et devis. Le devis part avec votre raison sociale en émetteur, pas la nôtre.</span></li>
-      <li><b>Facturation</b><span>Factures et encaissements. Numérotation séquentielle, facture non modifiable une fois émise, annulation qui laisse le numéro dans la suite — ce que la comptabilité impose.</span></li>
-      <li><b>Tâches</b><span>Ce qu'il reste à faire, avec commentaires et échéances.</span></li>
-      <li><b>Notes</b><span>Bloc-notes. Les notes personnelles restent sur l'appareil, elles ne partent jamais en synchronisation.</span></li>
-      <li><b>Médias</b><span>Photos et fichiers rattachés à un client, à un chantier, à une facture.</span></li>
-      <li><b>Rapports</b><span>Comptes-rendus, exportables et imprimables.</span></li>
-      <li><b>Coffre-fort</b><span>Mots de passe et accès, rangés à un seul endroit plutôt que dans un carnet ou un fil de messages.</span></li>
-      <li><b>Paramètres</b><span>Profil, notifications, et export d'une copie complète de votre espace quand vous le voulez.</span></li>
+    <!-- La grille des modules, dans l'ordre où ils apparaissent dans le
+         produit. Les deux tuiles doubles sont les deux modules les plus
+         ouverts : c'est ce qui donne son rythme à la mosaïque. -->
+    <ul class="grille-mod">
+      <li class="mod">
+        <span class="mod-n">01</span>
+        <b class="mod-nom">Accueil</b>
+        <span class="mod-txt">Votre journée en une page : ce qui arrive, ce qui traîne, ce qui vient d'être ajouté.</span>
+      </li>
+      <li class="mod mod--large">
+        <span class="mod-n">02</span>
+        <b class="mod-nom">Agenda</b>
+        <span class="mod-txt">Rendez-vous et disponibilités. C'est le module qu'on ouvre le plus, il est à un clic dès la première ouverture.</span>
+      </li>
+      <li class="mod">
+        <span class="mod-n">03</span>
+        <b class="mod-nom">Clients</b>
+        <span class="mod-txt">Fiches clients et devis. Le devis part avec votre raison sociale en émetteur, pas la nôtre.</span>
+      </li>
+      <li class="mod mod--large">
+        <span class="mod-n">04</span>
+        <b class="mod-nom">Facturation</b>
+        <span class="mod-txt">Factures et encaissements. Numérotation séquentielle, facture non modifiable une fois émise, annulation qui laisse le numéro dans la suite — ce que la comptabilité impose.</span>
+      </li>
+      <li class="mod">
+        <span class="mod-n">05</span>
+        <b class="mod-nom">Tâches</b>
+        <span class="mod-txt">Ce qu'il reste à faire, avec commentaires et échéances.</span>
+      </li>
+      <li class="mod">
+        <span class="mod-n">06</span>
+        <b class="mod-nom">Notes</b>
+        <span class="mod-txt">Bloc-notes. Les notes personnelles restent sur l'appareil, elles ne partent jamais en synchronisation.</span>
+      </li>
+      <li class="mod">
+        <span class="mod-n">07</span>
+        <b class="mod-nom">Médias</b>
+        <span class="mod-txt">Photos et fichiers rattachés à un client, à un chantier, à une facture.</span>
+      </li>
+      <li class="mod">
+        <span class="mod-n">08</span>
+        <b class="mod-nom">Rapports</b>
+        <span class="mod-txt">Comptes-rendus, exportables et imprimables.</span>
+      </li>
+      <li class="mod">
+        <span class="mod-n">09</span>
+        <b class="mod-nom">Coffre-fort</b>
+        <span class="mod-txt">Mots de passe et accès, rangés à un seul endroit plutôt que dans un carnet ou un fil de messages.</span>
+      </li>
+      <li class="mod">
+        <span class="mod-n">10</span>
+        <b class="mod-nom">Paramètres</b>
+        <span class="mod-txt">Profil, notifications, et export d'une copie complète de votre espace quand vous le voulez.</span>
+      </li>
     </ul>
 
     <div class="duo more">
@@ -97,19 +180,39 @@
     </div>
   </section>
 
-  <section class="wrap section">
+  <section class="wrap section" id="supervision">
     <div class="sec-head">
       <span class="mono"><b>02</b> — La supervision</span>
       <h2>Ce qu'on regarde pendant que vous travaillez</h2>
       <p class="lead">Décrit par ce que ça produit, pas par les outils qui le produisent. Les outils, eux, restent chez nous.</p>
     </div>
 
-    <ul class="mods">
-      <li><b>Disponibilité</b><span>Ce qui ne répond plus est vu de notre côté, pas signalé par un de vos clients au téléphone.</span></li>
-      <li><b>Certificats</b><span>Les échéances sont suivies. Un certificat expiré transforme un site en avertissement rouge dans le navigateur, et personne ne s'en aperçoit avant d'y perdre des visiteurs.</span></li>
-      <li><b>Accès</b><span>Chaque ouverture de votre espace depuis notre côté est enregistrée côté serveur. Vous pouvez demander ce journal.</span></li>
-      <li><b>Anomalies</b><span>Ce qui sort de l'ordinaire remonte chez nous et est lu par quelqu'un. Une alerte que personne ne lit n'est pas de la sécurité.</span></li>
-      <li><b>Hygiène</b><span>Contrôles réguliers sur ce qui est exposé publiquement, et correction quand il y a lieu.</span></li>
+    <ul class="instruments">
+      <li class="instr">
+        <span class="instr-led" aria-hidden="true"></span>
+        <b>Disponibilité</b>
+        <span>Ce qui ne répond plus est vu de notre côté, pas signalé par un de vos clients au téléphone.</span>
+      </li>
+      <li class="instr">
+        <span class="instr-led" aria-hidden="true"></span>
+        <b>Certificats</b>
+        <span>Les échéances sont suivies. Un certificat expiré transforme un site en avertissement rouge dans le navigateur, et personne ne s'en aperçoit avant d'y perdre des visiteurs.</span>
+      </li>
+      <li class="instr">
+        <span class="instr-led" aria-hidden="true"></span>
+        <b>Accès</b>
+        <span>Chaque ouverture de votre espace depuis notre côté est enregistrée côté serveur. Vous pouvez demander ce journal.</span>
+      </li>
+      <li class="instr">
+        <span class="instr-led" aria-hidden="true"></span>
+        <b>Anomalies</b>
+        <span>Ce qui sort de l'ordinaire remonte chez nous et est lu par quelqu'un. Une alerte que personne ne lit n'est pas de la sécurité.</span>
+      </li>
+      <li class="instr">
+        <span class="instr-led" aria-hidden="true"></span>
+        <b>Hygiène</b>
+        <span>Contrôles réguliers sur ce qui est exposé publiquement, et correction quand il y a lieu.</span>
+      </li>
     </ul>
 
     <div class="card notch more">
@@ -119,7 +222,7 @@
     </div>
   </section>
 
-  <section class="wrap section">
+  <section class="wrap section" id="absent">
     <div class="sec-head">
       <span class="mono"><b>03</b> — Ce qui n'y est pas</span>
       <h2>Absent, pas masqué</h2>
@@ -132,7 +235,7 @@
     </div>
   </section>
 
-  <section class="wrap section">
+  <section class="wrap section" id="acces">
     <div class="cta notch">
       <div>
         <h2>Reste à savoir si ça correspond à votre situation</h2>
@@ -149,7 +252,7 @@
     <div class="ftr-grid">
       <div class="ftr-about">
         <span class="logo">
-          <span class="logo-word">AMN</span>
+          <img class="logo-mark" src="/assets/logo.svg" alt="AMN DevSec" width="104" height="40">
           <span class="logo-sub">DEVSEC</span>
         </span>
         <p>Poste de travail et supervision de sécurité pour les structures qui n'ont personne dont c'est le métier.</p>

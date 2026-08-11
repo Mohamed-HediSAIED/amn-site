@@ -213,7 +213,7 @@ function htmlPage(status, title, body) {
 <body>
 <header class="hdr"><div class="wrap hdr-in">
   <a class="logo" href="/" aria-label="AMN DevSec — accueil">
-    <span class="logo-word">AMN</span><span class="logo-sub">DEVSEC</span>
+    <img class="logo-mark" src="/assets/logo.svg" alt="" width="104" height="40"><span class="logo-sub">DEVSEC</span>
   </a>
 </div></header>
 <main id="main"><section class="wrap legal">

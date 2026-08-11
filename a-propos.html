@@ -32,38 +32,78 @@
 <header class="hdr">
   <div class="wrap hdr-in">
     <a class="logo" href="/" aria-label="AMN DevSec — accueil">
-      <span class="logo-word">AMN</span>
+      <img class="logo-mark" src="/assets/logo.svg" alt="" width="104" height="40">
       <span class="logo-sub">DEVSEC</span>
     </a>
-    <nav class="nav" aria-label="Navigation principale">
-      <a href="/">Accueil</a>
-      <a href="/service">Ce qu'on fait</a>
-      <a href="/methode">Comment ça se passe</a>
-      <a href="/a-propos" aria-current="page">À propos</a>
-    </nav>
-    <a class="btn btn-primary btn-sm hdr-cta" href="/contact">Demander un accès</a>
-    <details class="menu">
-      <summary aria-label="Ouvrir le menu"><span class="menu-bars" aria-hidden="true"></span>Menu</summary>
-      <div class="menu-panel">
-        <a href="/">Accueil</a>
-        <a href="/service">Ce qu'on fait</a>
-        <a href="/methode">Comment ça se passe</a>
-        <a href="/a-propos" aria-current="page">À propos</a>
-        <a href="/contact">Demander un accès</a>
+
+    <details class="console">
+      <summary aria-label="Ouvrir la navigation. Vous êtes sur : À propos">
+        <span class="console-glyph" aria-hidden="true"><i></i></span>
+        <span class="console-val">À propos</span>
+        <span class="console-val-mini">À propos</span>
+        <span class="console-chev" aria-hidden="true"></span>
+      </summary>
+      <div class="console-panel">
+        <span class="console-sol" aria-hidden="true"></span>
+        <span class="console-halo" aria-hidden="true"></span>
+        <span class="console-balai" aria-hidden="true"></span>
+        <div class="console-scene">
+          <p class="console-tag mono">Un endroit où aller ?</p>
+          <ul class="plaques">
+          <li><a class="plaque notch" href="/">
+            <span class="plaque-n">01</span>
+            <span class="plaque-nom">Accueil</span>
+            <span class="plaque-txt">Le poste de travail et la supervision, en une page.</span>
+          </a></li>
+          <li><a class="plaque notch" href="/service">
+            <span class="plaque-n">02</span>
+            <span class="plaque-nom">Ce qu'on fait</span>
+            <span class="plaque-txt">Les dix modules livrés, et ce qu’on surveille derrière.</span>
+          </a></li>
+          <li><a class="plaque notch" href="/methode">
+            <span class="plaque-n">03</span>
+            <span class="plaque-nom">Comment ça se passe</span>
+            <span class="plaque-txt">De votre message à votre premier jour de travail.</span>
+          </a></li>
+          <li><a class="plaque notch" href="/a-propos" aria-current="page">
+            <span class="plaque-n">04</span>
+            <span class="plaque-nom">À propos</span>
+            <span class="plaque-txt">Qui opère, avec quelles limites annoncées.</span>
+          </a></li>
+          <li><a class="plaque notch" href="/contact">
+            <span class="plaque-n">05</span>
+            <span class="plaque-nom">Demander un accès</span>
+            <span class="plaque-txt">Quatre champs. Une réponse écrite sous 48 h ouvrées.</span>
+          </a></li>
+          </ul>
+          <p class="console-pied mono-sm"><kbd>Échap</kbd> pour fermer</p>
+        </div>
       </div>
     </details>
+
+    <a class="btn btn-primary btn-sm hdr-cta" href="/contact">Demander un accès</a>
   </div>
 </header>
 
 <main id="main">
 
-  <section class="wrap hero">
+  <nav class="rail" aria-label="Sections de cette page">
+    <ol>
+      <li><a href="#debut">01<span class="rail-lbl">Le sujet</span></a></li>
+      <li><a href="#raison">02<span class="rail-lbl">Le raisonnement</span></a></li>
+      <li><a href="#travail">03<span class="rail-lbl">Comment on travaille</span></a></li>
+      <li><a href="#limites">04<span class="rail-lbl">Ce qu'on ne promet pas</span></a></li>
+      <li><a href="#acces">05<span class="rail-lbl">Écrivez-nous</span></a></li>
+    </ol>
+  </nav>
+
+  <section class="wrap hero" id="debut">
     <p class="mono">À propos</p>
     <h1>Un studio, pas une plateforme</h1>
     <p class="lead">AMN DevSec construit l'outil et surveille ce qui tourne derrière. Les deux, par les mêmes personnes — c'est ce qui rend la supervision utile plutôt que décorative.</p>
   </section>
 
-  <section class="wrap section">
+  <section class="wrap section" id="raison">
     <div class="sec-head">
       <span class="mono"><b>01</b> — Le raisonnement</span>
       <h2>Une alerte que personne ne lit n'est pas de la sécurité</h2>
@@ -75,7 +115,7 @@
     </div>
   </section>
 
-  <section class="wrap section">
+  <section class="wrap section" id="travail">
     <div class="sec-head">
       <span class="mono"><b>02</b> — Comment on travaille</span>
       <h2>Ce que ça implique concrètement</h2>
@@ -105,7 +145,7 @@
     </div>
   </section>
 
-  <section class="wrap section">
+  <section class="wrap section" id="limites">
     <div class="sec-head">
       <span class="mono"><b>03</b> — Honnêteté</span>
       <h2>Ce qu'on ne promet pas</h2>
@@ -122,7 +162,7 @@
     </ul>
   </section>
 
-  <section class="wrap section">
+  <section class="wrap section" id="acces">
     <div class="cta notch">
       <div>
         <h2>Si ça vous parle, écrivez-nous</h2>
@@ -139,7 +179,7 @@
     <div class="ftr-grid">
       <div class="ftr-about">
         <span class="logo">
-          <span class="logo-word">AMN</span>
+          <img class="logo-mark" src="/assets/logo.svg" alt="AMN DevSec" width="104" height="40">
           <span class="logo-sub">DEVSEC</span>
         </span>
         <p>Poste de travail et supervision de sécurité pour les structures qui n'ont personne dont c'est le métier.</p>

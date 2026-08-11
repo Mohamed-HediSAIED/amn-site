@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 104 40" width="104" height="40">
+  <!-- ================================================================
+       EMPLACEMENT DU LOGO — fichier de remplacement.
+
+       Ceci est un GABARIT, pas le logo officiel. Il reprend les
+       lettres AMN en traits fins et le dégradé graphite → blanc de la
+       marque pour que la mise en page soit juste dès maintenant.
+
+       Pour poser le vrai logo : remplacer CE FICHIER, rien d'autre.
+       Aucune page HTML, aucune règle CSS ne connaît son contenu — la
+       hauteur est imposée par `.logo-mark` dans site.css, la largeur
+       suit toute seule. Si le nouveau fichier n'a pas le même rapport
+       largeur/hauteur, ajuster `width`/`height` sur les huit balises
+       <img class="logo-mark"> (elles ne servent qu'à réserver la place
+       avant chargement, voir README §Logo).
+       ================================================================ -->
+  <defs>
+    <linearGradient id="amn-degrade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset=".55" stop-color="#cbcbc8"/>
+      <stop offset="1" stop-color="#6f6f6d"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#amn-degrade)" stroke-width="1.9"
+     stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="9">
+    <path d="M2 37 17 3l15 34"/>
+    <path d="M8.4 23h17.2"/>
+    <path d="M40 37V3l14 25 14-25v34"/>
+    <path d="M78 37V3l22 34V3"/>
+  </g>
+</svg>

@@ -10,23 +10,127 @@
 (function () {
   'use strict';
 
-  /* ---- Menu mobile : fermeture au clic sur un lien, à Échap, au clic
-          en dehors. Le <details> gère l'ouverture tout seul. ---- */
-  var menu = document.querySelector('.menu');
-  if (menu) {
-    menu.addEventListener('click', function (e) {
-      if (e.target.closest('.menu-panel a')) menu.open = false;
-    });
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && menu.open) {
-        menu.open = false;
-        var s = menu.querySelector('summary');
-        if (s) s.focus();
+  /* ================================================================
+     LA CONSOLE
+     ================================================================
+     Le <details> s'ouvre et se ferme tout seul, et ses cinq liens
+     fonctionnent sans une ligne de ce qui suit. Ce bloc n'ajoute que
+     du confort : Échap, le clic sur le fond, le focus qui entre puis
+     revient, le reste de la page mis hors d'atteinte, et l'inclinaison
+     au pointeur. Tout est facultatif, rien n'est nécessaire.
+     ================================================================ */
+  var cons = document.querySelector('.console');
+  if (cons) {
+    var temoin = cons.querySelector('summary');
+    var panneau = cons.querySelector('.console-panel');
+    var scene = cons.querySelector('.console-scene');
+
+    /* Le reste de la page devient inerte pendant l'ouverture : la
+       tabulation ne peut plus descendre dans un contenu recouvert.
+       `inert` sur un navigateur qui l'ignore est une propriété posée
+       dans le vide — sans effet, sans erreur. */
+    var dessous = [document.getElementById('main'), document.querySelector('.ftr')];
+
+    cons.addEventListener('toggle', function () {
+      for (var i = 0; i < dessous.length; i++) {
+        if (dessous[i]) dessous[i].inert = cons.open;
+      }
+      if (cons.open) {
+        var premier = panneau && panneau.querySelector('a[href]');
+        if (premier) premier.focus();
+      } else if (scene) {
+        scene.style.setProperty('--rx', '0deg');
+        scene.style.setProperty('--ry', '0deg');
       }
     });
-    document.addEventListener('click', function (e) {
-      if (menu.open && !menu.contains(e.target)) menu.open = false;
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && cons.open) {
+        cons.open = false;
+        temoin.focus();
+      }
     });
+
+    /* Le fond referme, les plaques non. */
+    if (panneau) {
+      panneau.addEventListener('click', function (e) {
+        if (e.target === panneau || e.target === scene) cons.open = false;
+      });
+    }
+    document.addEventListener('click', function (e) {
+      if (cons.open && !cons.contains(e.target)) cons.open = false;
+    });
+
+    /* ---- Inclinaison au pointeur ----
+       Installée seulement s'il y a réellement un pointeur qui survole
+       (donc jamais sur un écran tactile) et si le système ne demande
+       pas moins de mouvement. Une seule écriture par image : le
+       pointeur peut envoyer cent événements, il n'y aura jamais plus
+       d'une mise à jour par rafraîchissement. */
+    var survol = window.matchMedia('(hover: hover) and (pointer: fine)');
+    var sobre = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    if (scene && panneau && survol.matches && !sobre.matches) {
+      var img = 0;
+      var cx = 0;
+      var cy = 0;
+      panneau.addEventListener(
+        'pointermove',
+        function (e) {
+          cx = e.clientX;
+          cy = e.clientY;
+          if (img) return;
+          img = requestAnimationFrame(function () {
+            img = 0;
+            var x = cx / window.innerWidth - 0.5;
+            var y = cy / window.innerHeight - 0.5;
+            scene.style.setProperty('--ry', (x * 10).toFixed(2) + 'deg');
+            scene.style.setProperty('--rx', (-y * 6).toFixed(2) + 'deg');
+          });
+        },
+        { passive: true }
+      );
+    }
+  }
+
+  /* ================================================================
+     LA RÈGLE DE SECTION
+     ================================================================
+     Les ancres marchent sans rien de tout ceci ; il ne manquerait que
+     le repère de position. Aucun écouteur de défilement : un
+     IntersectionObserver ne réveille le fil principal que lorsqu'une
+     section traverse la bande, pas à chaque pixel parcouru.
+     ================================================================ */
+  var rail = document.querySelector('.rail');
+  if (rail && 'IntersectionObserver' in window) {
+    var reperes = {};
+    var liens = rail.querySelectorAll('a[href^="#"]');
+    for (var j = 0; j < liens.length; j++) {
+      reperes[liens[j].getAttribute('href').slice(1)] = liens[j];
+    }
+
+    var marquer = function (id) {
+      for (var k = 0; k < liens.length; k++) liens[k].removeAttribute('aria-current');
+      if (reperes[id]) reperes[id].setAttribute('aria-current', 'true');
+    };
+
+    /* Une bande étroite au milieu de l'écran : la section courante est
+       celle qui la traverse. On ne DÉMARQUE jamais sur une sortie —
+       sinon la règle clignote entre deux sections, et se vide en haut
+       comme en bas de page. */
+    var oeil = new IntersectionObserver(
+      function (entrees) {
+        for (var n = 0; n < entrees.length; n++) {
+          if (entrees[n].isIntersecting) marquer(entrees[n].target.id);
+        }
+      },
+      { rootMargin: '-45% 0px -50% 0px', threshold: 0 }
+    );
+
+    for (var id in reperes) {
+      var cible = document.getElementById(id);
+      if (cible) oeil.observe(cible);
+    }
   }
 
   /* ---- Formulaire de demande d'accès ---- */

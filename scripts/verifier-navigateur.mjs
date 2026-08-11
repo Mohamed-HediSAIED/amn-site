@@ -154,16 +154,25 @@ console.log('2. Accessibilité');
   t("Tab atteint d'abord le lien d'évitement", /contenu/i.test(premierFocus.texte), premierFocus.texte);
   t("Le lien d'évitement devient visible au focus", premierFocus.visible);
 
-  const courante = await page.locator('.nav a[aria-current="page"]').count();
-  t('La page courante est signalée dans la navigation', courante === 1, `trouvé ${courante}`);
+  const courante = await page.locator('.plaque[aria-current="page"]').count();
+  t('La page courante est signalée dans la console', courante === 1, `trouvé ${courante}`);
 
+  /* Ouverture AU CLAVIER, et pas au clic : `:focus-visible` ne se
+     déclenche qu'en modalité clavier. Un `.focus()` posé après un clic
+     de souris ne montrerait aucun anneau — et le contrôle passerait à
+     côté de ce qu'il prétend vérifier. */
+  await page.locator('.console > summary').focus();
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(500);
   const anneau = await page.evaluate(() => {
-    const a = document.querySelector('.nav a');
-    a.focus();
+    const a = document.activeElement;
     const s = getComputedStyle(a);
-    return s.outlineStyle !== 'none' && parseFloat(s.outlineWidth) >= 2;
+    return {
+      ok: a.matches('.console-panel a') && s.outlineStyle !== 'none' && parseFloat(s.outlineWidth) >= 2,
+      quoi: `${a.tagName}.${a.className} outline=${s.outlineStyle} ${s.outlineWidth}`
+    };
   });
-  t('Anneau de focus visible sur les liens', anneau);
+  t('Anneau de focus visible sur les liens', anneau.ok, anneau.quoi);
 
   await page.close();
 }
@@ -196,8 +205,11 @@ const CIBLES_CONTRASTE = {
     ['saisie', '#nom']
   ],
   '/service': [
-    ['nom de module', '.mods b'],
-    ['description de module', '.mods span']
+    ['nom de module', '.mod-nom'],
+    ['description de module', '.mod-txt'],
+    ['numéro de module', '.mod-n'],
+    ['intitulé de cadran', '.instr b'],
+    ['texte de cadran', '.instr b + span']
   ],
   '/methode': [
     ['numéro d\'étape', '.steps .n'],
@@ -246,30 +258,182 @@ for (const [chemin, cibles] of Object.entries(CIBLES_CONTRASTE)) {
   }
   await page.close();
 }
-{
-  const page = await navigateur.newPage({ viewport: { width: 390, height: 844 } });
-  await page.goto(BASE + '/', { waitUntil: 'networkidle' });
-  t('Menu mobile fermé au chargement', !(await page.locator('.menu').evaluate((d) => d.open)));
-  await page.locator('.menu summary').click();
-  t('Menu mobile ouvert au clic', await page.locator('.menu').evaluate((d) => d.open));
-  t('Menu mobile visible', await page.locator('.menu-panel a[href="/service"]').isVisible());
+/* ================= 2 bis. La console ================= */
+
+console.log('2 bis. La console (navigation v2)');
+
+const DESTINATIONS = ['/', '/service', '/methode', '/a-propos', '/contact'];
+
+/* Les plaques arrivent en décalé sur ~350 ms. Interroger leur position
+   pendant ce temps donne des résultats faux (l'élément est encore en
+   translation dans l'axe Z). On attend la fin des animations plutôt
+   qu'un délai au jugé. */
+const attendreArrivee = (page) =>
+  page.evaluate(() =>
+    Promise.all(
+      [...document.querySelectorAll('.plaque')].flatMap((p) => p.getAnimations()).map((a) => a.finished)
+    ).catch(() => {})
+  );
+
+/* Le contrat qui rend la v2 acceptable : chaque destination reste une
+   URL qui répond seule. Si ceci casse, le site a cessé d'être un site. */
+for (const chemin of DESTINATIONS) {
+  const r = await fetch(BASE + chemin);
+  const html = await r.text();
+  t(`${chemin} — répond seule, sans passer par la console`, r.status === 200, String(r.status));
+  t(`${chemin} — les 5 destinations sont dans le HTML SERVI (pas injectées)`,
+    DESTINATIONS.every((d) => html.includes(`href="${d}"`)));
+  t(`${chemin} — un seul logo dans l'en-tête, et c'est le fichier`,
+    (html.match(/class="logo-mark" src="\/assets\/logo\.svg"/g) || []).length >= 1);
+}
+
+for (const largeur of [390, 1440]) {
+  const page = await navigateur.newPage({ viewport: { width: largeur, height: 900 } });
+  const erreurs = [];
+  page.on('console', (m) => m.type() === 'error' && erreurs.push(m.text()));
+  page.on('pageerror', (e) => erreurs.push(String(e)));
+  await page.goto(BASE + '/service', { waitUntil: 'networkidle' });
+  const et = `console @${largeur}`;
+
+  t(`${et} — fermée au chargement`, !(await page.locator('.console').evaluate((d) => d.open)));
+
+  /* Le point qui porte toute la performance : fermée, la console n'est
+     pas rendue. Ni quadrillé, ni halo, ni plaques — le navigateur ne
+     les met pas en page et ne les peint pas. */
+  t(`${et} — contenu NON rendu tant qu'elle est fermée`,
+    await page.evaluate(() =>
+      ['.plaque', '.console-sol', '.console-halo'].every(
+        (s) => document.querySelector(s).checkVisibility() === false
+      )));
+
+  await page.locator('.console > summary').click();
+  await attendreArrivee(page);
+  t(`${et} — ouverte au clic`, await page.locator('.console').evaluate((d) => d.open));
+  t(`${et} — les cinq destinations sont visibles`,
+    (await page.locator('.console-panel a[href]:visible').count()) === 5);
+  t(`${et} — la page courante est marquée`,
+    (await page.locator('.plaque[aria-current="page"]').count()) === 1);
+  t(`${et} — le focus entre dans le panneau`,
+    await page.evaluate(() => document.querySelector('.console-panel').contains(document.activeElement)));
+  t(`${et} — le défilement de la page est bloqué`,
+    (await page.evaluate(() => getComputedStyle(document.documentElement).overflow)) === 'hidden');
+  t(`${et} — le reste de la page est rendu inerte`,
+    await page.evaluate(() => document.getElementById('main').inert === true));
+
   await page.keyboard.press('Escape');
-  t('Échap referme le menu', !(await page.locator('.menu').evaluate((d) => d.open)));
+  t(`${et} — Échap referme`, !(await page.locator('.console').evaluate((d) => d.open)));
+  t(`${et} — le focus revient sur le témoin`,
+    (await page.evaluate(() => document.activeElement.tagName)) === 'SUMMARY');
+  /* `inert` est reposé dans le gestionnaire de `toggle`, qui est mis en
+     file d'attente : juste après Échap, `open` vaut déjà false mais le
+     gestionnaire n'a pas encore tourné. On attend l'état, on ne dort
+     pas un délai au hasard. */
+  let rendu = true;
+  await page
+    .waitForFunction(() => document.getElementById('main').inert === false, null, { timeout: 3000 })
+    .catch(() => (rendu = false));
+  t(`${et} — la page redevient atteignable`, rendu);
+  t(`${et} — le défilement est rendu`,
+    (await page.evaluate(() => getComputedStyle(document.documentElement).overflow)) !== 'hidden');
+
+  /* Le fond referme, les plaques non. */
+  await page.locator('.console > summary').click();
+  await attendreArrivee(page);
+  await page.mouse.click(largeur - 12, 870);
+  t(`${et} — un clic sur le fond referme`, !(await page.locator('.console').evaluate((d) => d.open)));
+
+  /* Ouverture au clavier seul, puis navigation réelle vers une page —
+     sans jamais toucher la souris. */
+  await page.locator('.console > summary').focus();
+  await page.keyboard.press('Enter');
+  t(`${et} — s'ouvre au clavier (Entrée sur le témoin)`,
+    await page.locator('.console').evaluate((d) => d.open));
+  await attendreArrivee(page);
+  t(`${et} — le focus est sur une destination`,
+    await page.evaluate(() => document.activeElement.classList.contains('plaque')));
+  let arrivee = true;
+  await Promise.all([
+    page.waitForURL(`${BASE}/`, { timeout: 5000 }).catch(() => (arrivee = false)),
+    page.keyboard.press('Enter')
+  ]);
+  t(`${et} — Entrée sur une destination y mène vraiment`, arrivee, page.url());
+
+  t(`${et} — console du navigateur propre pendant tout ça`, erreurs.length === 0, erreurs.join(' | '));
   await page.close();
 }
+
 {
-  /* Sans JavaScript, le menu doit rester utilisable : c'est tout
-     l'intérêt d'un <details> plutôt que d'un bouton scripté. */
+  /* Sans JavaScript, la console reste utilisable : c'est tout l'intérêt
+     d'un <details> plutôt que d'un panneau scripté. */
   const ctx = await navigateur.newContext({
     javaScriptEnabled: false,
     viewport: { width: 390, height: 844 }
   });
   const page = await ctx.newPage();
   await page.goto(BASE + '/', { waitUntil: 'load' });
-  await page.locator('.menu summary').click();
-  t('Menu mobile fonctionne sans JavaScript', await page.locator('.menu-panel a[href="/service"]').isVisible());
+  await page.locator('.console > summary').click();
+  t('Sans JavaScript : la console s\'ouvre', await page.locator('.plaque[href="/service"]').isVisible());
+  /* Pas de page.evaluate ici : sans JavaScript il n'y a rien pour
+     l'exécuter. On laisse l'arrivée des plaques se terminer au délai. */
+  await page.waitForTimeout(700);
+  let arriveeSansJs = true;
+  await Promise.all([
+    page.waitForURL(`${BASE}/service`, { timeout: 5000 }).catch(() => (arriveeSansJs = false)),
+    page.locator('.plaque[href="/service"]').click()
+  ]);
+  t('Sans JavaScript : on arrive bien sur la page choisie', arriveeSansJs, page.url());
   await ctx.close();
 }
+
+{
+  /* Inclinaison au pointeur : elle doit s'appliquer sur un poste qui
+     survole… */
+  const page = await navigateur.newPage({ viewport: { width: 1440, height: 900 } });
+  const erreurs = [];
+  page.on('console', (m) => m.type() === 'error' && erreurs.push(m.text()));
+  page.on('pageerror', (e) => erreurs.push(String(e)));
+  await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  await page.locator('.console > summary').click();
+  await page.mouse.move(1360, 180);
+  await page.waitForTimeout(250);
+  const incline = await page.evaluate(() =>
+    document.querySelector('.console-scene').style.getPropertyValue('--ry')
+  );
+  t('Parallaxe : la scène s\'incline au pointeur', parseFloat(incline) !== 0, `--ry = « ${incline} »`);
+  t('Parallaxe : aucune erreur (la CSP n\'empêche pas l\'écriture CSSOM)',
+    erreurs.length === 0, erreurs.join(' | '));
+
+  const souleve = await page.evaluate(() => {
+    const p = document.querySelector('.plaques > li:nth-child(3) .plaque');
+    const avant = p.getBoundingClientRect().width;
+    return { avant, style: getComputedStyle(p).transformStyle };
+  });
+  t('Le relief 3D n\'est pas aplati par un ancêtre',
+    (await page.evaluate(() => getComputedStyle(document.querySelector('.plaques > li')).transformStyle)) ===
+      'preserve-3d', souleve.style);
+  await page.close();
+}
+
+{
+  /* … et ne pas être installée du tout sur un écran tactile. */
+  const ctx = await navigateur.newContext({
+    viewport: { width: 390, height: 844 },
+    hasTouch: true,
+    isMobile: true
+  });
+  const page = await ctx.newPage();
+  await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  t('Tactile : le navigateur n\'annonce pas de survol',
+    !(await page.evaluate(() => window.matchMedia('(hover: hover) and (pointer: fine)').matches)));
+  await page.locator('.console > summary').click();
+  await page.waitForTimeout(150);
+  t('Tactile : aucune parallaxe posée sur la scène',
+    (await page.evaluate(() => document.querySelector('.console-scene').style.getPropertyValue('--ry'))) === '');
+  t('Tactile : le balayage lumineux est retiré',
+    (await page.evaluate(() => getComputedStyle(document.querySelector('.console-balai')).display)) === 'none');
+  await ctx.close();
+}
+
 {
   const ctx = await navigateur.newContext({ reducedMotion: 'reduce', viewport: { width: 1440, height: 900 } });
   const page = await ctx.newPage();
@@ -278,7 +442,109 @@ for (const [chemin, cibles] of Object.entries(CIBLES_CONTRASTE)) {
     getComputedStyle(document.querySelector('.btn-primary')).transitionDuration
   );
   t('Mouvement réduit respecté', parseFloat(duree) < 0.01, duree);
+
+  await page.locator('.console > summary').click();
+  await page.waitForTimeout(120);
+  t('Mouvement réduit : la console reste utilisable',
+    (await page.locator('.console-panel a[href]:visible').count()) === 5);
+  t('Mouvement réduit : la scène n\'est pas inclinée',
+    (await page.evaluate(() => getComputedStyle(document.querySelector('.console-scene')).transform)) === 'none');
+  t('Mouvement réduit : l\'arrivée des plaques est neutralisée',
+    parseFloat(await page.evaluate(() =>
+      getComputedStyle(document.querySelector('.plaque')).animationDuration)) < 0.01);
   await ctx.close();
+}
+
+/* ---- Contraste DANS la console, panneau ouvert ---- */
+{
+  const page = await navigateur.newPage({ viewport: { width: 1440, height: 900 } });
+  await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  await page.locator('.console > summary').click();
+  await page.waitForTimeout(500);
+  const mesures = await page.evaluate(() => {
+    const lin = (c) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+    const lum = (rgb) => {
+      const [r, g, b] = rgb.map((v) => lin(v / 255));
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const nombres = (s) => (s.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+    const fond = (el) => {
+      for (let n = el; n; n = n.parentElement) {
+        const bg = getComputedStyle(n).backgroundColor;
+        const a = (bg.match(/[\d.]+/g) || [])[3];
+        if (bg && bg !== 'transparent' && a !== '0') return nombres(bg);
+      }
+      return [0, 0, 0];
+    };
+    return [
+      ['nom de destination', '.plaque-nom'],
+      ['texte de destination', '.plaque-txt'],
+      /* Sur une plaque QUI N'EST PAS la page courante : celle-ci passe
+         son numéro en ambre, ce qui donnerait un rapport flatteur et
+         ne mesurerait pas le cas ordinaire. */
+      ['numéro de destination', '.plaques > li:nth-child(3) .plaque-n'],
+      ['intitulé du panneau', '.console-tag'],
+      ['rappel Échap', '.console-pied'],
+      ['témoin de position', '.console > summary']
+    ].map(([nom, sel]) => {
+      const el = document.querySelector(sel);
+      if (!el) return { nom, ratio: null };
+      const s = getComputedStyle(el);
+      const ratio =
+        (Math.max(lum(nombres(s.color)), lum(fond(el))) + 0.05) /
+        (Math.min(lum(nombres(s.color)), lum(fond(el))) + 0.05);
+      const px = parseFloat(s.fontSize);
+      const grand = px >= 24 || (px >= 18.66 && parseInt(s.fontWeight, 10) >= 700);
+      return { nom, ratio: Math.round(ratio * 100) / 100, seuil: grand ? 3 : 4.5 };
+    });
+  });
+  for (const m of mesures) {
+    t(`Contraste console — ${m.nom}`, m.ratio !== null && m.ratio >= m.seuil,
+      m.ratio === null ? 'élément absent' : `${m.ratio}:1 (minimum ${m.seuil}:1)`);
+  }
+  await page.close();
+}
+
+/* ---- La règle de section ---- */
+{
+  const page = await navigateur.newPage({ viewport: { width: 1440, height: 900 } });
+  await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  t('Règle de section affichée sur grand écran', await page.locator('.rail').isVisible());
+
+  const ancres = await page.evaluate(() =>
+    [...document.querySelectorAll('.rail a')].map((a) => ({
+      href: a.getAttribute('href'),
+      cible: !!document.querySelector(a.getAttribute('href')),
+      nom: a.textContent.trim()
+    }))
+  );
+  t('Règle de section : cinq repères', ancres.length === 5, String(ancres.length));
+  t('Règle de section : chaque repère vise une section existante', ancres.every((a) => a.cible),
+    ancres.filter((a) => !a.cible).map((a) => a.href).join(', '));
+  t('Règle de section : les liens ne s\'appellent pas juste « 01 »',
+    ancres.every((a) => a.nom.replace(/[0-9\s]/g, '').length > 3), ancres.map((a) => a.nom).join(' | '));
+
+  await page.evaluate(() => document.getElementById('limites').scrollIntoView());
+  await page.waitForTimeout(400);
+  t('Règle de section : la section courante est signalée au défilement',
+    (await page.locator('.rail a[href="#limites"][aria-current="true"]').count()) === 1);
+
+  /* Une ancre ne doit pas placer le titre derrière le bandeau collant. */
+  await page.evaluate(() => (document.documentElement.scrollTop = 0));
+  await page.locator('.rail a[href="#parcours"]').click();
+  await page.waitForTimeout(300);
+  const sousBandeau = await page.evaluate(() => {
+    const h = document.querySelector('.hdr').getBoundingClientRect().bottom;
+    return document.getElementById('parcours').getBoundingClientRect().top >= h - 1;
+  });
+  t('Règle de section : la cible ne passe pas sous le bandeau', sousBandeau);
+  await page.close();
+}
+{
+  const page = await navigateur.newPage({ viewport: { width: 1024, height: 900 } });
+  await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  t('Règle de section absente sous 1320 px', !(await page.locator('.rail').isVisible()));
+  await page.close();
 }
 
 /* ================= 3. Formulaire ================= */
@@ -356,7 +622,7 @@ contact.reinitialiserCompteurs();
   t('Sans JavaScript : la demande est bien arrivée', recus.length === avant + 1);
   t(
     'Sans JavaScript : la confirmation reste sur la charte du site',
-    (await page.locator('.logo-word').count()) === 1
+    (await page.locator('.logo-mark').count()) === 1
   );
   await ctx.close();
 }
