@@ -2,9 +2,19 @@
    AMN DevSec — site vitrine
    ==================================================================
    Identité reprise du produit (amn-desktop, src/index.css) : noir et
-   gris neutres sans dominante bleue, Space Grotesk pour le texte,
-   JetBrains Mono pour les repères, surfaces plates, arêtes dures,
+   gris neutres sans dominante bleue, surfaces plates, arêtes dures,
    « lift » minimal au survol, aucune lueur.
+
+   v3 — la typographie. Archivo (variable, axe de LARGEUR) et Martian
+   Mono remplacent Space Grotesk + JetBrains Mono. Space Grotesk était
+   correct et JetBrains Mono est LA police par défaut du développeur :
+   ensemble, elles ne disaient rien de particulier. Archivo tiré en
+   élargi donne aux titres une présence dense et industrielle ; Martian
+   Mono, dessiné large pour être lu sur un écran technique, porte
+   l'identité partout où le site compte, étiquette et numérote.
+   Martian avance ~17 % plus large que JetBrains : toutes les tailles et
+   tous les interlettrages mono ont été redescendus en conséquence.
+   Voir docs/direction-v3.md.
 
    UNE SEULE couleur : l'ambre. C'est la couleur de marque du site.
    Côté produit l'accent devient configurable par organisation cliente,
@@ -58,8 +68,13 @@
   /* Réservé aux alertes. Ne pas utiliser en décoration. */
   --alert: #ff4230;
 
-  --f-sans: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --f-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --f-sans: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --f-mono: 'Martian Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Archivo est variable en LARGEUR. Les titres sont tirés en élargi,
+     le texte courant reste normal : une seule police, deux présences.
+     C'est cet écart qui fait la voix typographique du site. */
+  --large: 118%;
 
   --max: 1120px;
   --gutter: 20px;
@@ -134,7 +149,7 @@ main { flex: 1 0 auto; }
   color: var(--accent-ink);
   padding: 12px 18px;
   font-family: var(--f-mono);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
 }
 .skip:focus { left: 0; }
@@ -143,6 +158,7 @@ main { flex: 1 0 auto; }
 
 h1, h2, h3, h4 {
   font-weight: 500;
+  font-stretch: var(--large);
   line-height: 1.08;
   letter-spacing: -.03em;
   text-wrap: balance;
@@ -181,15 +197,15 @@ p + p { margin-top: 1em; }
 /* Repère mono — l'équivalent des libellés techniques du produit */
 .mono {
   font-family: var(--f-mono);
-  font-size: .78rem;
+  font-size: .70rem;
   font-weight: 500;
-  letter-spacing: .12em;
+  letter-spacing: .04em;
   text-transform: uppercase;
   color: var(--text-2);
   font-variant-numeric: tabular-nums;
 }
 
-.mono-sm { font-family: var(--f-mono); font-size: .74rem; letter-spacing: .06em; color: var(--text-3); }
+.mono-sm { font-family: var(--f-mono); font-size: .68rem; letter-spacing: .01em; color: var(--text-3); line-height: 1.65; }
 
 /* Le seul emploi « inline » de l'ambre : souligner UN mot. */
 .mark {
@@ -256,9 +272,9 @@ p + p { margin-top: 1em; }
 @media (min-width: 720px) { .logo-mark { height: 24px; } }
 .logo-sub {
   font-family: var(--f-mono);
-  font-size: .55rem;
+  font-size: .52rem;
   font-weight: 500;
-  letter-spacing: .46em;
+  letter-spacing: .34em;
   /* --text-4 tombait à 3,19:1. « DEVSEC » fait partie du nom de la
      marque : c'est du texte porteur de sens, pas de la décoration, donc
      le plancher --text-3 s'applique comme partout ailleurs. */
@@ -295,9 +311,9 @@ p + p { margin-top: 1em; }
   border: 1px solid var(--line-strong);
   color: var(--text);
   font-family: var(--f-mono);
-  font-size: .72rem;
+  font-size: .66rem;
   font-weight: 500;
-  letter-spacing: .1em;
+  letter-spacing: .02em;
   text-transform: uppercase;
   white-space: nowrap;
   transition: background-color .16s ease, border-color .16s ease;
@@ -522,9 +538,9 @@ html:has(.console[open]) { overflow: hidden; }
 }
 .plaque-n {
   font-family: var(--f-mono);
-  font-size: .7rem;
+  font-size: .66rem;
   font-weight: 500;
-  letter-spacing: .14em;
+  letter-spacing: .06em;
   color: var(--text-3);
   font-variant-numeric: tabular-nums;
   transition: color .18s ease;
@@ -610,9 +626,9 @@ html:has(.console[open]) { overflow: hidden; }
   gap: 10px;
   padding: 13px 22px;
   font-family: var(--f-mono);
-  font-size: .8rem;
+  font-size: .72rem;
   font-weight: 500;
-  letter-spacing: .09em;
+  letter-spacing: .035em;
   text-transform: uppercase;
   text-decoration: none;
   border: 1px solid transparent;
@@ -627,7 +643,7 @@ html:has(.console[open]) { overflow: hidden; }
 .btn-ghost { border-color: var(--line-strong); color: var(--text); background: transparent; }
 .btn-ghost:hover { background: var(--surface-hi); border-color: var(--text-4); }
 
-.btn-sm { padding: 9px 15px; font-size: .72rem; }
+.btn-sm { padding: 9px 14px; font-size: .66rem; }
 
 .btn-row { display: flex; flex-wrap: wrap; gap: 12px; }
 
@@ -701,8 +717,8 @@ html:has(.console[open]) { overflow: hidden; }
 .chips { display: flex; flex-wrap: wrap; gap: 7px; }
 .chip {
   font-family: var(--f-mono);
-  font-size: .76rem;
-  letter-spacing: .02em;
+  font-size: .70rem;
+  letter-spacing: 0;
   color: var(--text-2);
   border: 1px solid var(--line-strong);
   padding: 6px 10px;
@@ -768,17 +784,17 @@ html:has(.console[open]) { overflow: hidden; }
 
 .mod-n {
   font-family: var(--f-mono);
-  font-size: .68rem;
+  font-size: .64rem;
   font-weight: 500;
-  letter-spacing: .14em;
+  letter-spacing: .06em;
   color: var(--text-3);
   font-variant-numeric: tabular-nums;
 }
 .mod-nom {
   font-family: var(--f-mono);
-  font-size: .82rem;
+  font-size: .75rem;
   font-weight: 500;
-  letter-spacing: .05em;
+  letter-spacing: .01em;
   text-transform: uppercase;
   color: var(--text);
 }
@@ -811,9 +827,9 @@ html:has(.console[open]) { overflow: hidden; }
 }
 .instr b {
   font-family: var(--f-mono);
-  font-size: .8rem;
+  font-size: .74rem;
   font-weight: 500;
-  letter-spacing: .06em;
+  letter-spacing: .01em;
   text-transform: uppercase;
   color: var(--text);
 }
@@ -839,9 +855,9 @@ html:has(.console[open]) { overflow: hidden; }
 }
 .steps .n {
   font-family: var(--f-mono);
-  font-size: .8rem;
+  font-size: .74rem;
   font-weight: 500;
-  letter-spacing: .1em;
+  letter-spacing: .04em;
   color: var(--accent);
   font-variant-numeric: tabular-nums;
   padding-top: 3px;
@@ -913,9 +929,9 @@ html:has(.console[open]) { overflow: hidden; }
     text-decoration: none;
     color: var(--text-3);
     font-family: var(--f-mono);
-    font-size: .67rem;
+    font-size: .63rem;
     font-weight: 500;
-    letter-spacing: .1em;
+    letter-spacing: .02em;
     font-variant-numeric: tabular-nums;
     transition: color .16s ease;
   }
@@ -1008,9 +1024,9 @@ section[id] { scroll-margin-top: 84px; }
 .field > .lbl {
   display: block;
   font-family: var(--f-mono);
-  font-size: .74rem;
+  font-size: .68rem;
   font-weight: 500;
-  letter-spacing: .1em;
+  letter-spacing: .035em;
   text-transform: uppercase;
   color: var(--text-2);
   margin-bottom: 8px;
@@ -1108,7 +1124,7 @@ section[id] { scroll-margin-top: 84px; }
 .legal ul { margin: 12px 0 0 0; padding-left: 20px; display: grid; gap: 8px; }
 .legal dl { display: grid; gap: 10px; margin-top: 14px; }
 @media (min-width: 620px) { .legal dl { grid-template-columns: minmax(150px, 25%) 1fr; gap: 10px 20px; } }
-.legal dt { font-family: var(--f-mono); font-size: .76rem; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); padding-top: 3px; }
+.legal dt { font-family: var(--f-mono); font-size: .70rem; letter-spacing: .02em; text-transform: uppercase; color: var(--text-3); padding-top: 3px; }
 .legal dd { color: var(--text-2); font-size: .97rem; }
 .legal .prose { max-width: 72ch; }
 
@@ -1146,7 +1162,7 @@ section[id] { scroll-margin-top: 84px; }
 }
 .ftr-grid { display: grid; gap: 30px; }
 @media (min-width: 780px) { .ftr-grid { grid-template-columns: 1.5fr 1fr 1fr; gap: 40px; } }
-.ftr h2 { font-size: .74rem; font-family: var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); margin-bottom: 14px; font-weight: 500; }
+.ftr h2 { font-size: .68rem; font-family: var(--f-mono); letter-spacing: .03em; text-transform: uppercase; color: var(--text-3); margin-bottom: 14px; font-weight: 500; }
 .ftr ul { list-style: none; display: grid; gap: 9px; }
 .ftr a { color: var(--text-2); text-decoration: none; font-size: .94rem; transition: color .16s ease; }
 .ftr a:hover { color: var(--text); }
@@ -1161,7 +1177,7 @@ section[id] { scroll-margin-top: 84px; }
   justify-content: space-between;
   align-items: center;
 }
-.ftr-bottom p { font-family: var(--f-mono); font-size: .72rem; letter-spacing: .06em; color: var(--text-3); }
+.ftr-bottom p { font-family: var(--f-mono); font-size: .66rem; letter-spacing: .01em; color: var(--text-3); }
 
 /* ---------- Mouvement réduit ---------- */
 
@@ -1178,3 +1194,220 @@ section[id] { scroll-margin-top: 84px; }
   .console-scene { transform: none !important; }
   .console-balai { display: none; }
 }
+
+/* ==================================================================
+   v3 — L'ÉNERGIE
+   ==================================================================
+   Le reproche : « ça doit transpirer une énergie ». La référence
+   donnée était un site de vêtements dessiné à la main — étoiles au
+   crayon, flèches à main levée. Le principe est bon, le vocabulaire
+   ne l'est pas : du crayonné sur un site de supervision de sécurité,
+   ça ne veut rien dire et ça sonne faux.
+
+   L'équivalent dans CE métier, c'est la marque que laisse un
+   opérateur sur un relevé : une trace de signal, des graduations, un
+   tampon, une note écrite dans la marge. Même intention — de la
+   texture humaine et un vrai parti pris — mais tiré du sujet.
+   ================================================================== */
+
+/* ---- La trace : le motif signature ----
+   Un relevé de supervision. Servie en MASQUE et non en image : la
+   couleur vient d'ici, donc elle suit l'ambre de la marque sans qu'il
+   faille rééditer le fichier. */
+.trace {
+  height: 26px;
+  background-color: var(--accent-line);
+  -webkit-mask-image: url('/assets/trace.svg');
+  mask-image: url('/assets/trace.svg');
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+/* Sur l'accueil elle s'éteint vers la droite, pour ne pas faire barre. */
+.trace--hero {
+  margin-top: 26px;
+  max-width: 620px;
+  -webkit-mask-composite: source-in;
+  background-image: linear-gradient(90deg, var(--accent) 0%, var(--accent-line) 46%, transparent 96%);
+  background-color: transparent;
+}
+
+/* ---- Graduations : la règle d'un instrument ----
+   Posée sous les titres de section. Un dégradé répété, peint une
+   fois, jamais animé. */
+.sec-head .mono {
+  position: relative;
+  padding-bottom: 13px;
+}
+.sec-head .mono::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* Un segment de règle, pas une bande : sur toute la largeur ça faisait
+     bruit de fond au lieu de repère. */
+  width: min(360px, 100%);
+  height: 6px;
+  background: repeating-linear-gradient(90deg, var(--line-strong) 0 1px, transparent 1px 9px);
+  -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 34%, transparent 100%);
+  mask-image: linear-gradient(90deg, #000 0%, #000 34%, transparent 100%);
+}
+
+/* ---- Le tampon ----
+   L'équivalent domestique de l'étoile dessinée : la marque qu'on
+   apposait sur un dossier traité. Penché, parce qu'un tampon posé à
+   la main n'est jamais droit. */
+.tampon {
+  display: inline-block;
+  transform: rotate(-2.4deg);
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  font-family: var(--f-mono);
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: 7px 13px 6px;
+  line-height: 1.15;
+  background: rgba(255, 178, 36, .05);
+}
+.tampon b { display: block; font-weight: 600; }
+.tampon i { display: block; font-style: normal; color: var(--text-3); font-size: .86em; letter-spacing: .02em; }
+
+/* ---- La note dans la marge ----
+   Ce qu'un opérateur griffonne à côté d'une ligne de relevé. Elle
+   casse la symétrie de la grille, et c'est le but. */
+.note-marge {
+  position: relative;
+  margin-top: 22px;
+  padding-left: 26px;
+  max-width: 44ch;
+  font-family: var(--f-mono);
+  font-size: .68rem;
+  line-height: 1.6;
+  color: var(--text-3);
+}
+.note-marge::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: .55em;
+  width: 16px;
+  height: 6px;
+  border-left: 2px solid var(--accent);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+/* ---- Un moment d'ambre franc ----
+   Tout le site est noir. Il lui faut UN endroit où la couleur prend
+   toute la place, sinon l'accent n'accentue rien. C'est le bloc
+   d'appel de fin de page. */
+.cta--ambre {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.cta--ambre h2 { color: var(--accent-ink); }
+.cta--ambre p { color: rgba(10, 10, 10, .82); }
+.cta--ambre .btn-primary {
+  background: var(--accent-ink);
+  color: var(--accent);
+}
+.cta--ambre .btn-primary:hover { background: #1c1c1c; }
+
+/* ---------- Page prix ----------
+   Un tableau comptable froid, c'est exactement ce qu'on ne veut pas.
+   Les forfaits sont des blocs, le chiffre est énorme, et l'option
+   « Commerce » est une bande à part — parce que c'en est une, pas un
+   forfait de plus. */
+
+.tarifs { display: grid; gap: 14px; }
+@media (min-width: 900px) { .tarifs { grid-template-columns: repeat(3, 1fr); gap: 16px; } }
+
+.tarif {
+  display: flex;
+  flex-direction: column;
+  padding: 26px 24px 28px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.tarif > .mono { display: block; color: var(--text-3); }
+.tarif h3 { margin-top: 12px; font-size: 1.22rem; }
+.tarif-qui { margin-top: 8px; font-size: .93rem; line-height: 1.5; color: var(--text-2); }
+
+.tarif-prix {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.tarif-prix b {
+  font-family: var(--f-mono);
+  font-size: 2.5rem;
+  font-weight: 600;
+  letter-spacing: -.04em;
+  line-height: 1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  /* L'espace d'un mono large fait presque 0,7 em : sans ça, « 35 € »
+     s'affiche avec un trou au milieu. */
+  word-spacing: -.3em;
+}
+.tarif-prix span {
+  font-family: var(--f-mono);
+  font-size: .68rem;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.tarif-prix .devis { font-size: 1.32rem; letter-spacing: -.02em; }
+
+.tarif ul { list-style: none; margin-top: 20px; display: grid; gap: 9px; }
+.tarif li {
+  font-size: .92rem;
+  line-height: 1.45;
+  color: var(--text-2);
+  padding-left: 15px;
+  border-left: 1px solid var(--line-strong);
+}
+
+/* Le forfait mis en avant. Un seul, sinon ça ne veut plus rien dire. */
+.tarif--phare { border-color: var(--accent-line); background: linear-gradient(180deg, rgba(255,178,36,.055), var(--surface) 190px); }
+.tarif--phare > .mono { color: var(--accent); }
+.tarif--phare .tarif-prix { border-top-color: var(--accent-line); }
+.tarif--phare .tarif-prix b { color: var(--accent); }
+
+/* Sur-mesure : pleine largeur, il ne se compare pas aux autres. */
+.tarif--large { grid-column: 1 / -1; }
+@media (min-width: 900px) {
+  .tarif--large { flex-direction: row; align-items: center; gap: 34px; }
+  .tarif--large > div:first-child { flex: 1 1 auto; }
+  .tarif--large .tarif-prix { margin-top: 0; padding-top: 0; border-top: 0; flex: none; }
+}
+
+/* L'option, en bande. Elle s'ajoute à un forfait, elle ne le remplace pas. */
+.option {
+  margin-top: 16px;
+  display: grid;
+  gap: 16px;
+  padding: 22px 24px;
+  border: 1px dashed var(--line-strong);
+  background: var(--bg);
+  align-items: center;
+}
+@media (min-width: 780px) { .option { grid-template-columns: auto 1fr auto; gap: 26px; } }
+.option .mono { color: var(--accent); white-space: nowrap; }
+.option p { font-size: .93rem; line-height: 1.5; color: var(--text-2); }
+.option .tarif-prix { margin: 0; padding: 0; border: 0; }
+.option .tarif-prix b { font-size: 1.7rem; }
+
+/* Le pied de tableau : ce qui vaut pour tout le monde. */
+.tarifs-pied { margin-top: 26px; display: grid; gap: 12px; }
+@media (min-width: 860px) { .tarifs-pied { grid-template-columns: 1fr 1fr; gap: 14px 34px; } }
+.tarifs-pied p { font-size: .9rem; line-height: 1.55; color: var(--text-3); }
+.tarifs-pied b { color: var(--text-2); font-weight: 500; }

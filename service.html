@@ -21,7 +21,13 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/space-grotesk-400700-latin.woff2" crossorigin>
+<!-- Les DEUX polices sont préchargées. Essai fait dans l'autre sens
+     (Archivo seule, pour ne pas lui disputer la bande passante) : le
+     premier affichage est parti de 1 358 à 1 503 ms sur réseau bridé,
+     parce que les étiquettes mono sont dans le premier écran elles
+     aussi. Mesuré, pas supposé — voir scripts/mesurer-lighthouse.mjs. -->
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/archivo-latin.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/martian-mono-latin.woff2" crossorigin>
 <link rel="stylesheet" href="/assets/fonts.css">
 <link rel="stylesheet" href="/site.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"AMN DevSec","url":"https://amn-devsec.example/","logo":"https://amn-devsec.example/assets/icon-512.png","description":"Poste de travail et supervision de sécurité pour PME et indépendants.","areaServed":"FR","contactPoint":{"@type":"ContactPoint","contactType":"sales","url":"https://amn-devsec.example/contact","availableLanguage":["fr"]}}</script>
@@ -65,13 +71,18 @@
             <span class="plaque-nom">Comment ça se passe</span>
             <span class="plaque-txt">De votre message à votre premier jour de travail.</span>
           </a></li>
-          <li><a class="plaque notch" href="/a-propos">
+          <li><a class="plaque notch" href="/prix">
             <span class="plaque-n">04</span>
+            <span class="plaque-nom">Prix</span>
+            <span class="plaque-txt">Quatre forfaits, un chiffre net pour chacun.</span>
+          </a></li>
+          <li><a class="plaque notch" href="/a-propos">
+            <span class="plaque-n">05</span>
             <span class="plaque-nom">À propos</span>
             <span class="plaque-txt">Qui opère, avec quelles limites annoncées.</span>
           </a></li>
           <li><a class="plaque notch" href="/contact">
-            <span class="plaque-n">05</span>
+            <span class="plaque-n">06</span>
             <span class="plaque-nom">Demander un accès</span>
             <span class="plaque-txt">Quatre champs. Une réponse écrite sous 48 h ouvrées.</span>
           </a></li>
@@ -100,14 +111,15 @@
   <section class="wrap hero" id="debut">
     <p class="mono">Ce qu'on fait</p>
     <h1>Deux choses, et elles vont ensemble</h1>
-    <p class="lead">Un poste de travail où votre activité tient en entier. Et, derrière, une supervision que nous opérons — parce qu'un outil livré puis oublié n'est pas un service, c'est une vente.</p>
+    <p class="lead">Un poste de travail où votre activité tient en entier. Et derrière, nous. C'est la deuxième moitié qui coûte cher à tenir, et c'est justement celle qu'on ne peut pas automatiser.</p>
+    <div class="trace trace--hero" aria-hidden="true"></div>
   </section>
 
   <section class="wrap section" id="poste">
     <div class="sec-head">
       <span class="mono"><b>01</b> — Le poste de travail</span>
       <h2>Ce que vous ouvrez tous les jours</h2>
-      <p class="lead">Un espace, un compte. Ce qui suit est la liste complète de ce que contient votre espace — pas une sélection commerciale.</p>
+      <p class="lead">Un espace, un compte. La liste ci-dessous est complète : on n'a rien gardé de côté pour un forfait supérieur.</p>
     </div>
 
     <!-- La grille des modules, dans l'ordre où ils apparaissent dans le
@@ -184,7 +196,7 @@
     <div class="sec-head">
       <span class="mono"><b>02</b> — La supervision</span>
       <h2>Ce qu'on regarde pendant que vous travaillez</h2>
-      <p class="lead">Décrit par ce que ça produit, pas par les outils qui le produisent. Les outils, eux, restent chez nous.</p>
+      <p class="lead">Ci-dessous, des résultats. Vous remarquerez qu'on ne nomme jamais les outils qui les produisent : ils restent chez nous, et il y a une raison.</p>
     </div>
 
     <ul class="instruments">
@@ -217,19 +229,19 @@
 
     <div class="card notch more">
       <span class="mono">La différence, en une phrase</span>
-      <h3>Le résultat vous arrive, pas le travail</h3>
-      <p>Un outil de surveillance qui vous envoie des notifications vous a donné un métier de plus. Ici, ce qui sonne est traité de notre côté ; ce qui vous arrive, c'est ce qui vous concerne vraiment — et généralement accompagné de ce qui a déjà été fait.</p>
+      <h3>Ce qui vous arrive, c'est la fin de l'histoire</h3>
+      <p>Un outil qui vous envoie des notifications vient de vous donner un métier de plus. Chez nous, ce qui sonne est traité avant que vous en entendiez parler. Et quand quelque chose remonte jusqu'à vous, ça arrive presque toujours accompagné de la phrase « voilà ce qu'on a fait ».</p>
     </div>
   </section>
 
   <section class="wrap section" id="absent">
     <div class="sec-head">
       <span class="mono"><b>03</b> — Ce qui n'y est pas</span>
-      <h2>Absent, pas masqué</h2>
+      <h2>Il n'y a rien à déverrouiller</h2>
     </div>
 
     <div class="prose">
-      <p>Les outils de sécurité qu'on utilise pour vous ne sont pas dans votre espace. Ce n'est pas un bouton grisé ni un menu caché : ils ne font <strong>pas partie</strong> du logiciel qui vous est livré. Ce qui n'est pas installé chez vous ne peut pas fuiter par chez vous.</p>
+      <p>Les outils de sécurité qu'on utilise pour vous ne sont pas dans votre espace. Pas grisés, pas rangés dans un menu d'administration : <strong>absents du logiciel</strong> qu'on vous livre. Ce qui n'est pas installé chez vous ne peut pas fuiter par chez vous. C'est bête, mais c'est la seule garantie qui tienne.</p>
       <p>C'est une décision de construction, pas un réglage. Elle a un coût pour nous et un intérêt pour vous : votre espace ne contient rien qui concerne un autre client, ni rien qui concerne notre infrastructure.</p>
       <p>Elle a aussi une conséquence à connaître : <strong>ces outils ne sont pas vendus séparément</strong>, ni en accès direct, ni en abonnement. Ils sont opérés par nous, pour les organisations qu'on supervise. C'est ce qu'on vend — pas une licence.</p>
     </div>
@@ -238,8 +250,8 @@
   <section class="wrap section" id="acces">
     <div class="cta notch">
       <div>
-        <h2>Reste à savoir si ça correspond à votre situation</h2>
-        <p>Décrivez-la en quelques lignes. On répond sous 48 h ouvrées, y compris quand la réponse est non.</p>
+        <h2>Reste à savoir si ça vous va</h2>
+        <p>Décrivez votre situation en quelques lignes. Réponse sous 48 h ouvrées, y compris quand c'est non.</p>
       </div>
       <p class="btn-row"><a class="btn btn-primary" href="/contact">Demander un accès</a></p>
     </div>
@@ -263,6 +275,7 @@
           <li><a href="/">Accueil</a></li>
           <li><a href="/service">Ce qu'on fait</a></li>
           <li><a href="/methode">Comment ça se passe</a></li>
+          <li><a href="/prix">Prix</a></li>
           <li><a href="/a-propos">À propos</a></li>
           <li><a href="/contact">Demander un accès</a></li>
         </ul>

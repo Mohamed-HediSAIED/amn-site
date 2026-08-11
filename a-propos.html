@@ -21,7 +21,13 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/space-grotesk-400700-latin.woff2" crossorigin>
+<!-- Les DEUX polices sont préchargées. Essai fait dans l'autre sens
+     (Archivo seule, pour ne pas lui disputer la bande passante) : le
+     premier affichage est parti de 1 358 à 1 503 ms sur réseau bridé,
+     parce que les étiquettes mono sont dans le premier écran elles
+     aussi. Mesuré, pas supposé — voir scripts/mesurer-lighthouse.mjs. -->
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/archivo-latin.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/martian-mono-latin.woff2" crossorigin>
 <link rel="stylesheet" href="/assets/fonts.css">
 <link rel="stylesheet" href="/site.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"AMN DevSec","url":"https://amn-devsec.example/","logo":"https://amn-devsec.example/assets/icon-512.png","description":"Poste de travail et supervision de sécurité pour PME et indépendants.","areaServed":"FR","contactPoint":{"@type":"ContactPoint","contactType":"sales","url":"https://amn-devsec.example/contact","availableLanguage":["fr"]}}</script>
@@ -65,13 +71,18 @@
             <span class="plaque-nom">Comment ça se passe</span>
             <span class="plaque-txt">De votre message à votre premier jour de travail.</span>
           </a></li>
-          <li><a class="plaque notch" href="/a-propos" aria-current="page">
+          <li><a class="plaque notch" href="/prix">
             <span class="plaque-n">04</span>
+            <span class="plaque-nom">Prix</span>
+            <span class="plaque-txt">Quatre forfaits, un chiffre net pour chacun.</span>
+          </a></li>
+          <li><a class="plaque notch" href="/a-propos" aria-current="page">
+            <span class="plaque-n">05</span>
             <span class="plaque-nom">À propos</span>
             <span class="plaque-txt">Qui opère, avec quelles limites annoncées.</span>
           </a></li>
           <li><a class="plaque notch" href="/contact">
-            <span class="plaque-n">05</span>
+            <span class="plaque-n">06</span>
             <span class="plaque-nom">Demander un accès</span>
             <span class="plaque-txt">Quatre champs. Une réponse écrite sous 48 h ouvrées.</span>
           </a></li>
@@ -100,7 +111,8 @@
   <section class="wrap hero" id="debut">
     <p class="mono">À propos</p>
     <h1>Un studio, pas une plateforme</h1>
-    <p class="lead">AMN DevSec construit l'outil et surveille ce qui tourne derrière. Les deux, par les mêmes personnes — c'est ce qui rend la supervision utile plutôt que décorative.</p>
+    <p class="lead">On construit l'outil, et on surveille ce qui tourne derrière. Les deux, par les mêmes personnes. C'est ce qui fait la différence entre une supervision qui sert et une supervision qui décore.</p>
+    <div class="trace trace--hero" aria-hidden="true"></div>
   </section>
 
   <section class="wrap section" id="raison">
@@ -109,7 +121,7 @@
       <h2>Une alerte que personne ne lit n'est pas de la sécurité</h2>
     </div>
     <div class="prose">
-      <p>La plupart des outils de surveillance font honnêtement leur travail : ils détectent, et ils vous préviennent. Le problème est ce qui vient après. Le message arrive un mardi à 18 h, il parle de certificats et de ports, il ressemble aux quarante précédents qui ne voulaient rien dire — et il est archivé sans être lu. Techniquement, la détection a fonctionné. Concrètement, il ne s'est rien passé.</p>
+      <p>La plupart des outils de surveillance font très bien leur travail : ils détectent, ils préviennent. C'est après que ça coince. Le message tombe un mardi à 18 h. Il parle de certificats et de ports. Il ressemble aux quarante précédents qui ne voulaient rien dire. Il part à la corbeille. La détection a marché ; il ne s'est rien passé.</p>
       <p>C'est le point où <strong>un logiciel de plus ne suffit pas</strong>. Une PME ou un indépendant n'a personne dont le métier est de trier ces messages, de savoir lesquels sont sérieux, et d'agir. Pas par négligence : parce que ce poste n'existe pas dans une structure de cette taille, et qu'il n'a aucune raison d'y exister.</p>
       <p>Notre réponse est simple à énoncer et coûteuse à tenir : <strong>c'est nous qui lisons</strong>. Ce qui remonte est traité de notre côté ; ce qui vous arrive vous concerne vraiment, et arrive généralement accompagné de ce qui a déjà été fait.</p>
     </div>
@@ -124,12 +136,12 @@
     <div class="duo">
       <article class="card notch">
         <span class="mono">Un seul interlocuteur</span>
-        <h3>Pas de premier niveau</h3>
+        <h3>Vous tombez toujours sur la même personne</h3>
         <p>Les personnes qui construisent l'outil sont celles qui répondent quand quelque chose cloche. Aucun numéro de dossier, aucune transmission à un autre service : votre contexte n'a pas à être réexpliqué à chaque échange.</p>
       </article>
       <article class="card notch">
         <span class="mono">Un rythme choisi</span>
-        <h3>Peu de clients, suivis pour de vrai</h3>
+        <h3>On en prend peu</h3>
         <p>Chaque organisation acceptée est une organisation qu'on surveille réellement. C'est la raison pour laquelle les accès sont validés à la main et pas ouverts en libre-service — et la raison pour laquelle il nous arrive de dire non.</p>
       </article>
       <article class="card notch">
@@ -190,6 +202,7 @@
           <li><a href="/">Accueil</a></li>
           <li><a href="/service">Ce qu'on fait</a></li>
           <li><a href="/methode">Comment ça se passe</a></li>
+          <li><a href="/prix">Prix</a></li>
           <li><a href="/a-propos">À propos</a></li>
           <li><a href="/contact">Demander un accès</a></li>
         </ul>

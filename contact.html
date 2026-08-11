@@ -21,7 +21,13 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/space-grotesk-400700-latin.woff2" crossorigin>
+<!-- Les DEUX polices sont préchargées. Essai fait dans l'autre sens
+     (Archivo seule, pour ne pas lui disputer la bande passante) : le
+     premier affichage est parti de 1 358 à 1 503 ms sur réseau bridé,
+     parce que les étiquettes mono sont dans le premier écran elles
+     aussi. Mesuré, pas supposé — voir scripts/mesurer-lighthouse.mjs. -->
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/archivo-latin.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/martian-mono-latin.woff2" crossorigin>
 <link rel="stylesheet" href="/assets/fonts.css">
 <link rel="stylesheet" href="/site.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"AMN DevSec","url":"https://amn-devsec.example/","logo":"https://amn-devsec.example/assets/icon-512.png","description":"Poste de travail et supervision de sécurité pour PME et indépendants.","areaServed":"FR","contactPoint":{"@type":"ContactPoint","contactType":"sales","url":"https://amn-devsec.example/contact","availableLanguage":["fr"]}}</script>
@@ -65,13 +71,18 @@
             <span class="plaque-nom">Comment ça se passe</span>
             <span class="plaque-txt">De votre message à votre premier jour de travail.</span>
           </a></li>
-          <li><a class="plaque notch" href="/a-propos">
+          <li><a class="plaque notch" href="/prix">
             <span class="plaque-n">04</span>
+            <span class="plaque-nom">Prix</span>
+            <span class="plaque-txt">Quatre forfaits, un chiffre net pour chacun.</span>
+          </a></li>
+          <li><a class="plaque notch" href="/a-propos">
+            <span class="plaque-n">05</span>
             <span class="plaque-nom">À propos</span>
             <span class="plaque-txt">Qui opère, avec quelles limites annoncées.</span>
           </a></li>
           <li><a class="plaque notch" href="/contact" aria-current="page">
-            <span class="plaque-n">05</span>
+            <span class="plaque-n">06</span>
             <span class="plaque-nom">Demander un accès</span>
             <span class="plaque-txt">Quatre champs. Une réponse écrite sous 48 h ouvrées.</span>
           </a></li>
@@ -90,7 +101,7 @@
   <section class="wrap hero">
     <p class="mono">Demander un accès</p>
     <h1>Dites-nous où vous en êtes</h1>
-    <p class="lead">Quatre champs, deux minutes. Votre message est lu par quelqu'un — pas trié par un robot — et reçoit une réponse écrite sous 48 h ouvrées, y compris quand la réponse est non.</p>
+    <p class="lead">Quatre champs, deux minutes. Quelqu'un lira votre message en entier : il n'y a ni robot de tri, ni file d'attente. Réponse écrite sous 48 h ouvrées, y compris quand c'est non.</p>
   </section>
 
   <section class="wrap section">
@@ -98,7 +109,7 @@
 
       <div>
         <div class="msg msg-ok" id="form-ok" hidden role="status">
-          <h3>C'est envoyé.</h3>
+          <h3>C'est parti.</h3>
           <p>Votre demande est arrivée. Vous recevrez une réponse écrite à l'adresse indiquée, sous 48 h ouvrées. Inutile de renvoyer le formulaire.</p>
         </div>
 
@@ -198,6 +209,7 @@
           <li><a href="/">Accueil</a></li>
           <li><a href="/service">Ce qu'on fait</a></li>
           <li><a href="/methode">Comment ça se passe</a></li>
+          <li><a href="/prix">Prix</a></li>
           <li><a href="/a-propos">À propos</a></li>
           <li><a href="/contact">Demander un accès</a></li>
         </ul>

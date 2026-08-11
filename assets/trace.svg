@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 44" width="960" height="44"
+     preserveAspectRatio="none">
+  <!-- ================================================================
+       LA TRACE — le motif graphique du site.
+
+       Un relevé de supervision : une ligne de base plate, et des
+       événements dessus. C'est l'équivalent AMN du trait tracé à la
+       main : ça vient du métier, ça n'est pas un ornement plaqué.
+
+       Elle est IRRÉGULIÈRE exprès. Les pics n'ont ni la même hauteur,
+       ni le même espacement, et il y a un long calme au milieu. Une
+       sinusoïde régulière ferait décoration ; un vrai relevé, non.
+
+       Servie en masque CSS (voir .trace dans site.css), donc la couleur
+       vient de la feuille de style et pas d'ici.
+       ================================================================ -->
+  <path fill="none" stroke="#000" stroke-width="2"
+        stroke-linejoin="round" stroke-linecap="round"
+        d="M0 22
+           H58
+           l7 0 4 -9 5 18 4 -9 6 0
+           H143
+           l5 0 3 -5 4 9 3 -4 5 0
+           H268
+           l6 0 5 -16 4 31 5 -15 6 0
+           H395
+           l4 0 3 -6 3 11 4 -5 5 0
+           H455
+           l6 0 4 -3 3 6 4 -3 6 0
+           H612
+           l7 0 5 -21 5 39 4 -18 6 0
+           H700
+           l4 0 3 -4 4 7 3 -3 5 0
+           H793
+           l5 0 4 -11 4 21 4 -10 6 0
+           H884
+           l4 0 3 -5 3 9 3 -4 5 0
+           H960" />
+</svg>

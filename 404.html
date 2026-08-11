@@ -9,7 +9,13 @@
 <meta name="theme-color" content="#0a0a0a">
 <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/space-grotesk-400700-latin.woff2" crossorigin>
+<!-- Les DEUX polices sont préchargées. Essai fait dans l'autre sens
+     (Archivo seule, pour ne pas lui disputer la bande passante) : le
+     premier affichage est parti de 1 358 à 1 503 ms sur réseau bridé,
+     parce que les étiquettes mono sont dans le premier écran elles
+     aussi. Mesuré, pas supposé — voir scripts/mesurer-lighthouse.mjs. -->
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/archivo-latin.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/martian-mono-latin.woff2" crossorigin>
 <link rel="stylesheet" href="/assets/fonts.css">
 <link rel="stylesheet" href="/site.css">
 </head>
@@ -52,13 +58,18 @@
             <span class="plaque-nom">Comment ça se passe</span>
             <span class="plaque-txt">De votre message à votre premier jour de travail.</span>
           </a></li>
-          <li><a class="plaque notch" href="/a-propos">
+          <li><a class="plaque notch" href="/prix">
             <span class="plaque-n">04</span>
+            <span class="plaque-nom">Prix</span>
+            <span class="plaque-txt">Quatre forfaits, un chiffre net pour chacun.</span>
+          </a></li>
+          <li><a class="plaque notch" href="/a-propos">
+            <span class="plaque-n">05</span>
             <span class="plaque-nom">À propos</span>
             <span class="plaque-txt">Qui opère, avec quelles limites annoncées.</span>
           </a></li>
           <li><a class="plaque notch" href="/contact">
-            <span class="plaque-n">05</span>
+            <span class="plaque-n">06</span>
             <span class="plaque-nom">Demander un accès</span>
             <span class="plaque-txt">Quatre champs. Une réponse écrite sous 48 h ouvrées.</span>
           </a></li>
@@ -100,6 +111,7 @@
           <li><a href="/">Accueil</a></li>
           <li><a href="/service">Ce qu'on fait</a></li>
           <li><a href="/methode">Comment ça se passe</a></li>
+          <li><a href="/prix">Prix</a></li>
           <li><a href="/a-propos">À propos</a></li>
           <li><a href="/contact">Demander un accès</a></li>
         </ul>

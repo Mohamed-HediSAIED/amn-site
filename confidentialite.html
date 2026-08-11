@@ -21,7 +21,13 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/space-grotesk-400700-latin.woff2" crossorigin>
+<!-- Les DEUX polices sont préchargées. Essai fait dans l'autre sens
+     (Archivo seule, pour ne pas lui disputer la bande passante) : le
+     premier affichage est parti de 1 358 à 1 503 ms sur réseau bridé,
+     parce que les étiquettes mono sont dans le premier écran elles
+     aussi. Mesuré, pas supposé — voir scripts/mesurer-lighthouse.mjs. -->
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/archivo-latin.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/martian-mono-latin.woff2" crossorigin>
 <link rel="stylesheet" href="/assets/fonts.css">
 <link rel="stylesheet" href="/site.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"AMN DevSec","url":"https://amn-devsec.example/","logo":"https://amn-devsec.example/assets/icon-512.png","description":"Poste de travail et supervision de sécurité pour PME et indépendants.","areaServed":"FR","contactPoint":{"@type":"ContactPoint","contactType":"sales","url":"https://amn-devsec.example/contact","availableLanguage":["fr"]}}</script>
@@ -65,13 +71,18 @@
             <span class="plaque-nom">Comment ça se passe</span>
             <span class="plaque-txt">De votre message à votre premier jour de travail.</span>
           </a></li>
-          <li><a class="plaque notch" href="/a-propos">
+          <li><a class="plaque notch" href="/prix">
             <span class="plaque-n">04</span>
+            <span class="plaque-nom">Prix</span>
+            <span class="plaque-txt">Quatre forfaits, un chiffre net pour chacun.</span>
+          </a></li>
+          <li><a class="plaque notch" href="/a-propos">
+            <span class="plaque-n">05</span>
             <span class="plaque-nom">À propos</span>
             <span class="plaque-txt">Qui opère, avec quelles limites annoncées.</span>
           </a></li>
           <li><a class="plaque notch" href="/contact">
-            <span class="plaque-n">05</span>
+            <span class="plaque-n">06</span>
             <span class="plaque-nom">Demander un accès</span>
             <span class="plaque-txt">Quatre champs. Une réponse écrite sous 48 h ouvrées.</span>
           </a></li>
@@ -98,6 +109,12 @@
          dans le même commit. Une page de confidentialité qui décrit autre chose
          que la réalité est pire que pas de page du tout. -->
 
+    <h2>Qui est responsable de ces données</h2>
+    <div class="prose">
+      <p>Le responsable du traitement est l'éditeur de ce site, dont l'identité complète et l'adresse figurent dans les <a href="/mentions-legales">mentions légales</a>. C'est lui, et personne d'autre, qui décide de ce qui est collecté ici et de ce qu'on en fait.</p>
+      <p>Pour toute question sur vos données, ou pour exercer un des droits décrits plus bas : l'adresse email indiquée dans les mentions légales, ou le <a href="/contact">formulaire</a> en précisant l'objet de votre demande. Les deux arrivent au même endroit.</p>
+    </div>
+
     <h2>Aucun cookie, aucun traceur</h2>
     <div class="prose">
       <p>Ce site ne dépose aucun cookie, n'utilise aucun outil de mesure d'audience, aucun pixel publicitaire et aucun bouton de réseau social. Il n'y a donc pas de bandeau de consentement à afficher : il n'y a rien à consentir.</p>
@@ -112,6 +129,22 @@
       <p><strong>Combien de temps :</strong> trois ans à compter de notre dernier échange si la discussion se poursuit, douze mois si elle n'aboutit pas. Au-delà, la demande est supprimée.</p>
     </div>
 
+    <h2>Vos informations sortent-elles de l'Union européenne&nbsp;?</h2>
+    <div class="prose">
+      <p>Oui, et autant le dire clairement. Deux prestataires américains interviennent&nbsp;:</p>
+      <ul>
+        <li><strong>Resend Inc.</strong> achemine l'email qui nous transmet votre demande. Le contenu du formulaire passe donc par ses serveurs.</li>
+        <li><strong>Vercel Inc.</strong> héberge ce site. Comme tout hébergeur, il tient des journaux techniques de connexion.</li>
+      </ul>
+      <p>Un transfert de données personnelles hors de l'Union européenne doit être encadré par les garanties prévues au chapitre V du RGPD — clauses contractuelles types de la Commission européenne, ou adhésion au cadre de protection des données UE–États-Unis.</p>
+      <p><span class="todo">à compléter</span> — mentionner ici la garantie retenue pour chacun des deux prestataires, telle qu'elle figure dans leur contrat de sous-traitance. Tant que ce n'est pas vérifié et écrit, cette page décrit un transfert sans nommer son fondement.</p>
+    </div>
+
+    <h2>Aucune décision automatisée</h2>
+    <div class="prose">
+      <p>Votre demande n'est ni notée, ni classée, ni triée par un algorithme. Il n'y a pas de profilage, pas de score, pas de décision prise automatiquement à votre sujet. Quelqu'un lit, quelqu'un répond. C'est tout le traitement.</p>
+    </div>
+
     <h2>Protection contre les envois automatisés</h2>
     <div class="prose">
       <p>Pour empêcher qu'un script inonde le formulaire, le serveur compte les envois récents provenant d'une même origine. Pour cela, votre adresse IP est transformée à la volée en une empreinte non réversible, gardée en mémoire vive quelques minutes puis effacée.</p>
@@ -121,7 +154,8 @@
 
     <h2>Vos droits</h2>
     <div class="prose">
-      <p>Vous pouvez demander l'accès aux informations vous concernant, leur rectification, leur effacement, ou vous opposer à leur traitement. Une demande envoyée par le <a href="/contact">formulaire</a> suffit, en le mentionnant explicitement&nbsp;; nous répondons sous un mois.</p>
+      <p>Vous pouvez demander <strong>l'accès</strong> aux informations vous concernant, leur <strong>rectification</strong>, leur <strong>effacement</strong>, la <strong>limitation</strong> de leur traitement, leur <strong>portabilité</strong> dans un format lisible, ou <strong>vous opposer</strong> au traitement.</p>
+      <p>En pratique&nbsp;: écrivez à l'adresse email des <a href="/mentions-legales">mentions légales</a>, ou passez par le <a href="/contact">formulaire</a> en indiquant clairement qu'il s'agit d'une demande RGPD. Nous répondons sous un mois. Il n'y a rien à justifier ni de formulaire particulier à remplir&nbsp;; si nous avons un doute sur votre identité, nous vous le dirons plutôt que d'ignorer la demande.</p>
       <p>Si la réponse ne vous satisfait pas, vous pouvez saisir la CNIL — <a href="https://www.cnil.fr" rel="noopener nofollow">cnil.fr</a>.</p>
     </div>
 
@@ -154,6 +188,7 @@
           <li><a href="/">Accueil</a></li>
           <li><a href="/service">Ce qu'on fait</a></li>
           <li><a href="/methode">Comment ça se passe</a></li>
+          <li><a href="/prix">Prix</a></li>
           <li><a href="/a-propos">À propos</a></li>
           <li><a href="/contact">Demander un accès</a></li>
         </ul>

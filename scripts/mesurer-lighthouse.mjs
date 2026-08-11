@@ -20,7 +20,7 @@ import { demarrer } from './serveur-local.mjs';
 
 const PORT = 4188;
 const BASE = `http://localhost:${PORT}`;
-const PAGES = ['/', '/service', '/methode', '/a-propos', '/contact'];
+const PAGES = ['/', '/service', '/methode', '/prix', '/a-propos', '/contact'];
 
 const LH_DIR = process.env.LIGHTHOUSE_DIR || '/tmp/lh';
 const lhEntree = `${LH_DIR}/node_modules/lighthouse/core/index.js`;

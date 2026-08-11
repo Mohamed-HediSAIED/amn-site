@@ -13,11 +13,29 @@ de navigation est du CSS et une centaine de lignes dans `site.js`.
 > **La navigation ne ressemble pas à celle d'un site ordinaire.** Pourquoi,
 > comment elle se dégrade, ce qu'elle coûte et ce qu'on a accepté de perdre :
 > **`docs/direction-v2.md`**. À lire avant d'y toucher.
+>
+> **La typographie, le ton des textes, les prix et le RGPD** ont été repris en
+> v3 : **`docs/direction-v3.md`** — dont le tableau qui explique pourquoi
+> chaque prix vaut ce qu'il vaut, et la liste de ce qui reste à compléter.
+
+### Les polices
+
+Archivo et Martian Mono, auto-hébergées, régénérables :
+
+```sh
+pip install fonttools brotli      # une fois
+node scripts/polices.mjs          # télécharge, découpe, réécrit assets/fonts.css
+```
+
+Archivo est **variable en largeur** : les titres sont tirés à 118 %
+(`--large`), le texte courant reste à 100 %. Martian Mono avance ~17 % plus
+large que l'ancienne JetBrains Mono — **si un interlettrage mono remonte un
+jour, vérifier à 320 px**, c'est là que ça déborde en premier.
 
 ```
 amn-site/
-├── index.html  service.html  methode.html  a-propos.html  contact.html
-├── mentions-legales.html  confidentialite.html  404.html
+├── index.html  service.html  methode.html  prix.html  a-propos.html
+├── contact.html  mentions-legales.html  confidentialite.html  404.html
 ├── site.css   site.js
 ├── api/contact.js          ← la seule partie dynamique
 ├── assets/                 ← polices auto-hébergées, favicons, image de partage
@@ -45,10 +63,10 @@ node scripts/verifier-avant-mise-en-ligne.mjs   # 1 s, sans dépendance
 node scripts/verifier-navigateur.mjs            # ~3 min, Chromium réel
 ```
 
-Le second lance **328 contrôles** : 8 pages × 5 largeurs (console du
+Le second lance **372 contrôles** : 9 pages × 5 largeurs (console du
 navigateur, requêtes en échec, débordement horizontal, appels à des tiers),
 accessibilité (lien d'évitement, focus, contrastes calculés sur les couleurs
-réellement rendues), **la console de navigation** (chaque destination répond
+réellement rendues, y compris sur la page prix), **la console de navigation** (chaque destination répond
 seule par son URL, ouverture au clic et au clavier, Échap, retour du focus,
 reste de la page rendu inerte, défilement bloqué puis rendu, fonctionnement
 sans JavaScript jusqu'à la navigation effective, parallaxe absente sur écran
@@ -71,7 +89,7 @@ soit au dépôt : Lighthouse est appelé depuis une installation à part.
 
 ```sh
 npm i --no-save --prefix /tmp/lh lighthouse
-node scripts/mesurer-lighthouse.mjs     # 5 pages × mobile et ordinateur
+node scripts/mesurer-lighthouse.mjs     # 6 pages × mobile et ordinateur
 node scripts/mesurer-fluidite.mjs       # processeur bridé ×6
 ```
 
@@ -90,8 +108,8 @@ Derniers relevés — voir `docs/direction-v2.md` pour ce qu'ils veulent dire :
 
 | | Perf | A11y | Bonnes pratiques | SEO | TBT | CLS |
 | --- | --- | --- | --- | --- | --- | --- |
-| Mobile, 5 pages | 100 | 100 | 100 | 100 | 0 ms | 0 |
-| Ordinateur, 5 pages | 100 | 100 | 100 | 100 | 0 ms | 0 |
+| Mobile, 6 pages | 100 | 100 | 100 | 100 | 0 ms | 0 |
+| Ordinateur, 6 pages | 100 | 100 | 100 | 100 | 0 ms | 0 |
 
 ### Regénérer les images
 
@@ -304,7 +322,17 @@ pas de texte laissé en police) avant de remplacer le fichier.
   descendants `position: fixed` — le panneau de la console se retrouverait
   dimensionné sur les 64 px du bandeau au lieu de la fenêtre.
 - **Le rouge est réservé aux alertes** (`--alert`), jamais décoratif. Une seule
-  couleur d'accent : l'ambre.
+  couleur d'accent : l'ambre. Elle ne prend toute la place qu'à **un seul
+  endroit par page**, le bloc d'appel de fin (`.cta--ambre`) — c'est ce qui
+  fait qu'elle accentue encore quelque chose.
+- **Aucun bouton de paiement, nulle part**, page prix comprise. Le site
+  informe ; l'entrée en relation passe par « Demander un accès ». C'est une
+  décision produit, pas une étape qui manque.
+- **Ne jamais inventer une information légale.** SIRET, adresse, forme
+  juridique, garanties de transfert hors UE : si l'information n'est pas
+  disponible, elle reste marquée `à compléter` et le script de vérification
+  sort en code 2. Un gabarit visible en production est gênant ; une mention
+  légale fausse est un problème.
 - **Aucun script écrit dans les pages**, en dehors du JSON-LD. La CSP n'autorise
   que les fichiers du site plus les empreintes des blocs JSON-LD. Après toute
   modification d'un de ces blocs :

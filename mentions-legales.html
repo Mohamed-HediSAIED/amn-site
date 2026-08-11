@@ -21,7 +21,13 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/space-grotesk-400700-latin.woff2" crossorigin>
+<!-- Les DEUX polices sont préchargées. Essai fait dans l'autre sens
+     (Archivo seule, pour ne pas lui disputer la bande passante) : le
+     premier affichage est parti de 1 358 à 1 503 ms sur réseau bridé,
+     parce que les étiquettes mono sont dans le premier écran elles
+     aussi. Mesuré, pas supposé — voir scripts/mesurer-lighthouse.mjs. -->
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/archivo-latin.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/martian-mono-latin.woff2" crossorigin>
 <link rel="stylesheet" href="/assets/fonts.css">
 <link rel="stylesheet" href="/site.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"AMN DevSec","url":"https://amn-devsec.example/","logo":"https://amn-devsec.example/assets/icon-512.png","description":"Poste de travail et supervision de sécurité pour PME et indépendants.","areaServed":"FR","contactPoint":{"@type":"ContactPoint","contactType":"sales","url":"https://amn-devsec.example/contact","availableLanguage":["fr"]}}</script>
@@ -65,13 +71,18 @@
             <span class="plaque-nom">Comment ça se passe</span>
             <span class="plaque-txt">De votre message à votre premier jour de travail.</span>
           </a></li>
-          <li><a class="plaque notch" href="/a-propos">
+          <li><a class="plaque notch" href="/prix">
             <span class="plaque-n">04</span>
+            <span class="plaque-nom">Prix</span>
+            <span class="plaque-txt">Quatre forfaits, un chiffre net pour chacun.</span>
+          </a></li>
+          <li><a class="plaque notch" href="/a-propos">
+            <span class="plaque-n">05</span>
             <span class="plaque-nom">À propos</span>
             <span class="plaque-txt">Qui opère, avec quelles limites annoncées.</span>
           </a></li>
           <li><a class="plaque notch" href="/contact">
-            <span class="plaque-n">05</span>
+            <span class="plaque-n">06</span>
             <span class="plaque-nom">Demander un accès</span>
             <span class="plaque-txt">Quatre champs. Une réponse écrite sous 48 h ouvrées.</span>
           </a></li>
@@ -106,6 +117,7 @@
       <dt>TVA intracommunautaire</dt><dd><span class="todo">à compléter, ou « non applicable »</span></dd>
       <dt>Directeur de la publication</dt><dd><span class="todo">à compléter</span></dd>
       <dt>Contact</dt><dd><span class="todo">adresse email à compléter</span> — en attendant, le <a href="/contact">formulaire de demande d'accès</a> est le canal de contact du site.</dd>
+      <dt>Données personnelles</dt><dd>L'éditeur ci-dessus est le responsable du traitement au sens du RGPD. Les demandes d'accès, de rectification ou d'effacement se font à la même adresse&nbsp;; le détail est dans la <a href="/confidentialite">politique de confidentialité</a>.</dd>
     </dl>
 
     <h2>Hébergeur</h2>
@@ -117,7 +129,7 @@
 
     <h2>Propriété intellectuelle</h2>
     <div class="prose">
-      <p>Les textes, la charte graphique et le code de ce site sont la propriété de son éditeur, à l'exception des polices de caractères Space Grotesk et JetBrains Mono, distribuées sous licence SIL Open Font License 1.1 et hébergées directement sur ce site.</p>
+      <p>Les textes, la charte graphique et le code de ce site sont la propriété de son éditeur, à l'exception des polices de caractères Archivo (Omnibus-Type) et Martian Mono (Evil Martians), distribuées sous licence SIL Open Font License 1.1 et hébergées directement sur ce site.</p>
     </div>
 
     <h2>Signaler un problème de sécurité</h2>
@@ -143,6 +155,7 @@
           <li><a href="/">Accueil</a></li>
           <li><a href="/service">Ce qu'on fait</a></li>
           <li><a href="/methode">Comment ça se passe</a></li>
+          <li><a href="/prix">Prix</a></li>
           <li><a href="/a-propos">À propos</a></li>
           <li><a href="/contact">Demander un accès</a></li>
         </ul>

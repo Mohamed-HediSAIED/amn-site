@@ -21,7 +21,13 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/space-grotesk-400700-latin.woff2" crossorigin>
+<!-- Les DEUX polices sont préchargées. Essai fait dans l'autre sens
+     (Archivo seule, pour ne pas lui disputer la bande passante) : le
+     premier affichage est parti de 1 358 à 1 503 ms sur réseau bridé,
+     parce que les étiquettes mono sont dans le premier écran elles
+     aussi. Mesuré, pas supposé — voir scripts/mesurer-lighthouse.mjs. -->
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/archivo-latin.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/martian-mono-latin.woff2" crossorigin>
 <link rel="stylesheet" href="/assets/fonts.css">
 <link rel="stylesheet" href="/site.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"AMN DevSec","url":"https://amn-devsec.example/","logo":"https://amn-devsec.example/assets/icon-512.png","description":"Poste de travail et supervision de sécurité pour PME et indépendants.","areaServed":"FR","contactPoint":{"@type":"ContactPoint","contactType":"sales","url":"https://amn-devsec.example/contact","availableLanguage":["fr"]}}</script>
@@ -65,13 +71,18 @@
             <span class="plaque-nom">Comment ça se passe</span>
             <span class="plaque-txt">De votre message à votre premier jour de travail.</span>
           </a></li>
-          <li><a class="plaque notch" href="/a-propos">
+          <li><a class="plaque notch" href="/prix">
             <span class="plaque-n">04</span>
+            <span class="plaque-nom">Prix</span>
+            <span class="plaque-txt">Quatre forfaits, un chiffre net pour chacun.</span>
+          </a></li>
+          <li><a class="plaque notch" href="/a-propos">
+            <span class="plaque-n">05</span>
             <span class="plaque-nom">À propos</span>
             <span class="plaque-txt">Qui opère, avec quelles limites annoncées.</span>
           </a></li>
           <li><a class="plaque notch" href="/contact">
-            <span class="plaque-n">05</span>
+            <span class="plaque-n">06</span>
             <span class="plaque-nom">Demander un accès</span>
             <span class="plaque-txt">Quatre champs. Une réponse écrite sous 48 h ouvrées.</span>
           </a></li>
@@ -98,14 +109,15 @@
   </nav>
 
   <section class="wrap hero" id="debut">
-    <p class="mono">Supervision &amp; gestion d'activité — PME et indépendants</p>
+    <p class="mono">Pour les structures qui n'ont personne à la technique</p>
     <h1>Vous n'avez pas d'équipe technique. Vous en avez une <span class="mark">quand même</span>.</h1>
-    <p class="lead">AMN DevSec vous fournit un poste de travail unique pour piloter votre activité — agenda, clients, devis, factures — et supervise en continu ce qui tourne derrière. Vous travaillez, on regarde le reste.</p>
+    <p class="lead">Un seul endroit pour votre agenda, vos clients, vos devis, vos factures. Et derrière, quelqu'un qui surveille ce qui tourne. Vous, vous travaillez. Nous, on regarde le reste.</p>
+    <div class="trace trace--hero" aria-hidden="true"></div>
     <div class="btn-row">
       <a class="btn btn-primary" href="/contact">Demander un accès</a>
       <a class="btn btn-ghost" href="/methode">Comment ça se passe</a>
     </div>
-    <p class="mono-sm hero-note">Pas de paiement en ligne, pas d'ouverture automatique. Chaque demande est lue par quelqu'un avant qu'un accès existe.</p>
+    <p class="mono-sm hero-note">Il n'y a rien à payer ici. Vous écrivez, quelqu'un vous lit, on vous répond. Un accès ne s'ouvre jamais tout seul.</p>
 
     <div class="split notch">
       <div class="split-col">
@@ -125,7 +137,7 @@
           <span class="chip">Coffre-fort</span>
           <span class="chip">Paramètres</span>
         </div>
-        <p class="split-note">Sur l'ordinateur et sur le téléphone, avec les mêmes données. Rien à installer si vous ne voulez pas : l'espace s'ouvre dans le navigateur et s'ajoute à l'écran d'accueil.</p>
+        <p class="split-note">Ordinateur, téléphone, les mêmes données des deux côtés. Vous n'avez rien à installer : ça s'ouvre dans le navigateur, et ça s'ajoute à l'écran d'accueil comme une application.</p>
       </div>
       <div class="split-col">
         <div class="split-head">
@@ -138,7 +150,7 @@
           <li><b>Accès à votre espace</b>Chaque ouverture de votre espace par nous est enregistrée côté serveur.</li>
           <li><b>Anomalies</b>Ce qui sort de l'ordinaire remonte, et quelqu'un le lit.</li>
         </ul>
-        <p class="split-note">Le nom des outils qui produisent ces contrôles ne sort pas d'ici. C'est volontaire : ils restent opérés par nous, jamais revendus ni ouverts en accès direct.</p>
+        <p class="split-note">On ne dit pas avec quoi on fait tout ça. Ces outils-là restent chez nous, on ne les vend pas et on n'en ouvre pas l'accès. C'est un choix, pas un oubli.</p>
       </div>
     </div>
   </section>
@@ -146,20 +158,20 @@
   <section class="wrap section" id="offre">
     <div class="sec-head">
       <span class="mono"><b>01</b> — Ce qu'on fait</span>
-      <h2>Un outil de travail, et quelqu'un derrière</h2>
-      <p class="lead">La plupart des indépendants gèrent leur activité dans quatre endroits différents : l'agenda du téléphone, les clients dans un carnet, les devis dans un traitement de texte, les factures ailleurs. Et personne ne regarde la sécurité, parce qu'il n'y a personne dont c'est le métier.</p>
+      <h2>Le logiciel, c'est la moitié du travail</h2>
+      <p class="lead">L'agenda sur le téléphone. Les clients dans un carnet. Les devis dans un traitement de texte, les factures on ne sait plus trop où. Ça tient, jusqu'au jour où il faut retrouver quelque chose. Et la sécurité, pendant ce temps-là ? Personne. Pas par négligence : dans une structure de cette taille, ce poste n'existe pas.</p>
     </div>
 
     <div class="duo">
       <article class="card notch">
         <span class="mono">Le poste de travail</span>
-        <h3>Tout ce que vous faites tourner, au même endroit</h3>
-        <p>Vos rendez-vous, vos fiches clients, vos devis et vos factures, vos tâches, vos notes et vos fichiers. Un espace, un compte, synchronisé entre votre ordinateur et votre téléphone. Les factures sont numérotées en séquence et ne peuvent plus être modifiées une fois émises — comme la comptabilité l'exige.</p>
+        <h3>Tout au même endroit</h3>
+        <p>Rendez-vous, fiches clients, devis, factures, tâches, notes, fichiers. Un compte, un espace, la même chose sur l'ordinateur et sur le téléphone. Les factures se numérotent à la suite et se verrouillent dès qu'elles partent. C'est ce que la comptabilité demande, et c'est rarement fait correctement.</p>
       </article>
       <article class="card notch">
         <span class="mono">La supervision</span>
-        <h3>Ce qui tourne derrière, surveillé en continu</h3>
-        <p>Un outil livré puis oublié n'est pas un service. Votre espace reste supervisé par nous : disponibilité, certificats, accès, anomalies. Quand quelque chose sort de l'ordinaire, c'est nous qui le voyons en premier — et qui agissons, plutôt que de vous envoyer une alerte de plus à traiter.</p>
+        <h3>Et quelqu'un qui regarde</h3>
+        <p>Un outil qu'on vous livre puis qu'on oublie, ça s'appelle une vente. Le vôtre reste surveillé : disponibilité, certificats, accès, anomalies. Quand ça sonne, ça sonne chez nous. On traite, et ensuite on vous raconte. Dans cet ordre.</p>
       </article>
     </div>
 
@@ -176,29 +188,29 @@
       <li>
         <span class="n">01</span>
         <div>
-          <h3>Vous décrivez votre besoin</h3>
-          <p>Quatre champs, deux minutes. Votre nom, votre structure, votre email, et ce que vous cherchez à régler. Rien d'autre — ni carte bancaire, ni mot de passe.</p>
+          <h3>Vous écrivez</h3>
+          <p>Quatre champs, deux minutes. Qui vous êtes, ce que vous faites, ce qui coince. On ne vous demande ni carte bancaire ni mot de passe.</p>
         </div>
       </li>
       <li>
         <span class="n">02</span>
         <div>
           <h3>On lit, et on répond</h3>
-          <p>Sous 48 h ouvrées. Si ce que vous décrivez correspond à ce qu'on sait faire, on vous le dit directement. Sinon on vous le dit aussi, plutôt que de vous vendre quelque chose de mal adapté.</p>
+          <p>Sous 48 h ouvrées, par écrit. Si ça entre dans ce qu'on sait faire, on vous le dit. Si ça n'y entre pas, on vous le dit aussi. C'est moins agréable à écrire, mais ça vous évite six mois avec un outil qui ne va pas.</p>
         </div>
       </li>
       <li>
         <span class="n">03</span>
         <div>
           <h3>On prépare votre espace</h3>
-          <p>Votre organisation est créée à votre nom — celui qui apparaîtra sur vos devis et vos factures imprimés. Rien n'est ouvert avant qu'on sache à qui.</p>
+          <p>Créé à votre nom : celui qui sortira sur vos devis et vos factures. Tant qu'on ne sait pas exactement à qui on ouvre, on n'ouvre pas.</p>
         </div>
       </li>
       <li>
         <span class="n">04</span>
         <div>
           <h3>L'accès vous est remis</h3>
-          <p>Soit un lien d'activation à usage unique, valable sept jours, où vous choisissez vous-même votre mot de passe. Soit un mot de passe temporaire, qu'on vous dicte de vive voix. Jamais un mot de passe définitif envoyé par email.</p>
+          <p>Un lien d'activation valable sept jours, où vous choisissez votre mot de passe vous-même. Ou bien un mot de passe temporaire, dicté au téléphone. Jamais un mot de passe définitif par email : ça reste dans une boîte pour toujours.</p>
         </div>
       </li>
     </ol>
@@ -210,22 +222,22 @@
     <div class="sec-head">
       <span class="mono"><b>03</b> — À dire tout de suite</span>
       <h2>Ce qu'on ne fait pas</h2>
-      <p class="lead">Autant que vous le sachiez avant d'écrire, plutôt qu'après.</p>
+      <p class="lead">Autant le savoir maintenant.</p>
     </div>
 
     <ul class="nots">
-      <li><span><b>On ne vend pas d'accès en libre-service.</b> Pas de bouton « acheter », pas d'ouverture à trois heures du matin. Chaque accès est nominatif, remis à la main, et peut être suspendu.</span></li>
-      <li><span><b>On n'affiche pas de logos de clients qu'on n'a pas.</b> Ni d'avis qu'on n'a pas reçus. Le jour où il y en aura, ils seront signés.</span></li>
-      <li><span><b>On ne vend pas nos outils de supervision.</b> Ils restent chez nous. Ce que vous recevez, c'est le résultat et l'action qui suit, pas un tableau de bord de plus à surveiller.</span></li>
-      <li><span><b>On ne dit pas « 100&nbsp;% sécurisé ».</b> Personne ne peut le dire honnêtement. On dit ce qu'on surveille, à quelle fréquence, et ce qu'on fait quand ça sonne.</span></li>
+      <li><span><b>Aucun accès en libre-service.</b> Il n'y a pas de bouton « acheter ». Rien ne s'ouvre à trois heures du matin sans que quelqu'un ait lu la demande. Chaque accès est nominatif, remis à la main, et peut être coupé.</span></li>
+      <li><span><b>Pas de logos de clients qu'on n'a pas.</b> Pas d'avis inventés non plus. Le jour où il y en aura des vrais, ils seront signés d'un nom.</span></li>
+      <li><span><b>Nos outils de supervision ne sont pas à vendre.</b> Ils restent chez nous. Vous recevez le résultat, et ce qu'on a fait avec — pas un tableau de bord de plus à surveiller le soir.</span></li>
+      <li><span><b>Jamais « 100&nbsp;% sécurisé ».</b> Personne ne peut dire ça sérieusement. On préfère annoncer ce qu'on surveille, à quelle fréquence, et ce qui se passe quand ça sonne.</span></li>
     </ul>
   </section>
 
   <section class="wrap section" id="acces">
-    <div class="cta notch">
+    <div class="cta cta--ambre notch">
       <div>
-        <h2>Décrivez votre situation, on vous dit si c'est pour nous</h2>
-        <p>Quatre champs. Une réponse écrite par quelqu'un, sous 48 h ouvrées — y compris quand la réponse est non.</p>
+        <h2>Racontez-nous votre situation</h2>
+        <p>Quatre champs, deux minutes. Quelqu'un vous lit et vous répond par écrit sous 48 h ouvrées. Y compris quand c'est non.</p>
       </div>
       <p class="btn-row"><a class="btn btn-primary" href="/contact">Demander un accès</a></p>
     </div>
@@ -249,6 +261,7 @@
           <li><a href="/">Accueil</a></li>
           <li><a href="/service">Ce qu'on fait</a></li>
           <li><a href="/methode">Comment ça se passe</a></li>
+          <li><a href="/prix">Prix</a></li>
           <li><a href="/a-propos">À propos</a></li>
           <li><a href="/contact">Demander un accès</a></li>
         </ul>

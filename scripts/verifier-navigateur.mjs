@@ -3,7 +3,7 @@
    Vérification dans un vrai navigateur (Chromium via Playwright).
 
    Ce que ça contrôle réellement, pas « en principe » :
-     1. les 8 pages à 5 largeurs — aucune erreur de console, aucune
+     1. les 9 pages à 5 largeurs — aucune erreur de console, aucune
         requête en échec, aucun débordement horizontal, polices chargées,
         et AUCUN appel sortant vers un domaine tiers ;
      2. l'accessibilité de base — lien d'évitement, focus visible,
@@ -124,11 +124,15 @@ for (const largeur of LARGEURS) {
 
     if (largeur === 1440) {
       const polices = await page.evaluate(() => ({
-        sg: document.fonts.check('500 16px "Space Grotesk"'),
-        jb: document.fonts.check('400 12px "JetBrains Mono"')
+        ar: document.fonts.check('500 16px "Archivo"'),
+        mm: document.fonts.check('400 12px "Martian Mono"'),
+        /* L'axe de largeur doit être réellement disponible : sans lui,
+           les titres retombent en largeur normale sans rien signaler. */
+        large: getComputedStyle(document.querySelector('h1')).fontStretch
       }));
-      t(`${chemin} — Space Grotesk chargée`, polices.sg);
-      t(`${chemin} — JetBrains Mono chargée`, polices.jb);
+      t(`${chemin} — Archivo chargée`, polices.ar);
+      t(`${chemin} — Martian Mono chargée`, polices.mm);
+      t(`${chemin} — les titres sont tirés en élargi`, polices.large === '118%', polices.large);
 
       const h1 = await page.locator('h1').count();
       t(`${chemin} — exactement un h1`, h1 === 1, `trouvé ${h1}`);
@@ -215,6 +219,17 @@ const CIBLES_CONTRASTE = {
     ['numéro d\'étape', '.steps .n'],
     ['encadré d\'étape', '.steps .aside']
   ],
+  '/prix': [
+    ['libellé de forfait', '.tarif > .mono'],
+    ['pour qui', '.tarif-qui'],
+    ['prix', '.tarif-prix b'],
+    ['unité du prix', '.tarif-prix span'],
+    ['ligne de forfait', '.tarif li'],
+    ['prix mis en avant', '.tarif--phare .tarif-prix b'],
+    ['texte de l\'option', '.option p'],
+    ['pied de tableau', '.tarifs-pied p'],
+    ['note en marge', '.note-marge']
+  ],
   '/page-inexistante': [['grand code 404', '.four04 .code']]
 };
 
@@ -262,7 +277,7 @@ for (const [chemin, cibles] of Object.entries(CIBLES_CONTRASTE)) {
 
 console.log('2 bis. La console (navigation v2)');
 
-const DESTINATIONS = ['/', '/service', '/methode', '/a-propos', '/contact'];
+const DESTINATIONS = ['/', '/service', '/methode', '/prix', '/a-propos', '/contact'];
 
 /* Les plaques arrivent en décalé sur ~350 ms. Interroger leur position
    pendant ce temps donne des résultats faux (l'élément est encore en
@@ -309,8 +324,8 @@ for (const largeur of [390, 1440]) {
   await page.locator('.console > summary').click();
   await attendreArrivee(page);
   t(`${et} — ouverte au clic`, await page.locator('.console').evaluate((d) => d.open));
-  t(`${et} — les cinq destinations sont visibles`,
-    (await page.locator('.console-panel a[href]:visible').count()) === 5);
+  t(`${et} — les six destinations sont visibles`,
+    (await page.locator('.console-panel a[href]:visible').count()) === DESTINATIONS.length);
   t(`${et} — la page courante est marquée`,
     (await page.locator('.plaque[aria-current="page"]').count()) === 1);
   t(`${et} — le focus entre dans le panneau`,
@@ -446,7 +461,7 @@ for (const largeur of [390, 1440]) {
   await page.locator('.console > summary').click();
   await page.waitForTimeout(120);
   t('Mouvement réduit : la console reste utilisable',
-    (await page.locator('.console-panel a[href]:visible').count()) === 5);
+    (await page.locator('.console-panel a[href]:visible').count()) === 6);
   t('Mouvement réduit : la scène n\'est pas inclinée',
     (await page.evaluate(() => getComputedStyle(document.querySelector('.console-scene')).transform)) === 'none');
   t('Mouvement réduit : l\'arrivée des plaques est neutralisée',
