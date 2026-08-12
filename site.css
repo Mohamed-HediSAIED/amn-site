@@ -5,20 +5,31 @@
    gris neutres sans dominante bleue, surfaces plates, arêtes dures,
    « lift » minimal au survol, aucune lueur.
 
-   v3 — la typographie. Archivo (variable, axe de LARGEUR) et Martian
-   Mono remplacent Space Grotesk + JetBrains Mono. Space Grotesk était
-   correct et JetBrains Mono est LA police par défaut du développeur :
-   ensemble, elles ne disaient rien de particulier. Archivo tiré en
-   élargi donne aux titres une présence dense et industrielle ; Martian
-   Mono, dessiné large pour être lu sur un écran technique, porte
-   l'identité partout où le site compte, étiquette et numérote.
-   Martian avance ~17 % plus large que JetBrains : toutes les tailles et
-   tous les interlettrages mono ont été redescendus en conséquence.
-   Voir docs/direction-v3.md.
+   v6 — FIDÉLITÉ AU PRODUIT. Cinq chantiers ont inventé cinq directions
+   et aucune ne ressemblait à l'application. Celui-ci n'invente plus :
+   toute valeur vient de docs/design-tokens.md, donc de
+   amn-desktop/src/index.css. Trois renversements par rapport à la v3 :
 
-   UNE SEULE couleur : l'ambre. C'est la couleur de marque du site.
-   Côté produit l'accent devient configurable par organisation cliente,
-   raison de plus pour que la marque, elle, ne bouge pas.
+     · L'AMBRE DISPARAÎT. Le produit est monochrome — son propre code
+       le dit : « Accent is now a near-white highlight — monochrome, not
+       a colour ». L'accent est #ededed. `grep -ri "ffb224|amber|orange"
+       amn-desktop/src/` ne renvoie rien : l'ambre n'a jamais existé
+       côté produit, elle a été introduite ici puis justifiée après coup.
+
+     · SPACE GROTESK + JETBRAINS MONO REVIENNENT. La v3 les avait
+       remplacées par Archivo + Martian Mono « pour plus de caractère ».
+       Le site n'a pas à chercher son caractère : il porte celui du
+       produit. L'axe de LARGEUR disparaît avec Archivo — la hiérarchie
+       tient désormais sur la graisse et la taille seules.
+
+     · LE COIN COUPÉ DEVIENT UN ARRONDI. Le produit définit bien un
+       `.corner-cut`, mais ne l'emploie NULLE PART (0 occurrence dans
+       src/**.tsx) : c'est du code mort. Ce qu'on voit réellement, ce
+       sont des conteneurs arrondis — 16 px sur les cartes, 12 px sur
+       les boîtes d'icône, pilules — et des boutons/champs carrés.
+
+   Le ROUGE (--alert) reste réservé aux alertes, comme le `danger` du
+   produit. C'est la seule couleur de tout le système.
 
    Le ROUGE (--alert) est réservé aux alertes. Il n'apparaît nulle part
    en décoration — même valeur que le `danger` du produit.
@@ -46,7 +57,7 @@
   /* Surfaces — noir et gris neutres, aucune dominante bleue */
   --bg:          #0a0a0a;
   --surface:     #131313;
-  --surface-hi:  #1a1a1a;
+  --surface-hi:  #1c1c1c;   /* valeur du produit ; la v5 avait #1a1a1a */
   --line:        #262626;
   --line-strong: #3a3a3a;
 
@@ -59,29 +70,43 @@
   --text-3: #858583;
   --text-4: #616160;  /* décoratif uniquement, ne doit jamais porter de sens */
 
-  /* Accent unique */
-  --accent:      #ffb224;      /* ambre — 10,7:1 sur le fond */
-  --accent-ink:  #0a0a0a;      /* texte posé SUR l'ambre */
-  --accent-soft: rgba(255, 178, 36, .10);
-  --accent-line: rgba(255, 178, 36, .32);
+  /* Accent — un BLANC CASSÉ, pas une couleur. Valeur du produit. */
+  --accent:      #ededed;      /* 17,4:1 sur le fond */
+  --accent-hi:   #ffffff;      /* survol, comme --color-accent-hover */
+  --accent-ink:  #0a0a0a;      /* texte posé SUR l'accent */
+  --accent-soft: rgba(255, 255, 255, .08);   /* = --color-accent-muted */
+  --accent-line: rgba(255, 255, 255, .30);
 
-  /* Réservé aux alertes. Ne pas utiliser en décoration. */
+  /* Réservé aux alertes. Ne pas utiliser en décoration.
+     C'est la SEULE couleur du système, produit compris. */
   --alert: #ff4230;
 
-  --f-sans: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --f-mono: 'Martian Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Les deux polices du produit (amn-desktop/src/index.css). */
+  --f-sans: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --f-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* Archivo est variable en LARGEUR. Les titres sont tirés en élargi,
-     le texte courant reste normal : une seule police, deux présences.
-     C'est cet écart qui fait la voix typographique du site. */
-  --large: 118%;
+  /* Rayons — échelle Tailwind v4, celle qu'emploie le produit. Les
+     CONTENEURS sont arrondis, les BOUTONS et les CHAMPS restent carrés
+     (41 boutons sur 55 et 88 champs sur 102 n'ont aucune classe de
+     rayon dans src/). */
+  --r-md:  6px;
+  --r-lg:  8px;
+  --r-xl:  12px;
+  --r-2xl: 16px;
 
-  --max: 1120px;
+  /* Géométrie du produit. La coquille est `max-w-6xl px-8` et l'écran
+     d'accueil centre dedans une colonne `max-w-3xl`. C'est cette
+     colonne qui donne aux cartes leur 248 px — et donc à leur rayon de
+     16 px la présence qu'il a dans l'application. Une carte de 348 px
+     porte le même rayon et se lit carrée : c'est l'écart que la
+     première maquette avait laissé passer. */
+  --max: 1152px;
+  --colonne: 768px;
   --gutter: 20px;
-  --notch: 14px;   /* profondeur du coin coupé, comme .corner-cut du produit */
 }
 
-@media (min-width: 720px) { :root { --gutter: 32px; } }
+@media (min-width: 720px) { :root { --gutter: 32px; } }   /* = sm:px-8 */
+
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -111,6 +136,34 @@ body {
 
 img, svg { max-width: 100%; display: block; }
 
+/* ---------- Le grain ----------
+   amn-desktop/src/components/GrainOverlay.tsx, recopié :
+
+     « Voile de grain argentique plein cadre. Volontairement franc
+       (~9 %) pour donner au noir une vraie matière — une texture de
+       pellicule développée plutôt qu'un saupoudrage symbolique. »
+
+   C'est un élément d'identité du produit que le site n'avait PAS DU
+   TOUT, et c'est ce qui fait le plus pour la parenté : sans lui, un
+   noir plat sur un écran de portable ressemble à n'importe quel fond
+   sombre. Posé en `::after` du body plutôt qu'en balise, pour ne pas
+   avoir à modifier neuf pages — et le motif est une donnée en ligne,
+   donc aucune requête réseau de plus. `pointer-events: none` : rien de
+   ce qui est dessous ne devient inaccessible. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  opacity: .09;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+/* À l'impression le grain n'a aucun sens et coûte de l'encre. */
+@media print { body::after { display: none; } }
+
 /* Un lien non stylé retombe sur le bleu par défaut du navigateur — la
    seule autre couleur du site, et celle qu'on n'a pas choisie. */
 a {
@@ -137,6 +190,12 @@ a:hover { text-decoration-color: var(--accent); }
   margin-inline: auto;
   padding-inline: var(--gutter);
 }
+
+/* La colonne étroite du produit — `max-w-3xl` centrée dans la coquille.
+   DÉCLARÉE APRÈS `.wrap` À DESSEIN : un élément qui porte les deux
+   classes doit retenir 768 px, et à spécificité égale c'est l'ordre du
+   fichier qui tranche. */
+.colonne { max-width: var(--colonne); margin-inline: auto; }
 
 main { flex: 1 0 auto; }
 
@@ -180,9 +239,13 @@ h1, h2, h3, h4 {
   text-wrap: balance;
 }
 
+/* Space Grotesk n'a PAS d'axe de largeur : les trois `font-stretch` de
+   la v3 ne faisaient plus rien. La hiérarchie repose donc sur la
+   graisse et la taille — c'est déjà comme ça que le produit s'y prend
+   (« Bonsoir, Aaron. » est `text-4xl font-semibold sm:text-5xl`, et
+   rien d'autre ne monte aussi haut). */
 h1 {
-  font-weight: 600;
-  font-stretch: var(--large);
+  font-weight: 700;
   font-size: clamp(2.05rem, 1.15rem + 3.9vw, 3.9rem);
   letter-spacing: -.045em;
   line-height: 1.01;
@@ -190,14 +253,12 @@ h1 {
 
 h2 {
   font-weight: 600;
-  font-stretch: 112%;
   font-size: clamp(1.5rem, 1.1rem + 1.8vw, 2.3rem);
   letter-spacing: -.032em;
 }
 
 h3 {
-  font-weight: 500;
-  font-stretch: 100%;
+  font-weight: 600;
   font-size: 1.1rem;
   letter-spacing: -.015em;
   line-height: 1.3;
@@ -230,7 +291,7 @@ p + p { margin-top: 1em; }
 
 .mono-sm { font-family: var(--f-mono); font-size: .68rem; letter-spacing: .01em; color: var(--text-3); line-height: 1.65; }
 
-/* Le seul emploi « inline » de l'ambre : souligner UN mot. */
+/* Le seul emploi « inline » de l'accent : souligner UN mot. */
 .mark {
   color: var(--accent);
   box-shadow: inset 0 -2px 0 var(--accent-line);
@@ -346,7 +407,7 @@ p + p { margin-top: 1em; }
 .console > summary:hover { background: var(--surface-hi); border-color: var(--text-4); }
 .console[open] > summary { background: var(--surface-hi); border-color: var(--accent-line); }
 
-/* Le glyphe : la table vue de biais — un trapèze — et le repère ambre
+/* Le glyphe : la table vue de biais — un trapèze — et le repère clair
    de la position courante posé dessus. Surtout PAS trois barres
    horizontales : c'est le pictogramme du menu classique, exactement ce
    dont on cherche à sortir. */
@@ -642,23 +703,32 @@ html:has(.console[open]) { overflow: hidden; }
 
 /* ---------- Boutons ---------- */
 
+/* Le bouton du produit, recopié :
+     bg-accent px-4 py-2 text-sm font-semibold text-bg
+   → sans-serif, 14 px, graisse 600, CARRÉ, et pas de capitales. La v3
+   en avait fait une étiquette mono en capitales de 11,5 px : c'est le
+   plus gros écart de forme qui restait avec l'application. Les marges
+   intérieures sont plus généreuses que les `px-4 py-2` du produit
+   (44 px de haut, la même hauteur mini que ses champs) — sur un site
+   on clique aussi au doigt. */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 13px 22px;
-  font-family: var(--f-mono);
-  font-size: .72rem;
-  font-weight: 500;
-  letter-spacing: .035em;
-  text-transform: uppercase;
+  min-height: 44px;
+  padding: 10px 18px;
+  font-family: var(--f-sans);
+  font-size: .875rem;
+  font-weight: 600;
+  letter-spacing: -.005em;
   text-decoration: none;
   border: 1px solid transparent;
   cursor: pointer;
   transition: background-color .16s ease, border-color .16s ease, transform .16s ease, color .16s ease;
 }
-.btn:active { transform: translateY(1px); transition-duration: .08s; }
+/* Appui : la valeur du produit, pas un déplacement vertical. */
+.btn:active { transform: scale(.985); transition-duration: .08s; }
 
 /* Tout ce qui est actionnable accuse réception de l'appui. Repris du
    produit, y compris le dosage : 1,5 % d'échelle, assez pour se sentir,
@@ -679,12 +749,12 @@ html:has(.console[open]) { overflow: hidden; }
 }
 
 .btn-primary { background: var(--accent); color: var(--accent-ink); }
-.btn-primary:hover { background: #ffc04a; }
+.btn-primary:hover { background: var(--accent-hi); }   /* #ffffff, comme le produit */
 
 .btn-ghost { border-color: var(--line-strong); color: var(--text); background: transparent; }
 .btn-ghost:hover { background: var(--surface-hi); border-color: var(--text-4); }
 
-.btn-sm { padding: 9px 14px; font-size: .66rem; }
+.btn-sm { min-height: 36px; padding: 7px 14px; font-size: .82rem; }
 
 .btn-row { display: flex; flex-wrap: wrap; gap: 12px; }
 
@@ -708,7 +778,21 @@ html:has(.console[open]) { overflow: hidden; }
    au moment où on essaie de faire plus sérieux. Les ombres portées
    sont réservées à ce qui flotte réellement au-dessus de la page. */
 
-.elev-1 { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .045); }
+/* Le produit associe à CHAQUE niveau une ombre portée en plus du filet
+   clair. La v5 n'avait gardé que le filet, parce que le coin coupé
+   (`clip-path`) découpait les ombres. Le coin coupé est parti : les
+   trois niveaux sont donc enfin ceux du produit, à l'identique. */
+.elev-1 {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .04),
+    0 1px 2px rgba(0, 0, 0, .4);
+}
+.elev-hover:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .06),
+    0 12px 28px -10px rgba(0, 0, 0, .75),
+    0 3px 8px rgba(0, 0, 0, .45);
+}
 .elev-2 {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, .05),
@@ -722,18 +806,49 @@ html:has(.console[open]) { overflow: hidden; }
     0 8px 20px rgba(0, 0, 0, .5);
 }
 
-/* Les surfaces au repos. `clip-path` (le coin coupé) découpe aussi les
-   ombres : sur ces blocs-là seul le filet intérieur survit — et il se
-   coupe net à l'angle, ce qui donne exactement le biseau attendu. */
+/* Les surfaces au repos portent le niveau 1 complet. */
 .panel, .card, .mod, .tarif, .cta, .split, .aside-panel, .steps .aside, .option {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .045);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .04),
+    0 1px 2px rgba(0, 0, 0, .4);
 }
 
 /* ---------- Blocs ---------- */
 
-/* Coin coupé — signature directe du produit (.corner-cut) */
-.notch {
-  clip-path: polygon(0 0, calc(100% - var(--notch)) 0, 100% var(--notch), 100% 100%, 0 100%);
+/* L'ARRONDI DES CONTENEURS — remplace le coin coupé de la v2.
+   La classe s'appelait `.notch` dans les neuf pages ; elle a été
+   renommée `.arrondi` plutôt que redéfinie en douce, pour qu'un nom ne
+   décrive pas le contraire de ce qu'il fait. */
+.arrondi { border-radius: var(--r-2xl); }
+
+/* Les autres rayons du produit, appliqués là où ils vont :
+   12 px sur les boîtes d'icône, pilule sur les puces, 6 px sur les
+   petites étiquettes mono. Les boutons et les champs restent CARRÉS. */
+.mod-n, .seq-logo, .ico { border-radius: var(--r-xl); }
+.pastille, .puce, .rail a, .led { border-radius: 9999px; }
+.etq, .badge { border-radius: var(--r-md); }
+
+/* Survol de carte — la valeur exacte du produit : `whileHover={{ y: -3 }}`
+   côté grille de modules, `translateY(-1px)` + filet clair + fond #171717
+   côté `.card-interactive`. Le site n'avait AUCUN relevé au survol. */
+.card, .mod, .tarif, .option {
+  transition:
+    border-color .16s ease,
+    background-color .16s ease,
+    transform .16s ease,
+    box-shadow .25s cubic-bezier(.16, 1, .3, 1);
+}
+.card:hover, .mod:hover, .tarif:hover, .option:hover {
+  border-color: var(--line-strong);
+  background: #171717;
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .06),
+    0 12px 28px -10px rgba(0, 0, 0, .75),
+    0 3px 8px rgba(0, 0, 0, .45);
+}
+@media (prefers-reduced-motion: reduce) {
+  .card:hover, .mod:hover, .tarif:hover, .option:hover { transform: none; }
 }
 
 .panel {
@@ -760,11 +875,91 @@ html:has(.console[open]) { overflow: hidden; }
 
 /* ---------- Accueil : le bandeau ---------- */
 
-.hero { padding-top: clamp(48px, 8vw, 92px); padding-bottom: clamp(28px, 3.5vw, 44px); }
-.hero h1 { margin-top: 18px; max-width: 17ch; }
-.hero .lead { margin-top: 22px; }
-.hero .btn-row { margin-top: 32px; }
-.hero-note { margin-top: 18px; max-width: 64ch; }
+/* L'écran d'accueil du produit est CENTRÉ : la date, « Bonsoir, Aaron. »,
+   le bandeau de chiffres, la grille de modules — tout est sur l'axe,
+   dans une colonne de 768 px. Le bandeau du site l'était à gauche,
+   héritage de la v2. */
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding-top: clamp(48px, 8vw, 92px);
+  padding-bottom: clamp(28px, 3.5vw, 44px);
+}
+.hero-in { position: relative; z-index: 1; text-align: center; }
+.hero h1 { margin-top: 18px; max-width: 17ch; margin-inline: auto; }
+.hero .lead { margin-top: 22px; margin-inline: auto; max-width: 58ch; }
+.hero .btn-row { margin-top: 32px; justify-content: center; }
+.hero-note { margin-top: 18px; max-width: 64ch; margin-inline: auto; }
+.hero .mono { display: block; }
+
+/* ---------- Les nappes de télémétrie ----------
+   Six plans qui défilent en continu derrière le titre. C'est ce
+   qu'affiche un mur de supervision, et c'est du `transform` pur.
+
+   MESURÉ — le premier montage estompait les bords avec `mask-image` sur
+   le conteneur. Ça sortait les nappes du chemin composé : 30,3 %
+   d'images sautées sur ordinateur, processeur bridé ×6. Deux voiles en
+   dégradé de la couleur du fond donnent le même effet pour 1,14 %.
+   C'est ce qui paie six nappes au lieu de quatre. */
+.nappes { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.voile { position: absolute; top: 0; bottom: 0; width: 13%; z-index: 1; pointer-events: none; }
+.voile-g { left: 0;  background: linear-gradient(90deg,  var(--bg) 12%, transparent); }
+.voile-d { right: 0; background: linear-gradient(270deg, var(--bg) 12%, transparent); }
+
+.nappe { position: absolute; left: 0; width: 200%; display: flex; will-change: transform; }
+.nappe svg { width: 50%; height: 100%; flex: none; }
+
+/* Trois plans de profondeur : le plan avant est plus grand, plus opaque
+   et plus rapide ; le lointain plus fin, plus pâle et plus lent. */
+.nappe-1 { top:  1%; height:  96px; opacity: .26; animation: defile 71s linear infinite; }
+.nappe-2 { top: 17%; height: 104px; opacity: .20; animation: defile 58s linear infinite; }
+.nappe-3 { top: 31%; height: 150px; opacity: .38; animation: defile 23s linear infinite; }
+.nappe-4 { top: 55%; height: 100px; opacity: .30; animation: defile 41s linear infinite; }
+.nappe-5 { top: 67%; height: 140px; opacity: .34; animation: defile 31s linear infinite; }
+.nappe-6 { top: 86%; height: 100px; opacity: .16; animation: defile 67s linear infinite; }
+@keyframes defile { to { transform: translate3d(-50%, 0, 0); } }
+
+@media (prefers-reduced-motion: reduce) { .nappe { animation: none; } }
+
+/* ---------- Le bandeau de chiffres ----------
+   Le procédé exact du produit : `gap-px` sur un fond couleur filet. Les
+   cellules sont en surface, l'écart d'un pixel laisse voir le fond — les
+   séparateurs SONT l'arrière-plan, jamais des bordures. */
+.stats {
+  margin: 44px auto 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--line);
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface);
+  padding: 16px 12px;
+}
+.stat b {
+  font-family: var(--f-mono);
+  font-size: 1.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.01em;
+  line-height: 1.1;
+}
+.stat span {
+  font-family: var(--f-mono);
+  font-size: .62rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  text-align: center;
+  line-height: 1.35;
+}
+@media (max-width: 560px) { .stats { grid-template-columns: 1fr; } }
 
 /* Le bloc « deux côtés » — c'est le positionnement, rendu en mise en page. */
 .split {
@@ -1307,7 +1502,7 @@ section[id] { scroll-margin-top: 84px; }
 
 /* ---- La trace : le motif signature ----
    Un relevé de supervision. Servie en MASQUE et non en image : la
-   couleur vient d'ici, donc elle suit l'ambre de la marque sans qu'il
+   couleur vient d'ici, donc elle suit l'accent du produit sans qu'il
    faille rééditer le fichier. */
 .trace {
   height: 26px;
@@ -1395,22 +1590,24 @@ section[id] { scroll-margin-top: 84px; }
   border-bottom: 1px solid var(--line-strong);
 }
 
-/* ---- Un moment d'ambre franc ----
-   Tout le site est noir. Il lui faut UN endroit où la couleur prend
-   toute la place, sinon l'accent n'accentue rien. C'est le bloc
-   d'appel de fin de page. */
-.cta--ambre {
+/* ---- Le seul bloc inversé ----
+   Tout le site est noir. Il lui faut UN endroit où l'accent prend toute
+   la place, sinon il n'accentue rien. C'est le bloc d'appel de fin de
+   page — et depuis la v6 c'est un aplat BLANC CASSÉ, pas ambre.
+   La classe s'appelait `.cta--plein` : renommée, parce que plus rien
+   d'ambre ne subsiste nulle part sur le site. */
+.cta--plein {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--accent-ink);
 }
-.cta--ambre h2 { color: var(--accent-ink); }
-.cta--ambre p { color: rgba(10, 10, 10, .82); }
-.cta--ambre .btn-primary {
+.cta--plein h2 { color: var(--accent-ink); }
+.cta--plein p { color: rgba(10, 10, 10, .82); }
+.cta--plein .btn-primary {
   background: var(--accent-ink);
   color: var(--accent);
 }
-.cta--ambre .btn-primary:hover { background: #1c1c1c; }
+.cta--plein .btn-primary:hover { background: #1c1c1c; }
 
 /* ---------- Page prix ----------
    Un tableau comptable froid, c'est exactement ce qu'on ne veut pas.
@@ -1834,7 +2031,7 @@ section[id] { scroll-margin-top: 84px; }
 .ajm > summary:active { transform: scale(.985); }
 .ajm[open] > summary { color: var(--text); background: var(--surface-hi); }
 
-/* Le point ambre : le témoin d'un appareil sous tension. Fixe — rien
+/* Le point clair : le témoin d'un appareil sous tension. Fixe — rien
    ne clignote sur ce site. */
 .ajm-led { width: 6px; height: 6px; background: var(--accent); flex: none; }
 
@@ -2164,8 +2361,8 @@ section[id] { scroll-margin-top: 84px; }
     border-color: #bbb !important; background: #fff !important; box-shadow: none !important;
     page-break-inside: avoid;
   }
-  .cta--ambre { background: #fff !important; border: 1px solid #111 !important; }
-  .cta--ambre h2, .cta--ambre p { color: #111 !important; }
+  .cta--plein { background: #fff !important; border: 1px solid #111 !important; }
+  .cta--plein h2, .cta--plein p { color: #111 !important; }
   .btn { border: 1px solid #111 !important; background: #fff !important; color: #111 !important; }
   .plus[open] .plus-corps, .plus-corps { display: block !important; }
   .plus > summary { display: none !important; }

@@ -133,16 +133,18 @@ for (const largeur of LARGEURS) {
     t(`${etiquette} — pas de débordement horizontal`, debordement === null, debordement || '');
 
     if (largeur === 1440) {
+      /* Les DEUX polices du PRODUIT. Si l'une retombe sur une police
+         système, la parenté avec l'application disparaît sans qu'aucun
+         autre contrôle ne s'en aperçoive. */
       const polices = await page.evaluate(() => ({
-        ar: document.fonts.check('500 16px "Archivo"'),
-        mm: document.fonts.check('400 12px "Martian Mono"'),
-        /* L'axe de largeur doit être réellement disponible : sans lui,
-           les titres retombent en largeur normale sans rien signaler. */
-        large: getComputedStyle(document.querySelector('h1')).fontStretch
+        sg: document.fonts.check('600 16px "Space Grotesk"'),
+        jb: document.fonts.check('400 12px "JetBrains Mono"'),
+        h1: getComputedStyle(document.querySelector('h1')).fontFamily
       }));
-      t(`${chemin} — Archivo chargée`, polices.ar);
-      t(`${chemin} — Martian Mono chargée`, polices.mm);
-      t(`${chemin} — les titres sont tirés en élargi`, polices.large === '118%', polices.large);
+      t(`${chemin} — Space Grotesk chargée`, polices.sg);
+      t(`${chemin} — JetBrains Mono chargée`, polices.jb);
+      t(`${chemin} — le titre emploie bien Space Grotesk`,
+        /Space Grotesk/.test(polices.h1), polices.h1);
 
       const h1 = await page.locator('h1').count();
       t(`${chemin} — exactement un h1`, h1 === 1, `trouvé ${h1}`);
@@ -210,12 +212,11 @@ const CIBLES_CONTRASTE = {
     ['mention du bas', '.ftr-bottom p'],
     ['intitulé de suivi', '.watch li b'],
     ['texte de suivi', '.watch li'],
-    ['numéro d\'article', '.art-n'],
-    ['numéro d\'article, chiffre', '.art-n b'],
-    ['intitulé du cartouche', '.cartouche dt'],
-    ['valeur du cartouche', '.cartouche dd'],
-    ['en-tête du cartouche', '.cartouche .cart-tete'],
-    ['référence du cartouche', '.cartouche .cart-ref dd']
+    /* v6 — les nouveaux éléments entrent dans la boucle EN MÊME TEMPS
+       qu'ils entrent dans la page. La v5 avait appris ça à ses dépens :
+       la suite passait à 424 pendant que Lighthouse tombait à 96. */
+    ['chiffre du bandeau', '.stat b'],
+    ['libellé du bandeau', '.stat span']
   ],
   '/contact': [
     ['libellé de champ', '.field .lbl'],

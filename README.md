@@ -40,17 +40,24 @@ temps à dire qu'il n'est pas fabriqué par une machine.
 
 ### Les polices
 
-Archivo et Martian Mono, auto-hébergées, régénérables :
+**Space Grotesk et JetBrains Mono** — celles du produit — auto-hébergées,
+régénérables :
 
 ```sh
 pip install fonttools brotli      # une fois
 node scripts/polices.mjs          # télécharge, découpe, réécrit assets/fonts.css
 ```
 
-Archivo est **variable en largeur** : les titres sont tirés à 118 %
-(`--large`), le texte courant reste à 100 %. Martian Mono avance ~17 % plus
-large que l'ancienne JetBrains Mono — **si un interlettrage mono remonte un
-jour, vérifier à 320 px**, c'est là que ça déborde en premier.
+Les deux sont **variables en graisse**, et un seul fichier par plage Unicode
+couvre donc toutes les graisses employées (400/500/600/700 pour la sans,
+400/500/700 pour la mono).
+
+La v3 les avait remplacées par Archivo + Martian Mono « pour plus de
+caractère » ; la v6 est revenue en arrière. Le site ne cherche pas son
+caractère, il porte celui du produit — et Space Grotesk n'ayant pas d'axe de
+largeur, la hiérarchie tient sur la graisse et la taille seules. **Si un
+interlettrage mono remonte un jour, vérifier à 320 px**, c'est là que ça
+déborde en premier.
 
 ```
 amn-site/

@@ -21,13 +21,14 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-<!-- Les DEUX polices sont préchargées. Essai fait dans l'autre sens
-     (Archivo seule, pour ne pas lui disputer la bande passante) : le
-     premier affichage est parti de 1 358 à 1 503 ms sur réseau bridé,
-     parce que les étiquettes mono sont dans le premier écran elles
-     aussi. Mesuré, pas supposé — voir scripts/mesurer-lighthouse.mjs. -->
-<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/archivo-latin.woff2" crossorigin>
-<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/martian-mono-latin.woff2" crossorigin>
+<!-- Les DEUX polices du produit sont préchargées : Space Grotesk et
+     JetBrains Mono. Essai fait dans l'autre sens (la sans seule, pour
+     ne pas lui disputer la bande passante) : le premier affichage est
+     parti de 1 358 à 1 503 ms sur réseau bridé, parce que les
+     étiquettes mono sont dans le premier écran elles aussi. Mesuré,
+     pas supposé — voir scripts/mesurer-lighthouse.mjs. -->
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/space-grotesk-400700-latin.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/jetbrains-mono-400-latin.woff2" crossorigin>
 <link rel="stylesheet" href="/assets/fonts.css">
 <link rel="stylesheet" href="/site.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"AMN DevSec","url":"https://amn-devsec.example/","logo":"https://amn-devsec.example/assets/icon-512.png","description":"Poste de travail et supervision de sécurité pour PME et indépendants.","areaServed":"FR","contactPoint":{"@type":"ContactPoint","contactType":"sales","url":"https://amn-devsec.example/contact","availableLanguage":["fr"]}}</script>
@@ -57,32 +58,32 @@
           <p class="console-tag mono">Sommaire du dossier</p>
           <p class="sommaire-tete">six feuillets — partie A remplie par AMN</p>
           <ul class="plaques">
-          <li><a class="plaque notch" href="/">
+          <li><a class="plaque arrondi" href="/">
             <span class="plaque-n">01</span>
             <span class="plaque-nom">Accueil</span>
             <span class="plaque-txt">Le poste de travail et la supervision, en une page.</span>
           </a></li>
-          <li><a class="plaque notch" href="/service">
+          <li><a class="plaque arrondi" href="/service">
             <span class="plaque-n">02</span>
             <span class="plaque-nom">Ce qu'on fait</span>
             <span class="plaque-txt">Les dix modules livrés, et ce qu’on surveille derrière.</span>
           </a></li>
-          <li><a class="plaque notch" href="/methode">
+          <li><a class="plaque arrondi" href="/methode">
             <span class="plaque-n">03</span>
             <span class="plaque-nom">Comment ça se passe</span>
             <span class="plaque-txt">De votre message à votre premier jour de travail.</span>
           </a></li>
-          <li><a class="plaque notch" href="/prix">
+          <li><a class="plaque arrondi" href="/prix">
             <span class="plaque-n">04</span>
             <span class="plaque-nom">Prix</span>
             <span class="plaque-txt">Quatre forfaits, un chiffre net pour chacun.</span>
           </a></li>
-          <li><a class="plaque notch" href="/a-propos">
+          <li><a class="plaque arrondi" href="/a-propos">
             <span class="plaque-n">05</span>
             <span class="plaque-nom">À propos</span>
             <span class="plaque-txt">Qui opère, avec quelles limites annoncées.</span>
           </a></li>
-          <li><a class="plaque notch" href="/contact" aria-current="page">
+          <li><a class="plaque arrondi" href="/contact" aria-current="page">
             <span class="plaque-n">06</span>
             <span class="plaque-nom">Demander un accès</span>
             <span class="plaque-txt">Quatre champs. Une réponse écrite sous 48 h ouvrées.</span>
@@ -100,18 +101,6 @@
 <main id="main" class="dossier">
 
   <section class="wrap hero">
-    <p class="art-n">Art.<b>01</b></p>
-    <aside class="cartouche" aria-label="Cartouche du document">
-      <p class="cart-tete">AMN DevSec — dossier d’accès</p>
-      <dl>
-        <div><dt>Objet</dt><dd><b>Poste de travail supervisé</b></dd></div>
-        <div><dt>Feuillet</dt><dd>06 / 06 — Demander un accès</dd></div>
-        <div><dt>Indice</dt><dd>v5</dd></div>
-        <div><dt>Partie A</dt><dd>remplie par AMN</dd></div>
-        <div><dt>Partie B</dt><dd><b>c’est cette page</b></dd></div>
-        <div class="cart-ref"><dt>Référence</dt><dd><i>attribuée à la réception</i>, pas ici</dd></div>
-      </dl>
-    </aside>
 
     <p class="mono">Demander un accès</p>
     <h1>Dites-nous où vous en êtes</h1>
@@ -119,7 +108,6 @@
   </section>
 
   <section class="wrap section">
-    <p class="art-n">Art.<b>02</b></p>
 
     <div class="form-grid">
 
@@ -184,7 +172,7 @@
       </div>
 
       <aside>
-        <div class="aside-panel notch">
+        <div class="aside-panel arrondi">
           <h2>Ce qui se passe après</h2>
           <ol>
             <li>Votre message arrive directement dans notre boîte. Personne d'autre ne le lit.</li>
@@ -193,7 +181,7 @@
           </ol>
         </div>
 
-        <div class="aside-panel notch">
+        <div class="aside-panel arrondi">
           <h2>Ce qu'on ne vous demande pas</h2>
           <ul>
             <li>Aucun moyen de paiement. Il n'y a rien à payer sur ce site.</li>

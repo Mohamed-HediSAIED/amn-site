@@ -7,16 +7,17 @@
    que confidentialite.html affirme ne pas faire. Elles sont donc
    téléchargées une fois, découpées, et servies depuis le site.
 
-   Deux familles, toutes deux sous licence SIL Open Font License 1.1 :
+   Deux familles, toutes deux sous licence SIL Open Font License 1.1,
+   et ce sont CELLES DU PRODUIT — amn-desktop/src/index.css :
 
-     Archivo (Omnibus-Type) — variable, avec un axe de LARGEUR. C'est
-       cet axe qui fait tout le travail : les titres sont figés en
-       élargi (wdth 118), le texte courant en normal (wdth 100). Une
-       seule famille, deux présences très différentes.
+     --font-sans: 'Space Grotesk', ...
+     --font-mono: 'JetBrains Mono', ...
 
-     Martian Mono (Evil Martians) — le mono. Large, dessiné pour être
-       lu de loin sur un écran technique. C'est lui qui porte
-       l'identité : boutons, étiquettes, chiffres, console.
+   La v3 les avait remplacées par Archivo + Martian Mono pour donner au
+   site « plus de caractère ». C'était l'erreur : le site n'a pas à
+   chercher son caractère, il porte celui du produit. Aucun axe de
+   largeur ici — Space Grotesk n'en a pas — donc la hiérarchie tient sur
+   la graisse et la taille.
 
    Prérequis (outil de développement, jamais déployé) :
      pip install fonttools brotli
@@ -46,38 +47,36 @@ const LATIN_EXT =
   'U+2C60-2C7F,U+A720-A7FF';
 
 const SOURCES = {
-  archivo:
-    'https://raw.githubusercontent.com/Omnibus-Type/Archivo/master/fonts/variable/Archivo%5Bwdth,wght%5D.ttf',
-  martian:
-    'https://raw.githubusercontent.com/evilmartians/mono/main/fonts/variable/MartianMono%5Bwdth,wght%5D.ttf'
+  grotesk:
+    'https://raw.githubusercontent.com/floriankarsten/space-grotesk/master/fonts/variable/SpaceGrotesk%5Bwght%5D.ttf',
+  jetbrains:
+    'https://raw.githubusercontent.com/JetBrains/JetBrainsMono/master/fonts/variable/JetBrainsMono%5Bwght%5D.ttf'
 };
 
-/* UN SEUL fichier Archivo, qui GARDE son axe de largeur (100 → 118).
-   La première version en livrait deux, un par largeur : 26 Ko de plus
-   sur le chemin critique pour la même chose. Ici `font-stretch: 118%`
-   dans site.css pioche la largeur voulue dans le même fichier.
-   Les plages de graisses sont réduites à ce que site.css emploie
-   réellement — le reste, ce sont des octets qu'on ferait télécharger
-   pour rien. */
+/* UN SEUL fichier par famille et par plage Unicode, qui GARDE son axe
+   de graisse : une police variable couvre toutes les graisses employées
+   sans qu'on télécharge un fichier par graisse.
+
+   Les plages sont celles que le PRODUIT charge réellement — Space
+   Grotesk 400/500/600/700, JetBrains Mono 400/500/700 — et pas une de
+   plus : chaque graisse gardée en trop est du poids téléchargé pour
+   rien. Les noms de fichiers reprennent ceux d'avant la v3, pour que
+   les préchargements des neuf pages restent valables. */
 const SORTIES = [
   {
-    nom: 'archivo',
-    source: 'archivo',
-    /* 400→600 et pas 400→700 : site.css n'emploie que 400 et 500, plus
-       600 en réserve pour l'affichage. Chaque graisse gardée en trop
-       est du poids téléchargé pour rien — la plage complète coûtait
-       12 Ko de plus. */
-    axes: ['wdth=100:118', 'wght=400:600'],
-    famille: 'Archivo',
-    graisses: '400 600',
-    largeurs: '100% 118%'
+    nom: 'space-grotesk-400700',
+    source: 'grotesk',
+    axes: ['wght=300:700'],
+    famille: 'Space Grotesk',
+    graisses: '300 700',
+    largeurs: null
   },
   {
-    nom: 'martian-mono',
-    source: 'martian',
-    axes: ['wdth=100', 'wght=400:600'],
-    famille: 'Martian Mono',
-    graisses: '400 600',
+    nom: 'jetbrains-mono-400',
+    source: 'jetbrains',
+    axes: ['wght=400:800'],
+    famille: 'JetBrains Mono',
+    graisses: '400 800',
     largeurs: null
   }
 ];
@@ -100,7 +99,8 @@ for (const [nom, url] of Object.entries(SOURCES)) {
 
 let css =
   `/* Polices auto-hébergées — aucun appel à un serveur tiers (RGPD).\n` +
-  `   Archivo et Martian Mono, SIL Open Font License 1.1.\n` +
+  `   Space Grotesk (Florian Karsten) et JetBrains Mono (JetBrains),\n` +
+  `   SIL Open Font License 1.1. Ce sont les polices du produit.\n` +
   `   Sous-ensembles latin + latin-ext. GÉNÉRÉE PAR scripts/polices.mjs,\n` +
   `   ne pas éditer à la main. */\n`;
 
