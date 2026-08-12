@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette — accueil AMN DevSec</title>
+<!--
+  MAQUETTE ISOLÉE. Ce fichier ne fait pas partie du site : il sert à faire
+  valider la direction avant d'y toucher. Toutes ses valeurs sont copiées de
+  docs/design-tokens.md, donc de amn-desktop/src/index.css. Aucune valeur
+  n'a été choisie ici.
+-->
+<style>
+/* ─── Polices du PRODUIT (Space Grotesk + JetBrains Mono) ─────────── */
+@font-face{font-family:'Space Grotesk';src:url('f/space-grotesk-400700-latin.woff2') format('woff2');font-weight:400 700;font-display:swap}
+@font-face{font-family:'JetBrains Mono';src:url('f/jetbrains-mono-400-latin.woff2') format('woff2');font-weight:400 500;font-display:swap}
+
+/* ─── Jetons, copiés à l'identique ───────────────────────────────── */
+:root{
+  --bg:#0a0a0a; --surface:#131313; --surface-hover:#1c1c1c;
+  --border:#262626; --border-strong:#3a3a3a;
+  --text-primary:#f2f2f0; --text-secondary:#9a9a97; --text-muted:#616160;
+  --accent:#ededed; --accent-hover:#ffffff; --accent-muted:rgba(255,255,255,.08);
+  --danger:#ff4230;
+  --sans:'Space Grotesk',-apple-system,BlinkMacSystemFont,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,monospace;
+  --r-md:6px; --r-lg:8px; --r-xl:12px; --r-2xl:16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg); color:var(--text-primary); color-scheme:dark;
+  font-family:var(--sans); font-size:14px; line-height:1.6;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+.elev-1{box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 1px 2px rgba(0,0,0,.4)}
+.elev-2{box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 8px 24px -8px rgba(0,0,0,.7),0 2px 6px rgba(0,0,0,.45)}
+.wrap{width:100%;max-width:1120px;margin-inline:auto;padding-inline:24px}
+
+/* ─── Le grain du produit : 9 %, soft-light, plein cadre ──────────── */
+.grain{
+  position:fixed;inset:0;z-index:100;pointer-events:none;opacity:.09;
+  mix-blend-mode:soft-light;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:200px 200px;
+}
+
+/* ─── En-tête ─────────────────────────────────────────────────────── */
+.hdr{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--border)}
+.hdr-in{display:flex;align-items:center;gap:14px;min-height:60px}
+.logo{display:inline-flex;flex-direction:column;gap:3px;text-decoration:none;margin-right:auto}
+.logo-word{font-size:20px;font-weight:700;letter-spacing:-.045em;color:var(--text-primary)}
+.logo-sub{font-family:var(--mono);font-size:8px;letter-spacing:.42em;color:var(--text-muted)}
+.pill{
+  display:inline-flex;align-items:center;gap:8px;border-radius:9999px;
+  border:1px solid var(--border);background:var(--surface);
+  padding:6px 12px;font-size:12px;color:var(--text-primary);
+  transition:border-color .16s ease;text-decoration:none;
+}
+.pill:hover{border-color:var(--border-strong)}
+.dot{width:6px;height:6px;border-radius:9999px;background:var(--accent)}
+.btn{
+  background:var(--accent);color:var(--bg);border:0;
+  padding:8px 16px;font-family:var(--sans);font-size:14px;font-weight:600;
+  cursor:pointer;transition:background-color .16s ease;
+}
+.btn:hover{background:var(--accent-hover)}
+.btn:active{transform:scale(.985)}
+.btn-ghost{background:transparent;color:var(--text-primary);border:1px solid var(--border-strong)}
+.btn-ghost:hover{background:var(--surface-hover)}
+:focus-visible{outline:2px solid rgba(255,255,255,.55);outline-offset:2px}
+
+/* ─── TÊTE D'AFFICHE ──────────────────────────────────────────────────
+   Le mouvement : trois nappes de télémétrie qui défilent en continu
+   derrière le titre. C'est ce qu'affiche un mur de supervision, et
+   c'est du `transform` pur — composé par la carte graphique.        */
+.hero{position:relative;padding:96px 0 76px;overflow:hidden}
+.nappes{position:absolute;inset:0;z-index:0;pointer-events:none;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.nappe{position:absolute;left:0;width:200%;height:120px;display:flex}
+.nappe svg{width:50%;height:100%;flex:none}
+/* ÉCART CORRIGÉ — la consigne demande « du mouvement réel et
+   perceptible, pas juste un fondu discret ». Les nappes étaient à
+   0,28 / 0,16 / 0,10 : invisibles en capture. Elles montent, et une
+   quatrième passe au premier plan. Toujours du `transform` seul. */
+.nappe-1{top:4%;opacity:.55;animation:defile 19s linear infinite}
+.nappe-2{top:30%;opacity:.34;animation:defile 29s linear infinite}
+.nappe-3{top:58%;opacity:.22;animation:defile 44s linear infinite}
+.nappe-4{top:80%;opacity:.14;animation:defile 63s linear infinite}
+@keyframes defile{to{transform:translate3d(-50%,0,0)}}
+
+/* ÉCART CORRIGÉ — l'écran d'accueil du produit est CENTRÉ (« MARDI 11
+   AOÛT », « Bonsoir, Aaron. », le bandeau de chiffres, la grille de
+   modules : tout est sur l'axe). La maquette était alignée à gauche,
+   héritage du site. */
+.hero-in{position:relative;z-index:1;text-align:center;display:flex;flex-direction:column;align-items:center}
+.kicker{
+  display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);
+  font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted);
+  border:1px solid var(--border);border-radius:9999px;padding:5px 12px;background:var(--surface);
+}
+/* ÉCART CORRIGÉ — « Bonsoir, Aaron. » est en `text-5xl font-semibold`,
+   soit 48 px en graisse 600. La maquette montait à 72 px en 700 : plus
+   gros et plus gras que le produit. On reste au-dessus de 48 px parce
+   qu'un site n'est pas une application, mais l'écart se resserre. */
+h1{
+  margin-top:22px;font-size:clamp(36px,5vw,58px);font-weight:600;
+  letter-spacing:-.03em;line-height:1.04;max-width:17ch;
+}
+h1 .mot{display:inline-block;animation:monte .5s cubic-bezier(.16,1,.3,1) both}
+h1 .mot:nth-child(1){animation-delay:.02s} h1 .mot:nth-child(2){animation-delay:.07s}
+h1 .mot:nth-child(3){animation-delay:.12s} h1 .mot:nth-child(4){animation-delay:.17s}
+h1 .mot:nth-child(5){animation-delay:.22s} h1 .mot:nth-child(6){animation-delay:.27s}
+h1 .mot:nth-child(7){animation-delay:.32s} h1 .mot:nth-child(8){animation-delay:.37s}
+h1 .mot:nth-child(9){animation-delay:.42s} h1 .mot:nth-child(10){animation-delay:.47s}
+@keyframes monte{from{opacity:0;transform:translateY(.42em)}}
+.lead{margin-top:20px;max-width:56ch;font-size:16px;line-height:1.6;color:var(--text-secondary)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px;justify-content:center}
+
+/* ─── Bandeau de chiffres : gap-px sur bg-border ─────────────────── */
+.stats{
+  margin-top:44px;width:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+  overflow:hidden;border-radius:var(--r-2xl);border:1px solid var(--border);
+  background:var(--border);max-width:620px;
+}
+.stat{display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--surface);padding:16px 12px}
+.stat b{font-family:var(--mono);font-size:26px;font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.stat span{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);text-align:center}
+
+/* ─── Sections ────────────────────────────────────────────────────── */
+.section{padding:72px 0;border-top:1px solid var(--border)}
+.sec-tag{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted)}
+h2{margin-top:12px;font-size:30px;font-weight:600;letter-spacing:-.025em;line-height:1.1}
+.sec-lead{margin-top:14px;max-width:62ch;font-size:15px;line-height:1.6;color:var(--text-secondary)}
+
+/* ─── Carte de module — recette exacte ───────────────────────────── */
+.grille{margin-top:32px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.carte{
+  display:flex;flex-direction:column;gap:12px;border-radius:var(--r-2xl);
+  border:1px solid var(--border);background:var(--surface);padding:20px;
+  text-align:left;text-decoration:none;color:inherit;
+  transition:border-color .16s ease,background-color .16s ease,transform .16s ease,box-shadow .25s cubic-bezier(.16,1,.3,1);
+}
+.carte:hover{
+  border-color:var(--border-strong);background:#171717;transform:translateY(-1px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 12px 28px -10px rgba(0,0,0,.75),0 3px 8px rgba(0,0,0,.45);
+}
+.ico{
+  display:flex;align-items:center;justify-content:center;width:40px;height:40px;
+  border-radius:var(--r-xl);border:1px solid var(--border);background:var(--bg);
+  color:var(--text-secondary);transition:color .16s ease;
+}
+.carte:hover .ico{color:var(--text-primary)}
+.ico svg{width:18px;height:18px}
+.carte h3{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.carte p{font-size:13px;line-height:1.5;color:var(--text-secondary)}
+.carte .spark{margin-top:auto;padding-top:6px}
+
+/* ─── Fragment d'interface, assumé comme illustration ────────────── */
+.fragment{
+  margin-top:32px;border-radius:var(--r-2xl);border:1px solid var(--border);
+  background:var(--surface);overflow:hidden;
+}
+.frag-tete{
+  display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);
+  font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);
+}
+.frag-corps{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border)}
+.frag-cell{background:var(--surface);padding:16px}
+.frag-cell dt{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)}
+.frag-cell dd{margin-top:6px;font-family:var(--mono);font-size:20px;font-variant-numeric:tabular-nums}
+.etq{
+  display:inline-block;border-radius:var(--r-md);border:1px solid var(--border);background:var(--bg);
+  padding:2px 6px;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);
+}
+
+/* ─── Assistant : visible, annoncé, pas caché dans un coin ───────── */
+.assist{
+  margin-top:32px;display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;
+  border-radius:var(--r-2xl);border:1px solid var(--border-strong);background:var(--surface);padding:18px 20px;
+}
+.assist-ico{
+  display:flex;align-items:center;justify-content:center;width:44px;height:44px;flex:none;
+  border-radius:var(--r-xl);border:1px solid var(--border);background:var(--bg);color:var(--text-primary);
+}
+.assist b{display:block;font-size:15px;font-weight:600}
+.assist p{font-size:13px;color:var(--text-secondary);margin-top:2px}
+.assist .etq{margin-top:8px}
+
+@media (max-width:860px){
+  .grille,.frag-corps{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr}
+  .assist{grid-template-columns:auto 1fr;gap:12px}
+  .assist .btn{grid-column:1 / -1}
+}
+@media (prefers-reduced-motion:reduce){
+  .nappe{animation:none} h1 .mot{animation:none}
+  *{transition-duration:.001ms !important}
+}
+</style>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="hdr">
+  <div class="wrap hdr-in">
+    <a class="logo" href="#"><span class="logo-word">AMN</span><span class="logo-sub">DEVSEC</span></a>
+    <a class="pill" href="#"><span class="dot" aria-hidden="true"></span>Assistant</a>
+    <button class="btn">Demander un accès</button>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="nappes" aria-hidden="true">
+      <div class="nappe nappe-1"><svg viewBox="0 0 1200 120" preserveAspectRatio="none" fill="none" aria-hidden="true"><polyline points="0.0,120.4 7.1,116.8 14.1,116.9 21.2,119.8 28.2,118.7 35.3,122.2 42.4,125.5 49.4,98.0 56.5,98.0 63.5,115.3 70.6,118.2 77.6,122.3 84.7,122.6 91.8,122.3 98.8,122.2 105.9,122.4 112.9,118.1 120.0,115.3 127.1,117.1 134.1,119.1 141.2,116.9 148.2,114.2 155.3,110.6 162.4,115.4 169.4,112.2 176.5,108.6 183.5,112.9 190.6,111.0 197.6,115.0 204.7,111.4 211.8,115.2 218.8,118.8 225.9,116.4 232.9,116.1 240.0,118.9 247.1,122.1 254.1,125.2 261.2,127.3 268.2,122.9 275.3,124.4 282.4,126.6 289.4,123.2 296.5,126.4 303.5,128.4 310.6,125.6 317.6,127.0 324.7,130.0 331.8,131.6 338.8,132.0 345.9,127.4 352.9,126.3 360.0,128.6 367.1,124.6 374.1,126.5 381.2,124.1 388.2,126.4 395.3,122.8 402.4,123.3 409.4,127.0 416.5,128.8 423.5,130.3 430.6,128.9 437.6,131.1 444.7,134.0 451.8,132.7 458.8,131.0 465.9,126.8 472.9,130.5 480.0,130.3 487.1,132.4 494.1,131.1 501.2,131.6 508.2,126.8 515.3,124.8 522.4,146.4 529.4,146.0 536.5,148.4 543.5,150.2 550.6,150.0 557.6,151.8 564.7,154.3 571.8,148.7 578.8,145.4 585.9,140.8 592.9,137.1 600.0,135.4 607.1,135.5 614.1,133.7 621.2,131.7 628.2,127.8 635.3,128.2 642.4,127.1 649.4,123.8 656.5,140.4 663.5,141.4 670.6,140.1 677.6,135.4 684.7,138.6 691.8,136.0 698.8,137.8 705.9,135.4 712.9,131.2 720.0,129.1 727.1,129.1 734.1,125.1 741.2,125.8 748.2,127.0 755.3,126.6 762.4,123.2 769.4,119.2 776.5,122.1 783.5,123.8 790.6,124.3 797.6,124.1 804.7,121.0 811.8,121.4 818.8,125.2 825.9,128.8 832.9,127.7 840.0,142.6 847.1,143.9 854.1,144.4 861.2,140.4 868.2,142.5 875.3,140.8 882.4,140.7 889.4,142.0 896.5,142.7 903.5,139.2 910.6,142.0 917.6,138.3 924.7,133.4 931.8,128.4 938.8,125.0 945.9,127.0 952.9,123.3 960.0,123.5 967.1,101.3 974.1,101.2 981.2,100.4 988.2,100.4 995.3,104.0 1002.4,100.9 1009.4,101.8 1016.5,104.4 1023.5,102.3 1030.6,106.9 1037.6,107.2 1044.7,126.3 1051.8,129.9 1058.8,127.7 1065.9,127.5 1072.9,123.6 1080.0,121.9 1087.1,118.6 1094.1,117.1 1101.2,117.8 1108.2,115.1 1115.3,118.2 1122.4,114.9 1129.4,113.8 1136.5,111.0 1143.5,113.2 1150.6,113.2 1157.6,113.7 1164.7,104.6 1171.8,101.6 1178.8,103.6 1185.9,104.0 1192.9,103.4 1200.0,104.0" stroke="#ededed" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg><svg viewBox="0 0 1200 120" preserveAspectRatio="none" fill="none" aria-hidden="true"><polyline points="0.0,120.4 7.1,116.8 14.1,116.9 21.2,119.8 28.2,118.7 35.3,122.2 42.4,125.5 49.4,98.0 56.5,98.0 63.5,115.3 70.6,118.2 77.6,122.3 84.7,122.6 91.8,122.3 98.8,122.2 105.9,122.4 112.9,118.1 120.0,115.3 127.1,117.1 134.1,119.1 141.2,116.9 148.2,114.2 155.3,110.6 162.4,115.4 169.4,112.2 176.5,108.6 183.5,112.9 190.6,111.0 197.6,115.0 204.7,111.4 211.8,115.2 218.8,118.8 225.9,116.4 232.9,116.1 240.0,118.9 247.1,122.1 254.1,125.2 261.2,127.3 268.2,122.9 275.3,124.4 282.4,126.6 289.4,123.2 296.5,126.4 303.5,128.4 310.6,125.6 317.6,127.0 324.7,130.0 331.8,131.6 338.8,132.0 345.9,127.4 352.9,126.3 360.0,128.6 367.1,124.6 374.1,126.5 381.2,124.1 388.2,126.4 395.3,122.8 402.4,123.3 409.4,127.0 416.5,128.8 423.5,130.3 430.6,128.9 437.6,131.1 444.7,134.0 451.8,132.7 458.8,131.0 465.9,126.8 472.9,130.5 480.0,130.3 487.1,132.4 494.1,131.1 501.2,131.6 508.2,126.8 515.3,124.8 522.4,146.4 529.4,146.0 536.5,148.4 543.5,150.2 550.6,150.0 557.6,151.8 564.7,154.3 571.8,148.7 578.8,145.4 585.9,140.8 592.9,137.1 600.0,135.4 607.1,135.5 614.1,133.7 621.2,131.7 628.2,127.8 635.3,128.2 642.4,127.1 649.4,123.8 656.5,140.4 663.5,141.4 670.6,140.1 677.6,135.4 684.7,138.6 691.8,136.0 698.8,137.8 705.9,135.4 712.9,131.2 720.0,129.1 727.1,129.1 734.1,125.1 741.2,125.8 748.2,127.0 755.3,126.6 762.4,123.2 769.4,119.2 776.5,122.1 783.5,123.8 790.6,124.3 797.6,124.1 804.7,121.0 811.8,121.4 818.8,125.2 825.9,128.8 832.9,127.7 840.0,142.6 847.1,143.9 854.1,144.4 861.2,140.4 868.2,142.5 875.3,140.8 882.4,140.7 889.4,142.0 896.5,142.7 903.5,139.2 910.6,142.0 917.6,138.3 924.7,133.4 931.8,128.4 938.8,125.0 945.9,127.0 952.9,123.3 960.0,123.5 967.1,101.3 974.1,101.2 981.2,100.4 988.2,100.4 995.3,104.0 1002.4,100.9 1009.4,101.8 1016.5,104.4 1023.5,102.3 1030.6,106.9 1037.6,107.2 1044.7,126.3 1051.8,129.9 1058.8,127.7 1065.9,127.5 1072.9,123.6 1080.0,121.9 1087.1,118.6 1094.1,117.1 1101.2,117.8 1108.2,115.1 1115.3,118.2 1122.4,114.9 1129.4,113.8 1136.5,111.0 1143.5,113.2 1150.6,113.2 1157.6,113.7 1164.7,104.6 1171.8,101.6 1178.8,103.6 1185.9,104.0 1192.9,103.4 1200.0,104.0" stroke="#ededed" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg></div>
+      <div class="nappe nappe-2"><svg viewBox="0 0 1200 120" preserveAspectRatio="none" fill="none" aria-hidden="true"><polyline points="0.0,116.4 7.1,113.3 14.1,112.9 21.2,113.1 28.2,116.1 35.3,118.7 42.4,122.8 49.4,120.9 56.5,120.7 63.5,121.8 70.6,119.3 77.6,118.1 84.7,114.2 91.8,112.4 98.8,112.2 105.9,114.2 112.9,114.8 120.0,114.4 127.1,113.5 134.1,116.6 141.2,114.1 148.2,117.7 155.3,121.8 162.4,121.0 169.4,122.4 176.5,124.0 183.5,121.5 190.6,123.4 197.6,120.8 204.7,118.0 211.8,117.7 218.8,117.1 225.9,120.1 232.9,123.8 240.0,127.6 247.1,125.6 254.1,122.7 261.2,122.2 268.2,119.9 275.3,115.9 282.4,118.8 289.4,119.1 296.5,115.5 303.5,118.2 310.6,118.1 317.6,117.8 324.7,120.0 331.8,116.6 338.8,118.2 345.9,115.6 352.9,114.3 360.0,113.0 367.1,112.3 374.1,114.5 381.2,112.5 388.2,112.5 395.3,116.3 402.4,117.9 409.4,115.2 416.5,111.7 423.5,111.7 430.6,114.4 437.6,115.0 444.7,100.8 451.8,98.1 458.8,100.3 465.9,105.4 472.9,104.2 480.0,105.8 487.1,105.9 494.1,104.9 501.2,105.5 508.2,102.2 515.3,107.0 522.4,88.2 529.4,91.8 536.5,94.8 543.5,92.4 550.6,95.0 557.6,93.8 564.7,95.0 571.8,98.3 578.8,102.0 585.9,100.1 592.9,104.6 600.0,108.7 607.1,109.9 614.1,112.5 621.2,115.1 628.2,130.4 635.3,130.9 642.4,127.4 649.4,124.9 656.5,123.1 663.5,126.5 670.6,124.8 677.6,120.5 684.7,148.3 691.8,148.3 698.8,148.4 705.9,154.3 712.9,154.3 720.0,149.2 727.1,148.1 734.1,145.4 741.2,140.8 748.2,140.7 755.3,137.4 762.4,138.0 769.4,132.8 776.5,135.2 783.5,132.0 790.6,135.1 797.6,132.3 804.7,131.3 811.8,131.4 818.8,132.3 825.9,128.8 832.9,129.0 840.0,130.0 847.1,129.9 854.1,126.6 861.2,122.2 868.2,121.1 875.3,120.1 882.4,116.0 889.4,116.9 896.5,114.2 903.5,115.5 910.6,119.7 917.6,115.7 924.7,114.2 931.8,116.5 938.8,115.8 945.9,115.3 952.9,115.3 960.0,119.2 967.1,122.2 974.1,123.7 981.2,121.4 988.2,121.0 995.3,122.2 1002.4,124.1 1009.4,123.9 1016.5,121.2 1023.5,130.4 1030.6,127.4 1037.6,123.3 1044.7,124.7 1051.8,120.6 1058.8,117.8 1065.9,121.9 1072.9,102.0 1080.0,102.5 1087.1,102.3 1094.1,105.9 1101.2,104.8 1108.2,103.0 1115.3,106.4 1122.4,105.9 1129.4,85.7 1136.5,87.2 1143.5,86.7 1150.6,91.7 1157.6,94.6 1164.7,96.0 1171.8,98.2 1178.8,103.0 1185.9,102.6 1192.9,100.9 1200.0,99.4" stroke="#ededed" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg><svg viewBox="0 0 1200 120" preserveAspectRatio="none" fill="none" aria-hidden="true"><polyline points="0.0,116.4 7.1,113.3 14.1,112.9 21.2,113.1 28.2,116.1 35.3,118.7 42.4,122.8 49.4,120.9 56.5,120.7 63.5,121.8 70.6,119.3 77.6,118.1 84.7,114.2 91.8,112.4 98.8,112.2 105.9,114.2 112.9,114.8 120.0,114.4 127.1,113.5 134.1,116.6 141.2,114.1 148.2,117.7 155.3,121.8 162.4,121.0 169.4,122.4 176.5,124.0 183.5,121.5 190.6,123.4 197.6,120.8 204.7,118.0 211.8,117.7 218.8,117.1 225.9,120.1 232.9,123.8 240.0,127.6 247.1,125.6 254.1,122.7 261.2,122.2 268.2,119.9 275.3,115.9 282.4,118.8 289.4,119.1 296.5,115.5 303.5,118.2 310.6,118.1 317.6,117.8 324.7,120.0 331.8,116.6 338.8,118.2 345.9,115.6 352.9,114.3 360.0,113.0 367.1,112.3 374.1,114.5 381.2,112.5 388.2,112.5 395.3,116.3 402.4,117.9 409.4,115.2 416.5,111.7 423.5,111.7 430.6,114.4 437.6,115.0 444.7,100.8 451.8,98.1 458.8,100.3 465.9,105.4 472.9,104.2 480.0,105.8 487.1,105.9 494.1,104.9 501.2,105.5 508.2,102.2 515.3,107.0 522.4,88.2 529.4,91.8 536.5,94.8 543.5,92.4 550.6,95.0 557.6,93.8 564.7,95.0 571.8,98.3 578.8,102.0 585.9,100.1 592.9,104.6 600.0,108.7 607.1,109.9 614.1,112.5 621.2,115.1 628.2,130.4 635.3,130.9 642.4,127.4 649.4,124.9 656.5,123.1 663.5,126.5 670.6,124.8 677.6,120.5 684.7,148.3 691.8,148.3 698.8,148.4 705.9,154.3 712.9,154.3 720.0,149.2 727.1,148.1 734.1,145.4 741.2,140.8 748.2,140.7 755.3,137.4 762.4,138.0 769.4,132.8 776.5,135.2 783.5,132.0 790.6,135.1 797.6,132.3 804.7,131.3 811.8,131.4 818.8,132.3 825.9,128.8 832.9,129.0 840.0,130.0 847.1,129.9 854.1,126.6 861.2,122.2 868.2,121.1 875.3,120.1 882.4,116.0 889.4,116.9 896.5,114.2 903.5,115.5 910.6,119.7 917.6,115.7 924.7,114.2 931.8,116.5 938.8,115.8 945.9,115.3 952.9,115.3 960.0,119.2 967.1,122.2 974.1,123.7 981.2,121.4 988.2,121.0 995.3,122.2 1002.4,124.1 1009.4,123.9 1016.5,121.2 1023.5,130.4 1030.6,127.4 1037.6,123.3 1044.7,124.7 1051.8,120.6 1058.8,117.8 1065.9,121.9 1072.9,102.0 1080.0,102.5 1087.1,102.3 1094.1,105.9 1101.2,104.8 1108.2,103.0 1115.3,106.4 1122.4,105.9 1129.4,85.7 1136.5,87.2 1143.5,86.7 1150.6,91.7 1157.6,94.6 1164.7,96.0 1171.8,98.2 1178.8,103.0 1185.9,102.6 1192.9,100.9 1200.0,99.4" stroke="#ededed" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg></div>
+      <div class="nappe nappe-4"><svg viewBox="0 0 1200 120" preserveAspectRatio="none" fill="none" aria-hidden="true"><polyline points="0.0,122.3 7.1,96.3 14.1,85.7 21.2,85.7 28.2,85.7 35.3,89.1 42.4,87.0 49.4,85.7 56.5,86.6 63.5,110.3 70.6,107.0 77.6,111.2 84.7,108.8 91.8,112.8 98.8,116.4 105.9,114.3 112.9,114.3 120.0,114.5 127.1,115.7 134.1,114.3 141.2,118.4 148.2,117.6 155.3,117.7 162.4,114.9 169.4,118.2 176.5,117.8 183.5,118.2 190.6,118.8 197.6,118.7 204.7,116.4 211.8,120.6 218.8,121.8 225.9,124.9 232.9,122.0 240.0,102.4 247.1,105.2 254.1,102.6 261.2,102.4 268.2,105.2 275.3,104.0 282.4,105.1 289.4,108.3 296.5,112.2 303.5,110.7 310.6,133.1 317.6,136.1 324.7,139.1 331.8,140.0 338.8,143.0 345.9,139.5 352.9,140.7 360.0,143.4 367.1,141.0 374.1,142.7 381.2,145.0 388.2,142.0 395.3,140.2 402.4,136.9 409.4,134.2 416.5,131.4 423.5,133.6 430.6,118.5 437.6,122.6 444.7,125.1 451.8,126.1 458.8,125.5 465.9,128.0 472.9,130.4 480.0,129.5 487.1,126.3 494.1,122.2 501.2,120.4 508.2,117.5 515.3,115.2 522.4,114.1 529.4,113.6 536.5,113.6 543.5,114.9 550.6,94.1 557.6,97.6 564.7,98.1 571.8,95.8 578.8,100.5 585.9,104.3 592.9,106.5 600.0,108.4 607.1,105.7 614.1,126.4 621.2,122.6 628.2,122.6 635.3,120.4 642.4,122.5 649.4,121.9 656.5,122.7 663.5,123.3 670.6,121.0 677.6,120.8 684.7,117.7 691.8,118.5 698.8,117.5 705.9,119.8 712.9,123.5 720.0,126.4 727.1,124.7 734.1,123.5 741.2,124.9 748.2,120.7 755.3,124.6 762.4,125.4 769.4,125.1 776.5,128.9 783.5,131.5 790.6,127.3 797.6,127.4 804.7,125.6 811.8,121.7 818.8,119.5 825.9,121.5 832.9,125.4 840.0,127.2 847.1,128.5 854.1,125.4 861.2,121.1 868.2,120.7 875.3,123.1 882.4,125.9 889.4,124.7 896.5,123.5 903.5,123.1 910.6,126.1 917.6,122.3 924.7,121.0 931.8,122.8 938.8,120.5 945.9,121.9 952.9,120.7 960.0,119.5 967.1,136.0 974.1,137.1 981.2,137.8 988.2,138.4 995.3,136.8 1002.4,138.6 1009.4,138.9 1016.5,137.0 1023.5,139.1 1030.6,140.0 1037.6,139.1 1044.7,135.6 1051.8,132.0 1058.8,135.4 1065.9,134.1 1072.9,129.7 1080.0,126.4 1087.1,126.2 1094.1,147.4 1101.2,149.9 1108.2,149.0 1115.3,149.8 1122.4,148.0 1129.4,149.8 1136.5,151.4 1143.5,154.3 1150.6,150.2 1157.6,150.3 1164.7,146.6 1171.8,148.8 1178.8,119.0 1185.9,115.3 1192.9,117.3 1200.0,117.4" stroke="#ededed" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg><svg viewBox="0 0 1200 120" preserveAspectRatio="none" fill="none" aria-hidden="true"><polyline points="0.0,122.3 7.1,96.3 14.1,85.7 21.2,85.7 28.2,85.7 35.3,89.1 42.4,87.0 49.4,85.7 56.5,86.6 63.5,110.3 70.6,107.0 77.6,111.2 84.7,108.8 91.8,112.8 98.8,116.4 105.9,114.3 112.9,114.3 120.0,114.5 127.1,115.7 134.1,114.3 141.2,118.4 148.2,117.6 155.3,117.7 162.4,114.9 169.4,118.2 176.5,117.8 183.5,118.2 190.6,118.8 197.6,118.7 204.7,116.4 211.8,120.6 218.8,121.8 225.9,124.9 232.9,122.0 240.0,102.4 247.1,105.2 254.1,102.6 261.2,102.4 268.2,105.2 275.3,104.0 282.4,105.1 289.4,108.3 296.5,112.2 303.5,110.7 310.6,133.1 317.6,136.1 324.7,139.1 331.8,140.0 338.8,143.0 345.9,139.5 352.9,140.7 360.0,143.4 367.1,141.0 374.1,142.7 381.2,145.0 388.2,142.0 395.3,140.2 402.4,136.9 409.4,134.2 416.5,131.4 423.5,133.6 430.6,118.5 437.6,122.6 444.7,125.1 451.8,126.1 458.8,125.5 465.9,128.0 472.9,130.4 480.0,129.5 487.1,126.3 494.1,122.2 501.2,120.4 508.2,117.5 515.3,115.2 522.4,114.1 529.4,113.6 536.5,113.6 543.5,114.9 550.6,94.1 557.6,97.6 564.7,98.1 571.8,95.8 578.8,100.5 585.9,104.3 592.9,106.5 600.0,108.4 607.1,105.7 614.1,126.4 621.2,122.6 628.2,122.6 635.3,120.4 642.4,122.5 649.4,121.9 656.5,122.7 663.5,123.3 670.6,121.0 677.6,120.8 684.7,117.7 691.8,118.5 698.8,117.5 705.9,119.8 712.9,123.5 720.0,126.4 727.1,124.7 734.1,123.5 741.2,124.9 748.2,120.7 755.3,124.6 762.4,125.4 769.4,125.1 776.5,128.9 783.5,131.5 790.6,127.3 797.6,127.4 804.7,125.6 811.8,121.7 818.8,119.5 825.9,121.5 832.9,125.4 840.0,127.2 847.1,128.5 854.1,125.4 861.2,121.1 868.2,120.7 875.3,123.1 882.4,125.9 889.4,124.7 896.5,123.5 903.5,123.1 910.6,126.1 917.6,122.3 924.7,121.0 931.8,122.8 938.8,120.5 945.9,121.9 952.9,120.7 960.0,119.5 967.1,136.0 974.1,137.1 981.2,137.8 988.2,138.4 995.3,136.8 1002.4,138.6 1009.4,138.9 1016.5,137.0 1023.5,139.1 1030.6,140.0 1037.6,139.1 1044.7,135.6 1051.8,132.0 1058.8,135.4 1065.9,134.1 1072.9,129.7 1080.0,126.4 1087.1,126.2 1094.1,147.4 1101.2,149.9 1108.2,149.0 1115.3,149.8 1122.4,148.0 1129.4,149.8 1136.5,151.4 1143.5,154.3 1150.6,150.2 1157.6,150.3 1164.7,146.6 1171.8,148.8 1178.8,119.0 1185.9,115.3 1192.9,117.3 1200.0,117.4" stroke="#ededed" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg></div>
+      <div class="nappe nappe-3"><svg viewBox="0 0 1200 120" preserveAspectRatio="none" fill="none" aria-hidden="true"><polyline points="0.0,118.5 7.1,117.6 14.1,114.9 21.2,114.1 28.2,114.2 35.3,113.0 42.4,115.3 49.4,113.6 56.5,110.1 63.5,107.8 70.6,112.1 77.6,113.8 84.7,111.4 91.8,110.7 98.8,115.2 105.9,117.9 112.9,122.2 120.0,118.6 127.1,98.5 134.1,121.7 141.2,124.0 148.2,122.0 155.3,118.4 162.4,120.3 169.4,120.5 176.5,105.7 183.5,105.3 190.6,108.4 197.6,112.2 204.7,116.1 211.8,115.7 218.8,114.6 225.9,136.5 232.9,137.2 240.0,134.6 247.1,133.5 254.1,136.8 261.2,153.1 268.2,152.7 275.3,154.3 282.4,148.9 289.4,148.4 296.5,154.3 303.5,149.3 310.6,143.7 317.6,139.2 324.7,134.1 331.8,129.1 338.8,129.8 345.9,128.0 352.9,130.8 360.0,126.2 367.1,125.0 374.1,127.5 381.2,125.2 388.2,126.4 395.3,122.9 402.4,124.3 409.4,123.4 416.5,119.5 423.5,120.6 430.6,123.1 437.6,119.1 444.7,122.0 451.8,119.3 458.8,138.9 465.9,142.0 472.9,142.1 480.0,138.4 487.1,136.9 494.1,138.2 501.2,135.6 508.2,132.0 515.3,127.5 522.4,126.4 529.4,125.7 536.5,121.3 543.5,121.3 550.6,123.4 557.6,120.8 564.7,119.1 571.8,119.4 578.8,122.3 585.9,120.9 592.9,120.3 600.0,123.8 607.1,126.6 614.1,128.3 621.2,124.3 628.2,126.2 635.3,127.7 642.4,128.1 649.4,126.8 656.5,125.5 663.5,128.8 670.6,127.3 677.6,126.9 684.7,125.2 691.8,124.6 698.8,124.4 705.9,122.9 712.9,125.8 720.0,127.5 727.1,127.6 734.1,125.5 741.2,128.6 748.2,131.8 755.3,134.3 762.4,130.2 769.4,112.7 776.5,109.1 783.5,106.9 790.6,108.7 797.6,108.9 804.7,107.7 811.8,109.3 818.8,110.2 825.9,107.2 832.9,107.7 840.0,107.1 847.1,105.7 854.1,106.2 861.2,103.2 868.2,102.2 875.3,104.5 882.4,108.4 889.4,108.9 896.5,109.7 903.5,107.8 910.6,111.3 917.6,114.6 924.7,127.5 931.8,126.5 938.8,122.1 945.9,124.7 952.9,124.7 960.0,124.9 967.1,127.8 974.1,130.5 981.2,129.3 988.2,131.6 995.3,134.2 1002.4,129.4 1009.4,132.5 1016.5,133.1 1023.5,129.9 1030.6,131.1 1037.6,129.6 1044.7,131.9 1051.8,130.6 1058.8,133.5 1065.9,136.3 1072.9,137.3 1080.0,134.1 1087.1,135.0 1094.1,134.4 1101.2,129.4 1108.2,130.1 1115.3,130.0 1122.4,130.0 1129.4,132.3 1136.5,131.8 1143.5,131.5 1150.6,110.9 1157.6,115.5 1164.7,116.7 1171.8,101.3 1178.8,102.9 1185.9,100.8 1192.9,100.4 1200.0,102.5" stroke="#ededed" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg><svg viewBox="0 0 1200 120" preserveAspectRatio="none" fill="none" aria-hidden="true"><polyline points="0.0,118.5 7.1,117.6 14.1,114.9 21.2,114.1 28.2,114.2 35.3,113.0 42.4,115.3 49.4,113.6 56.5,110.1 63.5,107.8 70.6,112.1 77.6,113.8 84.7,111.4 91.8,110.7 98.8,115.2 105.9,117.9 112.9,122.2 120.0,118.6 127.1,98.5 134.1,121.7 141.2,124.0 148.2,122.0 155.3,118.4 162.4,120.3 169.4,120.5 176.5,105.7 183.5,105.3 190.6,108.4 197.6,112.2 204.7,116.1 211.8,115.7 218.8,114.6 225.9,136.5 232.9,137.2 240.0,134.6 247.1,133.5 254.1,136.8 261.2,153.1 268.2,152.7 275.3,154.3 282.4,148.9 289.4,148.4 296.5,154.3 303.5,149.3 310.6,143.7 317.6,139.2 324.7,134.1 331.8,129.1 338.8,129.8 345.9,128.0 352.9,130.8 360.0,126.2 367.1,125.0 374.1,127.5 381.2,125.2 388.2,126.4 395.3,122.9 402.4,124.3 409.4,123.4 416.5,119.5 423.5,120.6 430.6,123.1 437.6,119.1 444.7,122.0 451.8,119.3 458.8,138.9 465.9,142.0 472.9,142.1 480.0,138.4 487.1,136.9 494.1,138.2 501.2,135.6 508.2,132.0 515.3,127.5 522.4,126.4 529.4,125.7 536.5,121.3 543.5,121.3 550.6,123.4 557.6,120.8 564.7,119.1 571.8,119.4 578.8,122.3 585.9,120.9 592.9,120.3 600.0,123.8 607.1,126.6 614.1,128.3 621.2,124.3 628.2,126.2 635.3,127.7 642.4,128.1 649.4,126.8 656.5,125.5 663.5,128.8 670.6,127.3 677.6,126.9 684.7,125.2 691.8,124.6 698.8,124.4 705.9,122.9 712.9,125.8 720.0,127.5 727.1,127.6 734.1,125.5 741.2,128.6 748.2,131.8 755.3,134.3 762.4,130.2 769.4,112.7 776.5,109.1 783.5,106.9 790.6,108.7 797.6,108.9 804.7,107.7 811.8,109.3 818.8,110.2 825.9,107.2 832.9,107.7 840.0,107.1 847.1,105.7 854.1,106.2 861.2,103.2 868.2,102.2 875.3,104.5 882.4,108.4 889.4,108.9 896.5,109.7 903.5,107.8 910.6,111.3 917.6,114.6 924.7,127.5 931.8,126.5 938.8,122.1 945.9,124.7 952.9,124.7 960.0,124.9 967.1,127.8 974.1,130.5 981.2,129.3 988.2,131.6 995.3,134.2 1002.4,129.4 1009.4,132.5 1016.5,133.1 1023.5,129.9 1030.6,131.1 1037.6,129.6 1044.7,131.9 1051.8,130.6 1058.8,133.5 1065.9,136.3 1072.9,137.3 1080.0,134.1 1087.1,135.0 1094.1,134.4 1101.2,129.4 1108.2,130.1 1115.3,130.0 1122.4,130.0 1129.4,132.3 1136.5,131.8 1143.5,131.5 1150.6,110.9 1157.6,115.5 1164.7,116.7 1171.8,101.3 1178.8,102.9 1185.9,100.8 1192.9,100.4 1200.0,102.5" stroke="#ededed" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg></div>
+    </div>
+    <div class="wrap hero-in">
+      <p class="kicker">Supervision &amp; gestion d’activité</p>
+      <h1><span class="mot">Vous</span> <span class="mot">n’avez</span> <span class="mot">pas</span>
+        <span class="mot">d’équipe</span> <span class="mot">technique.</span> <span class="mot">Vous</span>
+        <span class="mot">en</span> <span class="mot">avez</span> <span class="mot">une</span>
+        <span class="mot">quand&nbsp;même.</span></h1>
+      <p class="lead">Un seul endroit pour votre agenda, vos clients, vos devis, vos factures.
+        Et derrière, quelqu’un qui surveille ce qui tourne. Vous, vous travaillez. Nous, on regarde le reste.</p>
+      <div class="actions">
+        <button class="btn">Demander un accès</button>
+        <button class="btn btn-ghost">Comment ça se passe</button>
+      </div>
+      <div class="stats elev-1">
+        <div class="stat"><b>10</b><span>modules livrés</span></div>
+        <div class="stat"><b>5</b><span>axes supervisés</span></div>
+        <div class="stat"><b>48 h</b><span>délai de réponse</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <p class="sec-tag">Ce qu’on fait</p>
+      <h2>Le logiciel, c’est la moitié du travail</h2>
+      <p class="sec-lead">L’agenda sur le téléphone. Les clients dans un carnet. Les devis dans un
+        traitement de texte, les factures on ne sait plus trop où. Ça tient, jusqu’au jour où il faut
+        retrouver quelque chose.</p>
+
+      <div class="grille">
+        <a class="carte elev-1" href="#">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg></span>
+          <h3>Agenda</h3>
+          <p>Rendez-vous et disponibilités. Le module qu’on ouvre le plus.</p>
+          <span class="spark"><svg width="96" height="24" viewBox="0 0 96 24" fill="none" aria-hidden="true"><polyline points="0,17 12,14 24,18 36,9 48,12 60,5 72,10 84,6 96,8" stroke="#ededed" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </a>
+        <a class="carte elev-1" href="#">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg></span>
+          <h3>Facturation</h3>
+          <p>Numérotation séquentielle, facture verrouillée dès qu’elle part.</p>
+          <span class="spark"><svg width="96" height="24" viewBox="0 0 96 24" fill="none" aria-hidden="true"><polyline points="0,20 12,18 24,13 36,15 48,8 60,11 72,4 84,7 96,3" stroke="#ededed" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </a>
+        <a class="carte elev-1" href="#">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+          <h3>Coffre-fort</h3>
+          <p>Mots de passe et accès, à un seul endroit plutôt qu’en vrac.</p>
+          <span class="spark"><svg width="96" height="24" viewBox="0 0 96 24" fill="none" aria-hidden="true"><polyline points="0,12 12,12 24,11 36,12 48,10 60,12 72,11 84,12 96,12" stroke="#ededed" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </a>
+      </div>
+
+      <div class="fragment elev-1">
+        <p class="frag-tete"><span class="dot" aria-hidden="true"></span>Voici à quoi ressemble votre outil</p>
+        <dl class="frag-corps">
+          <div class="frag-cell"><dt>Disponibilité</dt><dd>surveillée</dd></div>
+          <div class="frag-cell"><dt>Certificats</dt><dd>suivis</dd></div>
+          <div class="frag-cell"><dt>Accès</dt><dd>journalisés</dd></div>
+        </dl>
+      </div>
+
+      <div class="assist">
+        <span class="assist-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+        <div>
+          <b>Une question ? Les réponses sont déjà écrites.</b>
+          <p>Prix, délais, ce qu’on surveille, vos données. Pas une intelligence artificielle :
+            des réponses préparées à l’avance.</p>
+          <span class="etq">Aucun modèle · aucune donnée envoyée</span>
+        </div>
+        <button class="btn">Ouvrir</button>
+      </div>
+    </div>
+  </section>
+</main>
+</body>
+</html>
