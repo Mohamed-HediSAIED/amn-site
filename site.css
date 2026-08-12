@@ -939,6 +939,16 @@ html:has(.console[open]) { overflow: hidden; }
 .nappe-6 { top: 86%; height: 100px; opacity: .16; animation: defile 67s linear infinite; }
 @keyframes defile { to { transform: translate3d(-50%, 0, 0); } }
 
+/* Sur téléphone, la même `viewBox` de 1 200 unités est comprimée dans
+   780 px : les accidents du tracé se resserrent et les courbes passent
+   au travers du chapô au lieu de rester derrière. On baisse d'un cran
+   plutôt que de retirer — le mouvement reste, la lecture repasse
+   devant. */
+@media (max-width: 620px) {
+  .nappes { opacity: .55; }
+  .voile { width: 8%; }
+}
+
 @media (prefers-reduced-motion: reduce) { .nappe { animation: none; } }
 
 /* ---------- Le bandeau de chiffres ----------
