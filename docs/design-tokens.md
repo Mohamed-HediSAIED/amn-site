@@ -76,7 +76,66 @@ ressemblance :
 
 - **les conteneurs sont arrondis** — cartes `rounded-2xl` (16 px), boîtes
   d'icône `rounded-xl` (12 px), puces `rounded-full` ;
-- **les boutons et les champs sont carrés** — aucune classe de rayon sur eux.
+- **les boutons et les champs sont carrés** — mais **pas tous**, et la première
+  rédaction de ce document le disait de façon trop absolue. Le compte réel :
+
+  | | Carrés | Avec rayon | Rayons employés |
+  | --- | --- | --- | --- |
+  | Boutons `bg-accent` | 41 / 55 | 14 / 55 | `rounded-lg` ×6, `-full` ×4, `-md` ×2 |
+  | Champs `input-focus` | 88 / 102 | 14 / 102 | `rounded-lg` ×10, `-xl` ×2, `-md` ×1 |
+
+  Le carré est donc la règle (≈ 3 sur 4 dans les deux cas), pas une loi. Les
+  exceptions sont les boutons **à l'intérieur d'un panneau déjà arrondi**
+  (boîtes de dialogue, tiroirs), où le rayon suit celui du conteneur.
+
+### Le coin coupé : il existe, mais il est mort
+
+`src/index.css` définit bien un coin coupé, et le site s'en est servi pour
+justifier son `.notch` :
+
+```css
+/* Corner-cut frame — a hard notch for a "control panel" character. */
+.corner-cut { clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%); }
+```
+
+Mais : `grep -r "corner-cut" src/ --include=*.tsx` → **0 occurrence**. C'est du
+code mort. Il ne se voit nulle part dans le produit, donc il n'appartient pas à
+son identité visuelle. La v5 disait « n'existe nulle part dans le produit » :
+c'était faux dans la lettre, juste dans les faits.
+
+---
+
+## 2 bis. La géométrie — la valeur qui manquait
+
+**C'est l'omission qui a fait échouer la première maquette.** Les rayons y
+étaient exacts (16 / 12 / 6 / 0 px, mesurés au navigateur) et Aaron les a
+pourtant vus carrés. La cause n'était pas le rayon, c'était la **taille de ce
+qui le porte**.
+
+`AppLayout.tsx` et `HomeScreen.tsx` :
+
+```
+coquille  : mx-auto max-w-6xl px-4 py-6 sm:px-8 sm:py-8   → 1152 px, marge 32 px
+accueil   : mx-auto max-w-3xl ... py-10                    → colonne de 768 px
+grille    : grid grid-cols-2 gap-3 sm:grid-cols-3          → écart 12 px
+```
+
+→ carte de module = (768 − 2 × 12) / 3 = **248 px**.
+
+La maquette posait une colonne de 1 120 px sans colonne intérieure, donc des
+cartes de **348 px** : 40 % plus larges pour un rayon identique. Mesuré côte à
+côte, la carte de 248 px se lit arrondie et celle de 348 px se lit carrée.
+
+> **Recopier un jeton ne suffit pas si on ne recopie pas la proportion sur
+> laquelle il s'applique.** Un rayon est une fraction d'un coin, pas une valeur
+> absolue.
+
+| Mesure | Produit | À respecter sur le site |
+| --- | --- | --- |
+| Coquille de page | `max-w-6xl` = 1152 px, marge 32 px | identique |
+| Colonne d'accueil | `max-w-3xl` = 768 px, centrée | identique |
+| Écart de grille | `gap-3` = 12 px | identique |
+| Carte de module | **248 px** | ne pas dépasser ≈ 280 px |
 
 ---
 
@@ -248,3 +307,51 @@ C'est un élément d'identité du produit **que le site n'avait pas du tout**.
 | Survol de carte | `translateY(-1px)` | néant | **à ajouter** |
 | Fond de survol | `#1c1c1c` | `#1a1a1a` | **à aligner** |
 | Sparkline | présente | absente | **à ajouter** |
+
+---
+
+## 10. Deux points où le site DOIT diverger — mesurés, pas supposés
+
+### a) `--color-text-muted` #616160 ne passe pas sur un site public
+
+Recopié tel quel dans la première maquette, il a fait tomber
+l'accessibilité à **93** sur onze éléments :
+
+| Fond | Contraste obtenu | Exigé (AA, texte normal) |
+| --- | --- | --- |
+| `#0a0a0a` | 3,19:1 | 4,5:1 |
+| `#131313` | 2,99:1 | 4,5:1 |
+
+Le site avait déjà tranché en v1 et le produit ne l'oblige pas : `--text-3`
+`#858583` est le plancher lisible (**5,04:1** sur `#131313`, 5,37:1 sur
+`#0a0a0a`), `#616160` reste décoratif et **ne doit jamais porter de sens**.
+Une étiquette de chiffre (« MODULES LIVRÉS ») porte du sens.
+
+→ Retour à **100** en accessibilité, sans toucher au reste de la palette.
+
+### b) Le coût du masque, et ce qu'il payait
+
+Les nappes de télémétrie sont le seul endroit où Aaron autorise à dépasser
+l'extraction. Avant d'en ajouter, il fallait savoir ce que coûtait
+l'existant. Mesure : processeur bridé ×6, trois passes, images comptées
+pendant 3 s d'animation continue.
+
+| | 4 nappes + `mask-image` | 6 nappes, 4 natures, 2 aires, voiles en dégradé |
+| --- | --- | --- |
+| Images sautées — ordinateur | **30,3 %** | **2,31 %** |
+| Images sautées — téléphone | 0 % | 0 % |
+| p95 — ordinateur | 33,4 ms | **16,8 ms** |
+| Tâches longues | 0 | 0 |
+| Couches composées | 24 | 26 |
+| Mémoire de couches | 49,8 Mo | **44,7 Mo** |
+| Lighthouse performance | — | **100** |
+
+**Le coupable n'était pas le nombre de courbes, c'était `mask-image`.** Il
+sortait les nappes du chemin composé : à lui seul, 30 % des images. Le même
+estompage des bords, obtenu par deux voiles en dégradé de la couleur du fond,
+coûte 1,14 %. C'est ce qui a payé six nappes au lieu de quatre, deux aires
+dégradées et quatre natures de signal — pour **moins** de mémoire qu'avant.
+
+> Mesuré en rendu logiciel (conteneur sans carte graphique), ce qui **majore**
+> le coût de composition par rapport à un vrai appareil. Les chiffres valent
+> donc comme comparaison avant/après, pas comme valeur absolue.
