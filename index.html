@@ -36,45 +36,45 @@
 <a class="skip" href="#main">Aller au contenu</a>
 
 <!-- ==================================================================
-     LA SÉQUENCE D'OUVERTURE
+     LA SÉQUENCE D'OUVERTURE — mise sous tension
      ==================================================================
-     Un contrôle de supervision qui tourne, et qui se coche. Le même
-     genre que ceux décrits sur /service (disponibilité, certificats,
-     accès, hygiène) — mais celui-ci porte sur LA PAGE QU'ON REGARDE,
-     et ses résultats sont vrais. C'est une démonstration, pas une
-     illustration : rien n'y est inventé.
+     Un terminal qui tape, puis le dossier. Les six lignes de contrôle
+     portent sur LA PAGE QU'ON REGARDE et sont vraies : deux d'entre
+     elles sont remesurées à l'exécution par site.js (appels à des
+     tiers réellement chargés, cookies réellement déposés), et le
+     compte d'en-têtes est comparé à vercel.json par la vérification.
 
-     Deux valeurs sont MESURÉES au chargement par site.js (traceurs
-     tiers réellement appelés, cookies réellement déposés) et
-     réécrites dans le document. Sans JavaScript, les valeurs écrites
-     ici restent affichées — elles sont vraies aussi, elles sont juste
-     constatées à l'avance plutôt qu'à l'instant.
+     LA FRAPPE EST EN CSS PUR. Chaque ligne porte un cache opaque qui
+     glisse vers la droite en `transform: translateX()` avec
+     `steps()` : aucune largeur animée, aucune écriture DOM pendant la
+     frappe, tout est composé par la carte graphique. Les dots de
+     conduite alignent toutes les lignes sur la même longueur, donc un
+     seul `steps()` suffit pour toutes.
 
-     Le compte d'en-têtes de sécurité est vérifié par
-     scripts/verifier-navigateur.mjs contre ce que le serveur envoie
-     vraiment : si quelqu'un touche à vercel.json sans corriger ici,
-     la vérification échoue.
-
-     TOUT EST EN CSS. L'animation se termine en effaçant le panneau,
-     donc la séquence se déroule et disparaît même sans JavaScript.
-     site.js n'ajoute que le confort : passer d'une touche ou d'un
-     clic, et ne pas la rejouer à chaque page de la même visite.
+     La séquence se joue et se retire SANS JavaScript (elle sort par
+     `opacity` puis `translateY`, jamais par `visibility`). Le <h1> est
+     peint dessous dès la première image : la séquence ne retarde pas
+     la mesure de plus grand contenu affiché.
      ================================================================== -->
 <div class="seq" aria-hidden="true">
   <div class="seq-cadre notch">
-    <p class="seq-tag">Contrôle — cette page, maintenant</p>
+    <p class="seq-tag">amn devsec — mise sous tension</p>
     <ul class="seq-liste">
-      <li><span class="seq-nom">Appels à des tiers</span><b class="seq-val" data-mesure="tiers">0</b></li>
-      <li><span class="seq-nom">Cookies déposés</span><b class="seq-val" data-mesure="cookies">0</b></li>
-      <li><span class="seq-nom">En-têtes de sécurité</span><b class="seq-val" data-seq-entetes>7 / 7</b></li>
-      <li><span class="seq-nom">Polices</span><b class="seq-val">servies d'ici</b></li>
-      <li><span class="seq-nom">Journal d'accès</span><b class="seq-val">côté serveur</b></li>
+      <li class="seq-l seq-l--cmd"><span class="seq-txt">$ amn superviser --cible cette-page</span><span class="seq-cache" aria-hidden="true"></span></li>
+      <li class="seq-l seq-l--ok"><span class="seq-txt">appels à des tiers ............ <b class="seq-v" data-mesure="tiers">0</b></span><span class="seq-cache" aria-hidden="true"></span></li>
+      <li class="seq-l seq-l--ok"><span class="seq-txt">cookies déposés ............... <b class="seq-v" data-mesure="cookies">0</b></span><span class="seq-cache" aria-hidden="true"></span></li>
+      <li class="seq-l seq-l--ok"><span class="seq-txt">en-têtes de sécurité .......... <b class="seq-v" data-seq-entetes>7 / 7</b></span><span class="seq-cache" aria-hidden="true"></span></li>
+      <li class="seq-l seq-l--ok"><span class="seq-txt">polices ....................... <b class="seq-v">servies d’ici</b></span><span class="seq-cache" aria-hidden="true"></span></li>
+      <li class="seq-l seq-l--ok"><span class="seq-txt">journal d’accès ............... <b class="seq-v">côté serveur</b></span><span class="seq-cache" aria-hidden="true"></span></li>
+      <li class="seq-l seq-l--ok"><span class="seq-txt">paiement en ligne ............. <b class="seq-v">aucun</b></span><span class="seq-cache" aria-hidden="true"></span></li>
+      <li class="seq-l seq-l--fin"><span class="seq-txt">6 feuillets sous tension</span><span class="seq-cache" aria-hidden="true"></span></li>
     </ul>
-    <p class="seq-fin">Rien à signaler</p>
+    <p class="seq-reglette"><span class="seq-cran"></span><span class="seq-cran"></span><span class="seq-cran"></span><span class="seq-cran"></span><span class="seq-cran"></span><span class="seq-cran"></span><span class="seq-cran"></span><b>contrôles 7 / 7</b></p>
     <img class="seq-logo" src="/assets/logo.svg" alt="" width="104" height="40">
   </div>
   <span class="seq-passer">Une touche ou un clic pour passer</span>
 </div>
+
 
 <header class="hdr">
   <div class="wrap hdr-in">
@@ -95,7 +95,8 @@
         <span class="console-halo" aria-hidden="true"></span>
         <span class="console-balai" aria-hidden="true"></span>
         <div class="console-scene">
-          <p class="console-tag mono">Un endroit où aller ?</p>
+          <p class="console-tag mono">Sommaire du dossier</p>
+          <p class="sommaire-tete">six feuillets — partie A remplie par AMN</p>
           <ul class="plaques">
           <li><a class="plaque notch" href="/" aria-current="page">
             <span class="plaque-n">01</span>
@@ -137,7 +138,7 @@
   </div>
 </header>
 
-<main id="main">
+<main id="main" class="dossier">
 
   <nav class="rail" aria-label="Sections de cette page">
     <ol>
@@ -150,6 +151,19 @@
   </nav>
 
   <section class="wrap hero" id="debut">
+    <p class="art-n">Art.<b>01</b></p>
+    <aside class="cartouche" aria-label="Cartouche du document">
+      <p class="cart-tete">AMN DevSec — dossier d’accès</p>
+      <dl>
+        <div><dt>Objet</dt><dd><b>Poste de travail supervisé</b></dd></div>
+        <div><dt>Feuillet</dt><dd>01 / 06 — Accueil</dd></div>
+        <div><dt>Indice</dt><dd>v5</dd></div>
+        <div><dt>Partie A</dt><dd>remplie par AMN</dd></div>
+        <div><dt>Partie B</dt><dd><b>quatre champs, à vous</b></dd></div>
+        <div class="cart-ref"><dt>Référence</dt><dd><i>attribuée à la réception</i>, pas ici</dd></div>
+      </dl>
+    </aside>
+
     <p class="mono">Pour les structures qui n'ont personne à la technique</p>
     <h1>Vous n'avez pas d'équipe technique. Vous en avez une <span class="mark">quand même</span>.</h1>
     <p class="lead">Un seul endroit pour votre agenda, vos clients, vos devis, vos factures. Et derrière, quelqu'un qui surveille ce qui tourne. Vous, vous travaillez. Nous, on regarde le reste.</p>
@@ -158,6 +172,24 @@
       <a class="btn btn-primary" href="/contact">Demander un accès</a>
       <a class="btn btn-ghost" href="/methode">Comment ça se passe</a>
     </div>
+
+    <!-- PIÈCE JOINTE — le mot de l'émetteur.
+         Le bloc est `hidden` dans le HTML servi et ne se révèle que si
+         <body> porte `data-piece`. Tant qu'Aaron n'a pas déposé son
+         enregistrement, il n'y a ni bouton mort, ni requête, ni 404 :
+         voir assets/audio/LISEZ-MOI.txt. Aucune synthèse vocale, jamais. -->
+    <div class="piece" id="piece" hidden>
+      <p class="piece-tete">Pièce jointe — le mot de l’émetteur</p>
+      <button type="button" class="piece-btn" id="piece-btn" aria-pressed="false">
+        <span class="piece-ico" aria-hidden="true"></span>
+        <span class="piece-lbl">Écouter</span>
+      </button>
+      <details class="plus piece-txt">
+        <summary><span class="plus-ferme">Transcription</span><span class="plus-ouvert">Replier</span><span class="plus-chev" aria-hidden="true"></span></summary>
+        <div class="plus-corps"><p>La transcription sera déposée ici en même temps que l’enregistrement.</p></div>
+      </details>
+    </div>
+
     <p class="mono-sm hero-note">Il n'y a rien à payer ici. Vous écrivez, quelqu'un vous lit, on vous répond. Un accès ne s'ouvre jamais tout seul.</p>
 
     <div class="split notch">
@@ -197,8 +229,10 @@
   </section>
 
   <section class="wrap section" id="offre">
+    <p class="art-n">Art.<b>02</b></p>
+
     <div class="sec-head">
-      <span class="mono"><b>01</b> — Ce qu'on fait</span>
+      <span class="mono">Ce qu'on fait</span>
       <h2>Le logiciel, c'est la moitié du travail</h2>
       <p class="lead">L'agenda sur le téléphone. Les clients dans un carnet. Les devis dans un traitement de texte, les factures on ne sait plus trop où. Ça tient, jusqu'au jour où il faut retrouver quelque chose. Et la sécurité, pendant ce temps-là ? Personne. Pas par négligence : dans une structure de cette taille, ce poste n'existe pas.</p>
     </div>
@@ -220,8 +254,10 @@
   </section>
 
   <section class="wrap section" id="parcours">
+    <p class="art-n">Art.<b>03</b></p>
+
     <div class="sec-head">
-      <span class="mono"><b>02</b> — Comment ça se passe</span>
+      <span class="mono">Comment ça se passe</span>
       <h2>Quatre étapes, aucune automatique</h2>
     </div>
 
@@ -260,8 +296,10 @@
   </section>
 
   <section class="wrap section" id="limites">
+    <p class="art-n">Art.<b>04</b></p>
+
     <div class="sec-head">
-      <span class="mono"><b>03</b> — À dire tout de suite</span>
+      <span class="mono">À dire tout de suite</span>
       <h2>Ce qu'on ne fait pas</h2>
       <p class="lead">Autant le savoir maintenant.</p>
     </div>
@@ -275,6 +313,8 @@
   </section>
 
   <section class="wrap section" id="acces">
+    <p class="art-n">Art.<b>05</b></p>
+
     <div class="cta cta--ambre notch">
       <div>
         <h2>Racontez-nous votre situation</h2>

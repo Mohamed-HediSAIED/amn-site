@@ -1,0 +1,31 @@
+EMPLACEMENT DU MESSAGE VOCAL D'ACCUEIL
+======================================
+
+Déposer ici un fichier nommé exactement :
+
+    accueil.m4a        (ou accueil.mp3)
+
+Un VRAI enregistrement, une vraie voix. Pas de synthèse vocale : le site
+passe son temps à dire qu'il n'est pas fabriqué par une machine, une voix
+de synthèse à l'accueil dirait le contraire en trois secondes.
+
+DEUX CHOSES À FAIRE, PAS UNE :
+
+1. déposer le fichier ici ;
+2. ouvrir index.html et ajouter l'attribut `data-piece` à la balise
+   <body>, c'est-à-dire remplacer
+
+       <body>
+   par
+       <body data-piece="/assets/audio/accueil.m4a">
+
+Sans le point 2, le bloc reste caché et RIEN n'est chargé — aucune
+requête, aucune erreur 404, aucun bouton mort à l'écran. C'est voulu :
+tant que la pièce n'existe pas, elle n'est pas annoncée.
+
+Le son ne part JAMAIS tout seul. `Permissions-Policy: autoplay=()` est
+déjà posé dans vercel.json, et le bouton est à l'arrêt par défaut.
+
+Prévoir aussi une transcription : la déposer dans le <details> prévu à
+côté du bouton dans index.html. Elle est dans le HTML servi, donc lisible
+son coupé et indexable.

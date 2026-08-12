@@ -209,7 +209,13 @@ const CIBLES_CONTRASTE = {
     ['description du pied', '.ftr-about p'],
     ['mention du bas', '.ftr-bottom p'],
     ['intitulé de suivi', '.watch li b'],
-    ['texte de suivi', '.watch li']
+    ['texte de suivi', '.watch li'],
+    ['numéro d\'article', '.art-n'],
+    ['numéro d\'article, chiffre', '.art-n b'],
+    ['intitulé du cartouche', '.cartouche dt'],
+    ['valeur du cartouche', '.cartouche dd'],
+    ['en-tête du cartouche', '.cartouche .cart-tete'],
+    ['référence du cartouche', '.cartouche .cart-ref dd']
   ],
   '/contact': [
     ['libellé de champ', '.field .lbl'],
@@ -397,7 +403,7 @@ for (const largeur of [390, 1440]) {
   });
   const page = await ctx.newPage();
   await page.goto(BASE + '/', { waitUntil: 'load' });
-  await page.waitForTimeout(3200);   /* sans JS : 2,15 s d'attente + 0,75 s de sortie, plus une marge */
+  await page.waitForTimeout(3700);   /* sans JS : 2,55 s de frappe + 0,75 s de sortie, plus une marge */
   await page.locator('.console > summary').click();
   t('Sans JavaScript : la console s\'ouvre', await page.locator('.plaque[href="/service"]').isVisible());
   /* Pas de page.evaluate ici : sans JavaScript il n'y a rien pour
@@ -606,8 +612,13 @@ console.log('2 ter. Séquence, dépliables, assistant');
   const manquants = declares.filter((h) => !r.headers.get(h) && h !== 'Strict-Transport-Security');
   t('Séquence : le serveur local envoie tous ces en-têtes (HSTS mis à part)',
     manquants.length === 0, manquants.join(', '));
-  t('Séquence : les valeurs affichées sont dans le HTML servi',
-    html.includes('Appels à des tiers') && html.includes('Cookies déposés'));
+  t('Séquence : les lignes de contrôle sont dans le HTML servi',
+    html.includes('appels à des tiers') && html.includes('cookies déposés'));
+  /* La frappe est en CSS : le texte doit être ENTIER dans le document,
+     jamais écrit lettre par lettre par un script. C'est ce qui la rend
+     lisible sans JavaScript et par un lecteur d'écran. */
+  t('Séquence : le texte tapé est déjà complet dans le HTML',
+    html.includes('$ amn superviser --cible cette-page') && html.includes('6 feuillets sous tension'));
 }
 {
   const ctx = await navigateur.newContext({ viewport: { width: 1280, height: 800 } });
@@ -633,7 +644,7 @@ console.log('2 ter. Séquence, dépliables, assistant');
   t('Séquence : les valeurs sont mesurées à l\'exécution',
     mesures.indexOf('tiers=0') > -1 && mesures.indexOf('cookies=0') > -1, mesures.join(' '));
 
-  await page.waitForTimeout(1400);
+  await page.waitForTimeout(2200);
   t('Séquence : elle s\'efface toute seule',
     await page.evaluate(() => {
       const s = document.querySelector('.seq');
@@ -665,7 +676,7 @@ console.log('2 ter. Séquence, dépliables, assistant');
   const ctx = await navigateur.newContext({ javaScriptEnabled: false, viewport: { width: 1280, height: 800 } });
   const page = await ctx.newPage();
   await page.goto(BASE + '/', { waitUntil: 'load' });
-  await page.waitForTimeout(3200);
+  await page.waitForTimeout(3700);
   t('Séquence : sans JavaScript, elle se retire seule',
     await page.evaluate(() => {
       const s = document.querySelector('.seq');

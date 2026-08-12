@@ -54,7 +54,8 @@
         <span class="console-halo" aria-hidden="true"></span>
         <span class="console-balai" aria-hidden="true"></span>
         <div class="console-scene">
-          <p class="console-tag mono">Un endroit où aller ?</p>
+          <p class="console-tag mono">Sommaire du dossier</p>
+          <p class="sommaire-tete">six feuillets — partie A remplie par AMN</p>
           <ul class="plaques">
           <li><a class="plaque notch" href="/">
             <span class="plaque-n">01</span>
@@ -96,7 +97,7 @@
   </div>
 </header>
 
-<main id="main">
+<main id="main" class="dossier">
 
   <nav class="rail" aria-label="Sections de cette page">
     <ol>
@@ -109,14 +110,29 @@
   </nav>
 
   <section class="wrap hero" id="debut">
+    <p class="art-n">Art.<b>01</b></p>
+    <aside class="cartouche" aria-label="Cartouche du document">
+      <p class="cart-tete">AMN DevSec — dossier d’accès</p>
+      <dl>
+        <div><dt>Objet</dt><dd><b>Poste de travail supervisé</b></dd></div>
+        <div><dt>Feuillet</dt><dd>03 / 06 — Comment ça se passe</dd></div>
+        <div><dt>Indice</dt><dd>v5</dd></div>
+        <div><dt>Partie A</dt><dd>remplie par AMN</dd></div>
+        <div><dt>Partie B</dt><dd><b>quatre champs, à vous</b></dd></div>
+        <div class="cart-ref"><dt>Référence</dt><dd><i>attribuée à la réception</i>, pas ici</dd></div>
+      </dl>
+    </aside>
+
     <p class="mono">Comment ça se passe</p>
     <h1>Rien ne s'ouvre tout seul</h1>
     <p class="lead">Voici le parcours réel, dans l'ordre, avec les délais. Si quelque chose vous paraît lent, la dernière section explique pourquoi c'est comme ça.</p>
   </section>
 
   <section class="wrap section" id="parcours">
+    <p class="art-n">Art.<b>02</b></p>
+
     <div class="sec-head">
-      <span class="mono"><b>01</b> — Le parcours</span>
+      <span class="mono">Le parcours</span>
       <h2>De votre message à votre premier jour de travail</h2>
     </div>
 
@@ -164,8 +180,10 @@
   </section>
 
   <section class="wrap section" id="delai">
+    <p class="art-n">Art.<b>03</b></p>
+
     <div class="sec-head">
-      <span class="mono"><b>02</b> — La question qu'on nous pose</span>
+      <span class="mono">La question qu'on nous pose</span>
       <h2>Pourquoi ça prend deux jours</h2>
       <p class="lead">On pourrait mettre un bouton « créer mon compte » et encaisser dans la foulée. On a choisi de ne pas le faire, et ce n'est pas parce que c'est difficile à construire.</p>
     </div>
@@ -179,8 +197,10 @@
   </section>
 
   <section class="wrap section" id="apres">
+    <p class="art-n">Art.<b>04</b></p>
+
     <div class="sec-head">
-      <span class="mono"><b>03</b> — Après</span>
+      <span class="mono">Après</span>
       <h2>Ce qui se passe si quelque chose casse</h2>
     </div>
     <div class="prose">
@@ -195,6 +215,8 @@
   </section>
 
   <section class="wrap section" id="acces">
+    <p class="art-n">Art.<b>05</b></p>
+
     <div class="cta notch">
       <div>
         <h2>Première étape : quatre champs</h2>

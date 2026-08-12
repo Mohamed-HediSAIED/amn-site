@@ -1547,7 +1547,7 @@ section[id] { scroll-margin-top: 84px; }
 
      Le retrait, lui, est une bascule unique posée à la fin. Une seule
      recalculation, au lieu de vingt-cinq. */
-  animation: seq-sortie .75s cubic-bezier(.4, 0, .2, 1) 2.15s forwards;
+  animation: seq-sortie .75s cubic-bezier(.4, 0, .2, 1) 2.55s forwards;
 }
 /* `opacity` et `transform`, RIEN D'AUTRE — les deux seules propriétés
    que le compositeur sait animer sans réveiller le fil principal.
@@ -1563,14 +1563,20 @@ section[id] { scroll-margin-top: 84px; }
    au-dessus de la fenêtre il ne recouvre plus rien et ne capte plus
    rien — le même résultat, obtenu par une propriété que la carte
    graphique sait traiter toute seule. */
+/* SORTIE PAR GLISSEMENT SEUL, SANS FONDU. Un fondu rend le panneau
+   semi-transparent pendant 400 ms, et pendant ces 400 ms TOUT ce
+   qu'il contient est, pour un audit de contraste, du texte mélangé au
+   fond : la note d'accessibilité de l'accueil tombait à 96 alors que
+   les cinq autres pages étaient à 100, sans qu'aucun texte réel du
+   site soit en cause. Le rideau remonte donc d'un bloc, opaque du
+   début à la fin. `transform` seul : toujours composé, et plus
+   franc à l'œil qu'un fondu. */
 @keyframes seq-sortie {
-  0%   { opacity: 1; transform: translateY(0); }
-  55%  { opacity: 0; transform: translateY(0); }
-  100% { opacity: 0; transform: translateY(-101vh); }
+  to { transform: translateY(-101vh); }
 }
 
 .seq-cadre {
-  width: min(420px, calc(100vw - 2 * var(--gutter)));
+  width: min(486px, calc(100vw - 2 * var(--gutter)));
   padding: 22px 24px 26px;
   background: var(--surface);
   border: 1px solid var(--line-strong);
@@ -1589,95 +1595,119 @@ section[id] { scroll-margin-top: 84px; }
   font-weight: 500;
   letter-spacing: .06em;
   text-transform: uppercase;
-  color: var(--text-3);
+  color: var(--text-2);
   padding-bottom: 12px;
   border-bottom: 1px solid var(--line);
   margin-bottom: 4px;
 }
 
-.seq-liste { list-style: none; display: grid; }
-.seq-liste li {
-  display: grid;
-  grid-template-columns: 15px 1fr auto;
-  align-items: baseline;
-  gap: 10px;
-  padding: 9px 0;
-  border-bottom: 1px solid var(--line);
-  font-size: .84rem;
-  /* `backwards` et pas `both` : après la séquence, la ligne reprend
-     ses styles normaux au lieu de rester figée sur l'image finale. */
-  animation: seq-ligne .3s ease backwards;
-}
-/* La coche. Deux traits, dessinés par une rotation — pas une image. */
-.seq-liste li::before {
-  content: '';
-  width: 9px; height: 5px;
-  border-left: 1.5px solid var(--accent);
-  border-bottom: 1.5px solid var(--accent);
-  transform: rotate(-45deg);
-  align-self: center;
-  animation: seq-coche .22s cubic-bezier(.2, .8, .3, 1) backwards;
-}
-.seq-nom { color: var(--text-2); }
-.seq-val {
-  font-family: var(--f-mono);
-  font-size: .74rem;
-  font-weight: 500;
-  color: var(--text);
-  font-variant-numeric: tabular-nums;
-}
+.seq-liste { list-style: none; display: grid; gap: 1px; }
 
-@keyframes seq-ligne { from { opacity: 0; transform: translateX(-5px); } }
-@keyframes seq-coche { from { opacity: 0; transform: rotate(-45deg) scale(.4); } }
-
-/* Le décalage ligne par ligne. En `nth-child` et non en style en
-   ligne : la CSP du site interdit les attributs `style=`. */
-.seq-liste li:nth-child(1) { animation-delay: .22s } .seq-liste li:nth-child(1)::before { animation-delay: .34s }
-.seq-liste li:nth-child(2) { animation-delay: .38s } .seq-liste li:nth-child(2)::before { animation-delay: .50s }
-.seq-liste li:nth-child(3) { animation-delay: .54s } .seq-liste li:nth-child(3)::before { animation-delay: .66s }
-.seq-liste li:nth-child(4) { animation-delay: .70s } .seq-liste li:nth-child(4)::before { animation-delay: .82s }
-.seq-liste li:nth-child(5) { animation-delay: .86s } .seq-liste li:nth-child(5)::before { animation-delay: .98s }
-
-.seq-fin {
-  margin-top: 16px;
+/* Une ligne de terminal. Le texte est écrit dans le HTML dès le
+   départ ; c'est le CACHE posé par-dessus qui recule pour le
+   découvrir. On n'anime donc jamais `width` — seulement `transform`,
+   la seule propriété que le compositeur sait traiter sans réveiller
+   le fil principal (la v4 a perdu 8 points de note en l'oubliant). */
+.seq-l {
+  position: relative;
   font-family: var(--f-mono);
   font-size: .72rem;
-  font-weight: 600;
-  letter-spacing: .05em;
-  text-transform: uppercase;
-  color: var(--accent);
-  animation: seq-ligne .3s ease 1.18s backwards;
+  line-height: 1.85;
+  white-space: pre;
+  overflow: hidden;
+  color: var(--text-2);
 }
+.seq-l--cmd { color: var(--text); }
+.seq-v { color: var(--text); font-weight: 500; }
+.seq-l--ok .seq-v { color: var(--accent); }
+.seq-l--fin { color: var(--accent); margin-top: 6px; }
 
-/* Le contrôle est passé, la marque signe en bas du relevé — comme une
-   signature au bas d'un rapport. Sa place est RÉSERVÉE dès le départ
-   (l'animation est en `backwards`, l'élément occupe déjà sa hauteur) :
-   le panneau ne se réajuste pas quand le logo arrive. Le filet au-
-   dessus fait lire ce blanc comme un cartouche plutôt que comme un
-   trou en attente.
-   Il vient de /assets/logo.svg : le jour où le vrai logo remplace le
-   gabarit, la séquence le reprend sans qu'on y touche. */
-.seq-logo {
-  height: 30px;
-  width: auto;
-  margin: 18px auto 0;
-  padding-top: 16px;
+/* LA FRAPPE SE FAIT PAR DÉCOUPE, PAS PAR RECOUVREMENT.
+   Première version : un cache opaque glissait sur le texte. Ça marche
+   à l'œil, mais l'audit d'accessibilité échantillonne pendant le
+   passage et voit du texte à moitié recouvert — c'est-à-dire, par
+   construction, du texte à contraste insuffisant. Note tombée à 96.
+
+   Ici c'est le texte lui-même qui est DÉCOUPÉ : un glyphe est soit
+   rendu en entier, soit pas rendu du tout, jamais à moitié. Il n'y a
+   plus d'état intermédiaire à mesurer. Le curseur, lui, reste une
+   `transform` — la carte graphique s'en occupe. */
+.seq-txt {
+  display: inline-block;
+  clip-path: inset(0 100% 0 0);
+  animation: seq-frappe .34s steps(38) both;
+}
+@keyframes seq-frappe { to { clip-path: inset(0 -2px 0 0); } }
+
+.seq-cache {
+  position: absolute;
+  left: 0; top: .18em; bottom: .18em;
+  width: 7px;
+  background: var(--accent);
+  animation: seq-curseur .34s steps(38) both;
+}
+@keyframes seq-curseur { to { transform: translateX(calc(100% * 38 + 1px)); } }
+
+/* Le décalage ligne par ligne. En `nth-child` : la CSP du site
+   interdit les attributs `style=`, donc pas de `--i` en ligne. */
+.seq-l:nth-child(1) .seq-txt,
+.seq-l:nth-child(1) .seq-cache { animation-delay: .10s }
+.seq-l:nth-child(2) .seq-txt,
+.seq-l:nth-child(2) .seq-cache { animation-delay: .40s }
+.seq-l:nth-child(3) .seq-txt,
+.seq-l:nth-child(3) .seq-cache { animation-delay: .62s }
+.seq-l:nth-child(4) .seq-txt,
+.seq-l:nth-child(4) .seq-cache { animation-delay: .84s }
+.seq-l:nth-child(5) .seq-txt,
+.seq-l:nth-child(5) .seq-cache { animation-delay: 1.06s }
+.seq-l:nth-child(6) .seq-txt,
+.seq-l:nth-child(6) .seq-cache { animation-delay: 1.28s }
+.seq-l:nth-child(7) .seq-txt,
+.seq-l:nth-child(7) .seq-cache { animation-delay: 1.50s }
+.seq-l:nth-child(8) .seq-txt,
+.seq-l:nth-child(8) .seq-cache { animation-delay: 1.78s }
+
+/* La réglette : sept crans, un par contrôle. Ce n'est PAS une barre
+   de téléchargement — rien ne se télécharge, on ne mime pas un
+   chargement qui n'existe pas. C'est un compte de contrôles passés. */
+.seq-reglette {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 16px;
+  padding-top: 14px;
   border-top: 1px solid var(--line);
-  box-sizing: content-box;
-  animation: seq-logo 1.5s cubic-bezier(.2, .7, .3, 1) 1.42s backwards;
 }
-@keyframes seq-logo {
-  from { opacity: 0; transform: translateY(6px); }
-  22%  { opacity: 1; transform: none; }
-  to   { opacity: 1; transform: none; }
+.seq-cran {
+  width: 14px; height: 6px;
+  background: var(--line-strong);
+  animation: seq-cran .18s ease both;
 }
+@keyframes seq-cran { from { background: var(--line-strong); } to { background: var(--accent); } }
+.seq-cran:nth-child(1) { animation-delay: .52s } .seq-cran:nth-child(2) { animation-delay: .74s }
+.seq-cran:nth-child(3) { animation-delay: .96s } .seq-cran:nth-child(4) { animation-delay: 1.18s }
+.seq-cran:nth-child(5) { animation-delay: 1.40s } .seq-cran:nth-child(6) { animation-delay: 1.62s }
+.seq-cran:nth-child(7) { animation-delay: 1.84s }
+.seq-reglette b {
+  margin-left: 8px;
+  font-family: var(--f-mono);
+  font-size: .58rem;
+  font-weight: 500;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  /* PAS d'animation d'opacité sur ce libellé. Un texte qu'on fait
+     apparaître en fondu est, pendant tout le fondu, un texte à
+     contraste insuffisant — et l'audit d'accessibilité le mesure
+     pendant le fondu. Le spectacle est dans la frappe, pas ici. */
+  color: var(--text-3);
+}
+@keyframes seq-ligne { from { opacity: 0; } }
 
 .seq-passer {
   font-family: var(--f-mono);
   font-size: .62rem;
   letter-spacing: .02em;
-  color: var(--text-4);
-  animation: seq-ligne .3s ease .75s backwards;
+  color: var(--text-3);   /* voir ci-dessus : pas de fondu sur du texte */
 }
 
 /* Déjà vue dans cette visite : site.js pose la classe et il ne se
@@ -1928,4 +1958,218 @@ section[id] { scroll-margin-top: 84px; }
 /* À l'impression, ni l'onglet ni la séquence n'ont de sens. */
 @media print {
   .ajm, .seq, .rail { display: none !important; }
+}
+
+/* ==================================================================
+   v5 — LE DOSSIER D'ACCÈS
+   ==================================================================
+   Le site cesse d'être une vitrine et devient le dossier d'accès
+   lui-même : six feuillets numérotés dont AMN a déjà rempli sa
+   moitié, et dont le seul blanc de tout le site, ce sont les quatre
+   champs à votre nom.
+
+   Ce qui change est le CONTENANT, jamais le discours. Le chrome
+   (réglure à numéros d'article, cartouche technique, colonne de
+   marge annotée, sommaire à points de conduite, impression sur
+   blanc) enveloppe les textes existants sans en réécrire un mot.
+   L'article 01 de l'accueil EST le bandeau de la v4, mot pour mot.
+   C'est la condition qui rend la direction vendable : le contenant
+   est froid, le premier écran reste chaud.
+
+   La référence n'est pas juridique, elle est TECHNIQUE : le cartouche
+   d'un plan d'exécution. Émetteur, objet, indice, feuillet, révision.
+   C'est l'objet que produit un bureau d'études — pas un contrat, pas
+   un formulaire d'impôts. Voir docs/direction-v5.md.
+   ================================================================== */
+
+/* ---------- La grille du feuillet ----------
+   Trois colonnes au-dessus de 1100 px : la réglure qui numérote, le
+   contenu, le cartouche. En dessous, une seule colonne et le
+   cartouche remonte sous l'en-tête. */
+
+.dossier { --regle: 46px; --cartouche: 226px; }
+
+@media (min-width: 1100px) {
+  .dossier > .wrap {
+    display: grid;
+    grid-template-columns: var(--regle) minmax(0, 1fr) var(--cartouche);
+    column-gap: 30px;
+    /* La largeur totale NE BOUGE PAS : les deux colonnes de chrome
+       sont prises DANS la mesure existante, elles ne s'ajoutent pas
+       à côté. Sinon le bloc déborde sur la règle de section, qui est
+       en `position: fixed` et ne se pousse pas. Effet secondaire
+       heureux : la colonne de texte descend à ~78 ch, une mesure plus
+       confortable que les 68 ch pleine largeur d'avant. */
+  }
+  .dossier > .wrap > * { grid-column: 2; }
+  .dossier > .wrap > .art-n { grid-column: 1; }
+  .dossier > .wrap > .cartouche { grid-column: 3; grid-row: 1 / span 40; }
+}
+
+/* ---------- Le cartouche ----------
+   Le bloc de titre d'un plan d'exécution : qui émet, quel objet,
+   quel indice, quel feuillet. Un bureau d'études en pose un sur
+   chaque planche ; c'est exactement ce qu'est une page ici. */
+
+.cartouche {
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .045);
+  font-family: var(--f-mono);
+  font-size: .6rem;
+  line-height: 1.5;
+  align-self: start;
+  margin-bottom: 28px;
+}
+@media (min-width: 1100px) { .cartouche { position: sticky; top: 84px; margin-bottom: 0; } }
+
+.cartouche dl { display: grid; }
+.cartouche div {
+  display: grid;
+  gap: 2px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.cartouche div:last-child { border-bottom: 0; }
+.cartouche dt {
+  font-size: .54rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.cartouche dd { color: var(--text-2); font-variant-numeric: tabular-nums; }
+.cartouche dd b { color: var(--text); font-weight: 500; }
+.cartouche .cart-tete {
+  background: var(--surface-hi);
+  color: var(--text);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  font-size: .56rem;
+  padding: 10px 12px;
+}
+/* La ligne qui porte tout le modèle : rien ne s'ouvre tout seul. */
+.cartouche .cart-ref dd { color: var(--text-3); }
+.cartouche .cart-ref dd i { font-style: normal; color: var(--accent); }
+
+/* ---------- Le numéro d'article, dans la réglure ---------- */
+
+.art-n {
+  font-family: var(--f-mono);
+  font-size: .58rem;
+  font-weight: 500;
+  letter-spacing: .04em;
+  /* --text-4 est décoratif : un numéro d'article porte du sens, donc
+     plancher --text-3. Relevé par Lighthouse à 96 en accessibilité. */
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.3;
+  padding-top: .35em;
+}
+.art-n b { display: block; color: var(--accent); font-weight: 500; font-size: .72rem; }
+/* Sous 1100 px la réglure n'existe plus : le numéro repasse en ligne,
+   au-dessus du titre, où il se lit comme une étiquette ordinaire. */
+@media (max-width: 1099px) {
+  .art-n { display: flex; gap: 7px; align-items: baseline; margin-bottom: 10px; }
+  .art-n b { display: inline; font-size: .62rem; }
+}
+
+/* ---------- L'annotation de marge ----------
+   Ce qu'un relecteur écrit à côté d'un paragraphe. C'est là qu'on
+   met la voix de la maison : sans elle, un document numéroté est
+   anonyme, et c'est le mode d'échec principal de cette direction. */
+
+.annot {
+  font-family: var(--f-mono);
+  font-size: .64rem;
+  line-height: 1.65;
+  color: var(--text-3);
+  border-left: 2px solid var(--accent-line);
+  padding-left: 13px;
+  margin-top: 18px;
+  max-width: 52ch;
+}
+.annot b { color: var(--accent); font-weight: 500; }
+
+/* ---------- Le sommaire (la console, reskinée) ----------
+   Le panneau plein écran de la v2 devient le sommaire du dossier :
+   six feuillets, points de conduite, numéro à droite. On garde le
+   <details>, le <summary>, les liens : la mécanique et toute son
+   accessibilité sont déjà vérifiées par 423 contrôles. */
+
+.console-panel .sommaire-tete {
+  font-family: var(--f-mono);
+  font-size: .58rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+/* Les plaques deviennent les feuillets du sommaire : le numéro passe à
+   droite, comme un folio, et une ligne de conduite le rejoint. */
+.plaque { position: relative; }
+.plaque-n {
+  position: absolute;
+  top: 16px; right: 16px;
+  font-size: .6rem;
+  letter-spacing: .1em;
+}
+.plaque-nom { padding-right: 34px; }
+
+/* ---------- Pièce jointe : le mot de l'émetteur ----------
+   Caché tant que <body data-piece> n'est pas posé. */
+.piece { margin-top: 26px; display: grid; gap: 10px; justify-items: start; }
+.piece[hidden] { display: none; }
+.piece-tete {
+  font-family: var(--f-mono); font-size: .6rem; letter-spacing: .05em;
+  text-transform: uppercase; color: var(--text-3);
+}
+.piece-btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 10px 16px; cursor: pointer;
+  background: transparent; border: 1px solid var(--line-strong); color: var(--text);
+  font-family: var(--f-mono); font-size: .68rem; font-weight: 500;
+  letter-spacing: .035em; text-transform: uppercase;
+  transition: background-color .16s ease, border-color .16s ease;
+}
+.piece-btn:hover { background: var(--surface-hi); border-color: var(--text-4); }
+.piece-btn:active { transform: scale(.985); }
+.piece-ico { width: 0; height: 0; border-left: 8px solid var(--accent); border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+.piece-btn[aria-pressed='true'] .piece-ico { width: 8px; height: 10px; border: 0; background: var(--accent); }
+.piece-txt { margin-top: 2px; }
+
+/* ---------- L'impression : le dossier sort sur blanc ----------
+   Un dossier, ça s'imprime. Noir sur blanc, cartouche compris, sans le
+   chrome d'écran. C'est la preuve que le document existe vraiment. */
+@media print {
+  .seq, .ajm, .rail, .console, .hdr-cta, .piece-btn, .trace { display: none !important; }
+  html, body { background: #fff !important; color: #111 !important; }
+  body { font-size: 11.5pt; }
+  .dossier > .wrap { display: block !important; max-width: none; padding: 0; }
+  h1, h2, h3, .lead, .prose, .prose strong, .mod-nom, .instr b, .tarif h3 { color: #111 !important; }
+  .lead, .prose, p, li, dd { color: #333 !important; }
+  .cartouche {
+    border: 1px solid #111 !important; background: #fff !important;
+    box-shadow: none !important; float: right; width: 62mm; margin: 0 0 8mm 8mm;
+    page-break-inside: avoid;
+  }
+  .cartouche .cart-tete { background: #f0f0f0 !important; color: #111 !important; }
+  .cartouche dt { color: #555 !important; }
+  .cartouche dd, .cartouche dd b { color: #111 !important; }
+  .cartouche .cart-ref dd i { color: #111 !important; font-style: italic; }
+  .art-n { color: #666 !important; }
+  .art-n b { color: #111 !important; }
+  .card, .panel, .mod, .tarif, .split, .aside-panel, .instr, .cta {
+    border-color: #bbb !important; background: #fff !important; box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+  .cta--ambre { background: #fff !important; border: 1px solid #111 !important; }
+  .cta--ambre h2, .cta--ambre p { color: #111 !important; }
+  .btn { border: 1px solid #111 !important; background: #fff !important; color: #111 !important; }
+  .plus[open] .plus-corps, .plus-corps { display: block !important; }
+  .plus > summary { display: none !important; }
+  .ftr { border-top: 1px solid #bbb !important; }
+  a { color: #111 !important; text-decoration: underline; }
+  section { page-break-inside: auto; }
 }

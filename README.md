@@ -22,6 +22,21 @@ de navigation est du CSS et une centaine de lignes dans `site.js`.
 > l'assistant** sont en v4 : **`docs/direction-v4.md`**. À lire avant de
 > toucher à l'échelle typographique ou à la séquence — les deux ont des
 > raisons chiffrées.
+>
+> **Le site n'est plus une vitrine : c'est le dossier d'accès lui-même.**
+> Pourquoi ce parti pris, pourquoi le « mur d'écrans » a été écarté malgré
+> deux juges sur trois, et les trois pièges d'accessibilité rencontrés :
+> **`docs/direction-v5.md`**.
+
+### Le message vocal d'accueil
+
+Il n'y a **aucun fichier audio** dans le dépôt, et c'est normal. Pour en
+ajouter un : `assets/audio/LISEZ-MOI.txt` explique les deux gestes (déposer le
+fichier, puis poser `data-piece` sur le `<body>` de `index.html`).
+
+Tant que l'attribut n'est pas posé, le bloc reste caché, **aucune requête n'est
+faite** et rien ne s'affiche. Jamais de synthèse vocale : le site passe son
+temps à dire qu'il n'est pas fabriqué par une machine.
 
 ### Les polices
 
@@ -68,7 +83,7 @@ node scripts/verifier-avant-mise-en-ligne.mjs   # 1 s, sans dépendance
 node scripts/verifier-navigateur.mjs            # ~3 min, Chromium réel
 ```
 
-Le second lance **423 contrôles** : 9 pages × 5 largeurs (console du
+Le second lance **430 contrôles** : 9 pages × 5 largeurs (console du
 navigateur, requêtes en échec, débordement horizontal, appels à des tiers),
 accessibilité (lien d'évitement, focus, contrastes calculés sur les couleurs
 réellement rendues, y compris sur la page prix), **la console de navigation** (chaque destination répond
@@ -113,14 +128,17 @@ Derniers relevés (v4, serveur compressé comme en production) :
 
 | | Perf | A11y | Bonnes pratiques | SEO | CLS |
 | --- | --- | --- | --- | --- | --- |
-| Mobile, 6 pages | **99–100** | 100 | 100 | 100 | 0 |
-| Ordinateur, 6 pages | **99–100** | 100 | 100 | 100 | 0 |
+| Mobile, 6 pages | **100** | 100 | 100 | 100 | 0 |
+| Ordinateur, 6 pages | **100** | 100 | 100 | 100 | 0 |
 
-Le 99 est toujours l'accueil, et toujours pour la même raison : ~56 ms
-d'analyse de `site.js`, qui a grossi. Les cinq autres pages sont à 100.
-LCP mobile 1,51 s, identique à la v3 malgré la séquence d'ouverture —
-comparaison faite avec le même serveur et la même compression, voir
-`docs/direction-v4.md` §7.
+La v5 a fait passer l'accueil de 99 à 100 : elle a supprimé plus de travail de
+fil principal (un fondu non composé) qu'elle n'en a ajouté. LCP mobile 1,51 s,
+inchangé depuis la v3.
+
+**Règle apprise en v5, à ne pas réapprendre :** ne jamais faire de fondu
+d'opacité sur un bloc contenant du texte. Pendant le fondu, tout ce qu'il
+contient est du texte mélangé au fond, et l'audit de contraste le mesure
+pendant le fondu. Glisser, oui ; s'effacer, non.
 
 ### Regénérer les images
 

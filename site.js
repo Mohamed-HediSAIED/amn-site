@@ -82,8 +82,64 @@
       /* Filet : si une animation ne se déclenche pas (onglet en
          arrière-plan au chargement, par exemple), le panneau ne doit
          pas rester en travers de la page. */
-      setTimeout(passer, 3200);
+      setTimeout(passer, 3800);
     }
+  }
+
+  /* ================================================================
+     LA PIÈCE JOINTE — le mot de l'émetteur
+     ================================================================
+     Aucune synthèse vocale, ni embarquée ni distante : le site passe
+     son temps à dire qu'il n'est pas fabriqué par une machine, une
+     voix de synthèse à l'accueil dirait le contraire en trois
+     secondes. Ce bloc n'est donc QUE l'emplacement — le vrai
+     enregistrement viendra d'un micro.
+
+     GARDE PAR ATTRIBUT, et pas sondage réseau : tant que <body> ne
+     porte pas `data-piece`, on ne révèle rien et on ne demande rien.
+     Pas de requête pour un fichier qui n'existe pas, pas de 404 dans
+     la console, pas de bouton mort qui s'excuse à chaque clic.
+     L'objet Audio n'est construit qu'au premier clic.
+     Voir assets/audio/LISEZ-MOI.txt.
+     ================================================================ */
+  var piece = document.getElementById('piece');
+  var pieceSrc = document.body.getAttribute('data-piece');
+  if (piece && pieceSrc) {
+    var pbtn = document.getElementById('piece-btn');
+    var plbl = pbtn && pbtn.querySelector('.piece-lbl');
+    var son = null;
+    piece.hidden = false;
+
+    var etat = function (joue) {
+      pbtn.setAttribute('aria-pressed', joue ? 'true' : 'false');
+      if (plbl) plbl.textContent = joue ? 'Arrêter' : 'Écouter';
+    };
+
+    pbtn.addEventListener('click', function () {
+      if (!son) {
+        son = new Audio(pieceSrc);
+        son.preload = 'none';
+        son.addEventListener('ended', function () { etat(false); });
+        /* Le fichier a été annoncé mais ne se charge pas : on le dit
+           devant le visiteur plutôt que d'échouer en silence. */
+        son.addEventListener('error', function () {
+          piece.textContent = '';
+          var p = document.createElement('p');
+          p.className = 'piece-tete';
+          p.textContent = 'Le message n’est pas disponible pour le moment.';
+          piece.appendChild(p);
+        });
+      }
+      if (son.paused) {
+        var essai = son.play();
+        if (essai && essai.catch) essai.catch(function () { etat(false); });
+        etat(true);
+      } else {
+        son.pause();
+        son.currentTime = 0;
+        etat(false);
+      }
+    });
   }
 
   /* ================================================================
