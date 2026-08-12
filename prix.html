@@ -224,6 +224,46 @@
     </div>
   </section>
 
+  <section class="wrap section ajm-zone" aria-label="Questions fréquentes">
+  <!-- ==================================================================
+       ASSISTANT À RÉPONSES PRÉPARÉES
+       ==================================================================
+       Aucun modèle de langage derrière, aucun appel réseau, aucun coût.
+       Des réponses écrites à la main dans site.js, choisies par mots-
+       clés. Ce qui n'est pas prévu renvoie au formulaire — jamais une
+       réponse improvisée qui ressemblerait à un engagement sur un prix,
+       un délai ou une garantie.
+
+       Sans JavaScript, le formulaire part vers /contact et un message le
+       dit. On ne laisse pas un champ qui a l'air de marcher.
+       ================================================================== -->
+  <details class="ajm">
+    <summary class="ajm-invite">
+      <span class="ajm-ico" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </span>
+      <span class="ajm-invite-txt">
+        <b>Une question ? Les réponses sont déjà écrites.</b>
+        <span class="ajm-invite-p">Prix, délais, ce qu'on surveille, vos données. Pas une intelligence artificielle : des réponses préparées à l'avance.</span>
+        <span class="etq">Aucun modèle · aucune donnée envoyée</span>
+      </span>
+      <span class="ajm-invite-btn"><span class="ajm-ferme">Ouvrir</span><span class="ajm-ouvert">Fermer</span></span>
+    </summary>
+    <div class="ajm-panel">
+      <p class="ajm-tete">Réponses écrites à l'avance, pas une intelligence artificielle. Si votre question sort de ce qui est prévu, je vous envoie vers le formulaire.</p>
+      <div class="ajm-fil" role="log" aria-live="polite" aria-label="Conversation">
+        <p class="ajm-bulle ajm-bulle--lui">Bonjour. Je peux répondre sur les prix, les délais, ce qu'on surveille, les données personnelles et la marche à suivre pour demander un accès.</p>
+      </div>
+      <form class="ajm-form" action="/contact" method="get">
+        <label class="hp" for="ajm-q">Votre question</label>
+        <input type="text" id="ajm-q" name="q" autocomplete="off" placeholder="Votre question…" maxlength="300">
+        <button type="submit">Demander</button>
+      </form>
+      <p class="ajm-sansjs">Sans JavaScript, ce champ vous emmène simplement au <a href="/contact">formulaire de demande d'accès</a>.</p>
+    </div>
+  </details>
+  </section>
+
 </main>
 
 <footer class="ftr">
@@ -262,36 +302,6 @@
   </div>
 </footer>
 
-<!-- ==================================================================
-     ASSISTANT À RÉPONSES PRÉPARÉES
-     ==================================================================
-     Aucun modèle de langage derrière, aucun appel réseau, aucun coût.
-     Des réponses écrites à la main dans site.js, choisies par mots-
-     clés. Ce qui n'est pas prévu renvoie au formulaire — jamais une
-     réponse improvisée qui ressemblerait à un engagement sur un prix,
-     un délai ou une garantie.
-
-     Sans JavaScript, le formulaire part vers /contact et un message le
-     dit. On ne laisse pas un champ qui a l'air de marcher.
-     ================================================================== -->
-<details class="ajm">
-  <summary>
-    <span class="ajm-led" aria-hidden="true"></span>
-    Questions fréquentes
-  </summary>
-  <div class="ajm-panel">
-    <p class="ajm-tete">Réponses écrites à l'avance, pas une intelligence artificielle. Si votre question sort de ce qui est prévu, je vous envoie vers le formulaire.</p>
-    <div class="ajm-fil" role="log" aria-live="polite" aria-label="Conversation">
-      <p class="ajm-bulle ajm-bulle--lui">Bonjour. Je peux répondre sur les prix, les délais, ce qu'on surveille, les données personnelles et la marche à suivre pour demander un accès.</p>
-    </div>
-    <form class="ajm-form" action="/contact" method="get">
-      <label class="hp" for="ajm-q">Votre question</label>
-      <input type="text" id="ajm-q" name="q" autocomplete="off" placeholder="Votre question…" maxlength="300">
-      <button type="submit">Demander</button>
-    </form>
-    <p class="ajm-sansjs">Sans JavaScript, ce champ vous emmène simplement au <a href="/contact">formulaire de demande d'accès</a>.</p>
-  </div>
-</details>
 
 <script src="/site.js" defer></script>
 </body>

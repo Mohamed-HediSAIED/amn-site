@@ -23,10 +23,15 @@ de navigation est du CSS et une centaine de lignes dans `site.js`.
 > toucher à l'échelle typographique ou à la séquence — les deux ont des
 > raisons chiffrées.
 >
-> **Le site n'est plus une vitrine : c'est le dossier d'accès lui-même.**
-> Pourquoi ce parti pris, pourquoi le « mur d'écrans » a été écarté malgré
-> deux juges sur trois, et les trois pièges d'accessibilité rencontrés :
-> **`docs/direction-v5.md`**.
+> **Le site porte l'identité du produit, il ne s'en invente pas une.**
+> Toutes les valeurs viennent de `amn-desktop` et sont recopiées dans
+> **`docs/design-tokens.md`** — la source de vérité unique. Si une valeur du
+> site ne s'y retrouve pas, elle est fausse.
+>
+> Pourquoi les coins « appliqués » se lisaient quand même carrés, pourquoi
+> `mask-image` coûtait 30 % des images, et le seul écart volontaire avec le
+> produit (le grain) avec son chiffrage : **`docs/direction-v6.md`**.
+> L'historique des directions précédentes reste dans `docs/direction-v2…v5.md`.
 
 ### Le message vocal d'accueil
 
@@ -90,10 +95,13 @@ node scripts/verifier-avant-mise-en-ligne.mjs   # 1 s, sans dépendance
 node scripts/verifier-navigateur.mjs            # ~3 min, Chromium réel
 ```
 
-Le second lance **430 contrôles** : 9 pages × 5 largeurs (console du
+Le second lance **435 contrôles** : 9 pages × 5 largeurs (console du
 navigateur, requêtes en échec, débordement horizontal, appels à des tiers),
 accessibilité (lien d'évitement, focus, contrastes calculés sur les couleurs
-réellement rendues, y compris sur la page prix), **la console de navigation** (chaque destination répond
+réellement rendues, y compris sur la page prix), **le monochrome** (la teinte
+de chaque couleur rendue de chaque page — pas un `grep` sur la source : c'est
+comme ça que huit `rgba(255, 178, 36, …)` avaient survécu à un nettoyage qui
+cherchait « ffb224 »), **la console de navigation** (chaque destination répond
 seule par son URL, ouverture au clic et au clavier, Échap, retour du focus,
 reste de la page rendu inerte, défilement bloqué puis rendu, fonctionnement
 sans JavaScript jusqu'à la navigation effective, parallaxe absente sur écran
@@ -138,9 +146,11 @@ Derniers relevés (v4, serveur compressé comme en production) :
 | Mobile, 6 pages | **100** | 100 | 100 | 100 | 0 |
 | Ordinateur, 6 pages | **100** | 100 | 100 | 100 | 0 |
 
-La v5 a fait passer l'accueil de 99 à 100 : elle a supprimé plus de travail de
-fil principal (un fondu non composé) qu'elle n'en a ajouté. LCP mobile 1,51 s,
-inchangé depuis la v3.
+LCP mobile : 1,52 s sur l'accueil, 1,59 à 1,68 s sur les pages intérieures.
+La v6 ajoute ~10 Ko par page (le tracé des six nappes de télémétrie) et 80 à
+170 ms de LCP sur les pages intérieures. Le score reste à 100 et le CLS à 0,
+mais **c'est une dégradation réelle, et elle est déclarée** : elle n'apparaît
+pas dans la note.
 
 **Règle apprise en v5, à ne pas réapprendre :** ne jamais faire de fondu
 d'opacité sur un bloc contenant du texte. Pendant le fondu, tout ce qu'il

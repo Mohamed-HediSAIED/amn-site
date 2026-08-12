@@ -1066,6 +1066,70 @@ contact.reinitialiserCompteurs();
   );
 }
 
+/* ================= 3 bis. Monochrome ==================================
+   « Interdiction stricte et non négociable : aucune couleur orange/ambre
+   nulle part sur le site, à aucun titre. » Le produit est monochrome et
+   ne s'autorise qu'un rouge, réservé aux alertes.
+
+   Ce contrôle ne LIT PAS le CSS, il regarde ce qui est RÉELLEMENT
+   RENDU : couleurs de texte, de fond, de bordure et d'ombre de chaque
+   élément de chaque page. Un `grep` sur la source ne suffisait pas —
+   c'est précisément comme ça que huit `rgba(255, 178, 36, …)` ont
+   survécu à une passe de nettoyage qui cherchait « ffb224 » et
+   « ambre ». Une couleur écrite autrement est une couleur quand même.
+   ==================================================================== */
+
+console.log('3 bis. Monochrome (aucune trace d’ambre)');
+{
+  for (const chemin of PAGES) {
+    const page = await navigateur.newPage({ viewport: { width: 1440, height: 900 } });
+    await page.goto(BASE + chemin, { waitUntil: 'networkidle' });
+
+    const fautifs = await page.evaluate(() => {
+      /* Saturation et teinte d'un `rgb()`/`rgba()` rendu. */
+      const lire = (v) => {
+        const m = /rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/.exec(v);
+        if (!m) return null;
+        const [r, g, b] = [+m[1], +m[2], +m[3]];
+        const a = m[4] === undefined ? 1 : +m[4];
+        if (a < 0.02) return null;              // invisible, on ne juge pas
+        const max = Math.max(r, g, b), min = Math.min(r, g, b);
+        if (max - min < 12) return null;        // gris : neutre, donc conforme
+        let h;
+        const d = max - min;
+        if (max === r) h = 60 * (((g - b) / d) % 6);
+        else if (max === g) h = 60 * ((b - r) / d + 2);
+        else h = 60 * ((r - g) / d + 4);
+        if (h < 0) h += 360;
+        return { h: Math.round(h), sat: max - min, css: v };
+      };
+
+      const trouves = [];
+      for (const el of document.querySelectorAll('body *')) {
+        const s = getComputedStyle(el);
+        for (const prop of ['color', 'backgroundColor', 'borderTopColor',
+                            'borderBottomColor', 'borderLeftColor',
+                            'borderRightColor', 'outlineColor']) {
+          const c = lire(s[prop]);
+          if (!c) continue;
+          /* Le rouge d'alerte du produit (#ff4230 ≈ 8°) est la SEULE
+             couleur admise, et seulement en teinte franchement rouge. */
+          const rougeReserve = c.h <= 12 || c.h >= 350;
+          if (!rougeReserve) {
+            trouves.push(`${el.tagName.toLowerCase()}.${el.className || '—'} ${prop}=${c.css} (teinte ${c.h}°)`);
+          }
+        }
+        if (trouves.length > 4) break;
+      }
+      return trouves;
+    });
+
+    t(`${chemin} — aucune couleur non monochrome rendue`,
+      fautifs.length === 0, fautifs.slice(0, 3).join(' · '));
+    await page.close();
+  }
+}
+
 /* ================= 4. En-têtes de sécurité ================= */
 
 console.log('4. En-têtes de sécurité réellement servis');
