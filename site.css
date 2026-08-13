@@ -912,44 +912,145 @@ html:has(.console[open]) { overflow: hidden; }
 .hero-note { margin-top: 18px; max-width: 64ch; margin-inline: auto; }
 .hero .mono { display: block; }
 
-/* ---------- Les nappes de télémétrie ----------
-   Six plans qui défilent en continu derrière le titre. C'est ce
-   qu'affiche un mur de supervision, et c'est du `transform` pur.
+/* ---------- LE FOND DU BANDEAU : une carte de veille ----------
+   Remplace les six nappes de télémétrie de la v6. Aaron les trouvait
+   TROP LUMINEUSES : six courbes qui défilaient en permanence, ça
+   bougeait partout et ça tirait l'œil loin du titre.
 
-   MESURÉ — le premier montage estompait les bords avec `mask-image` sur
-   le conteneur. Ça sortait les nappes du chemin composé : 30,3 %
-   d'images sautées sur ordinateur, processeur bridé ×6. Deux voiles en
-   dégradé de la couleur du fond donnent le même effet pour 1,14 %.
-   C'est ce qui paie six nappes au lieu de quatre. */
-.nappes { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
-.voile { position: absolute; top: 0; bottom: 0; width: 13%; z-index: 1; pointer-events: none; }
-.voile-g { left: 0;  background: linear-gradient(90deg,  var(--bg) 12%, transparent); }
-.voile-d { right: 0; background: linear-gradient(270deg, var(--bg) 12%, transparent); }
+   Ce qu'il a demandé à la place : « une salle de contrôle la nuit où
+   tout va bien ». Donc une carte du monde presque noire, immobile, et
+   de rares pulsations lentes. Le silence d'abord, le mouvement ensuite.
 
-.nappe { position: absolute; left: 0; width: 200%; display: flex; will-change: transform; }
-.nappe svg { width: 50%; height: 100%; flex: none; }
+   La carte est une MATRICE DE POINTS produite par un script sans aucune
+   dépendance : les continents sont des polygones simplifiés écrits à la
+   main en longitude/latitude, échantillonnés sur une grille 110 × 52.
+   Voir docs/direction-v7.md. Aucun fichier de données géographiques
+   n'est embarqué, et la carte est STATIQUE — elle ne coûte rien par
+   image, contrairement aux six couches qui défilaient.
 
-/* Trois plans de profondeur : le plan avant est plus grand, plus opaque
-   et plus rapide ; le lointain plus fin, plus pâle et plus lent. */
-.nappe-1 { top:  1%; height:  96px; opacity: .26; animation: defile 71s linear infinite; }
-.nappe-2 { top: 17%; height: 104px; opacity: .20; animation: defile 58s linear infinite; }
-.nappe-3 { top: 31%; height: 150px; opacity: .38; animation: defile 23s linear infinite; }
-.nappe-4 { top: 55%; height: 100px; opacity: .30; animation: defile 41s linear infinite; }
-.nappe-5 { top: 67%; height: 140px; opacity: .34; animation: defile 31s linear infinite; }
-.nappe-6 { top: 86%; height: 100px; opacity: .16; animation: defile 67s linear infinite; }
-@keyframes defile { to { transform: translate3d(-50%, 0, 0); } }
-
-/* Sur téléphone, la même `viewBox` de 1 200 unités est comprimée dans
-   780 px : les accidents du tracé se resserrent et les courbes passent
-   au travers du chapô au lieu de rester derrière. On baisse d'un cran
-   plutôt que de retirer — le mouvement reste, la lecture repasse
-   devant. */
-@media (max-width: 620px) {
-  .nappes { opacity: .55; }
-  .voile { width: 8%; }
+   HONNÊTETÉ — les points sont ILLUSTRATIFS. Ils sont posés sur des
+   régions d'hébergement courantes, parce qu'un site français vit
+   souvent sur un serveur à Francfort, à Dublin ou en Virginie. Le
+   bloc est `aria-hidden` et purement décoratif : aucun chiffre, aucune
+   étiquette, nulle part sur le site, ne prétend compter des sites
+   supervisés ni dire où ils sont. C'est un décor, pas une donnée. */
+.fond {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
 }
 
-@media (prefers-reduced-motion: reduce) { .nappe { animation: none; } }
+/* La carte et les points partagent EXACTEMENT la même boîte : sans ça,
+   les points en pourcentage ne tomberaient pas sur la géographie. */
+.carte-boite {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(1240px, 104%);
+  aspect-ratio: 1000 / 473;
+}
+/* MESURÉ À L'ŒIL — première tentative à 13 % : la carte écrasait le
+   titre et rendait le chapô pénible à lire. C'était exactement le
+   défaut reproché aux nappes. « Presque noire » veut dire qu'on ne la
+   voit qu'au deuxième regard. */
+.carte {
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: .30;
+}
+
+/* Un voile radial re-noircit le centre, là où se trouvent le titre et
+   le chapô. La carte reste lisible sur les bords, le texte ne se bat
+   contre rien. Statique : aucun coût par image.
+
+   Il est posé ENTRE la carte et les points, pas au-dessus des deux :
+   sinon il éteignait aussi les pulsations, et c'est justement elles
+   qui rendent la carte vivante. */
+.fond-voile {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 46% 58% at 50% 46%, var(--bg) 32%, transparent 78%),
+    linear-gradient(90deg, var(--bg), transparent 16%, transparent 84%, var(--bg));
+}
+
+/* ---- Les points de veille ----
+   Ils RESPIRENT, ils ne clignotent pas : 7 s par cycle, et jamais deux
+   en même temps. Seule l'opacité est animée — c'est composé, le fil
+   principal ne fait rien. */
+.veille {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 9999px;
+  background: var(--accent);
+  opacity: .22;
+  animation: veille-respire 7s ease-in-out infinite;
+}
+@keyframes veille-respire {
+  0%, 100% { opacity: .18; }
+  50%      { opacity: .72; }
+}
+
+/* Trois points sur huit émettent en plus une onde qui s'ouvre — le
+   « ping » d'une console de supervision. Limité à trois : chaque onde
+   est une couche composée de plus, et une carte où tout pulse redevient
+   exactement ce qu'Aaron ne voulait plus. */
+.onde {
+  position: absolute;
+  inset: -13px;
+  border-radius: 9999px;
+  border: 1px solid var(--accent);
+  opacity: 0;
+  animation: veille-onde 7s cubic-bezier(.22, .61, .36, 1) infinite;
+}
+@keyframes veille-onde {
+  0%       { transform: scale(.28); opacity: 0; }
+  12%      { opacity: .42; }
+  55%, 100% { transform: scale(1); opacity: 0; }
+}
+
+/* Les décalages : aucune pulsation ne tombe en même temps qu'une autre. */
+.v1 { left: 46.78%; top: 18.4%; animation-delay: 0.0s; }
+.v1 .onde { animation-delay: 0.0s; }
+.v2 { left: 49.24%; top: 21.75%; animation-delay: 1.7s; }
+.v2 .onde { animation-delay: 1.7s; }
+.v3 { left: 51.05%; top: 20.81%; animation-delay: 3.4s; }
+.v4 { left: 27.55%; top: 24.25%; animation-delay: 5.1s; }
+.v5 { left: 26.43%; top: 29.18%; animation-delay: 6.8s; }
+.v5 .onde { animation-delay: 6.8s; }
+.v6 { left: 35.25%; top: 75.78%; animation-delay: 8.5s; }
+.v7 { left: 78.23%; top: 57.2%; animation-delay: 10.2s; }
+.v8 { left: 91.77%; top: 83.49%; animation-delay: 11.9s; }
+/* Sur téléphone, la colonne est étroite et haute : le texte occupe
+   presque toute la largeur, et la carte se retrouve DERRIÈRE le chapô
+   au lieu d'être autour. Première version à 10 % : les points
+   traversaient « Un seul endroit pour votre agenda… », exactement le
+   défaut reproché aux nappes. Elle descend donc plus bas qu'au bureau,
+   et le voile se resserre sur la colonne de texte. */
+@media (max-width: 620px) {
+  .carte-boite { width: 190%; }
+  .carte { opacity: .24; }
+  .fond-voile {
+    background:
+      radial-gradient(ellipse 74% 46% at 50% 42%, var(--bg) 44%, transparent 88%),
+      linear-gradient(180deg, var(--bg), transparent 22%, transparent 80%, var(--bg));
+  }
+  .veille { opacity: .16; }
+}
+
+/* La consigne du dépôt : glisser oui, mais rien d'obligatoire. Sans
+   mouvement, les points restent visibles à mi-intensité — la carte ne
+   disparaît pas, elle se tait. */
+@media (prefers-reduced-motion: reduce) {
+  .veille { animation: none; opacity: .45; }
+  .onde { animation: none; opacity: .18; transform: scale(1); }
+}
 
 /* ---------- Le bandeau de chiffres ----------
    Le procédé exact du produit : `gap-px` sur un fond couleur filet. Les

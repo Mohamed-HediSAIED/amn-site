@@ -1130,6 +1130,94 @@ console.log('3 bis. Monochrome (aucune trace d’ambre)');
   }
 }
 
+/* ================= 3 ter. Le fond du bandeau =========================
+   La v6 avait six nappes de télémétrie qui défilaient ; Aaron les
+   trouvait trop lumineuses. La v7 les remplace par une carte immobile et
+   huit points qui respirent.
+
+   Ces contrôles existent parce que la leçon de la v5 tient toujours :
+   « un contrôle qui ne regarde pas les nouveaux éléments ne protège que
+   le passé ». Ils vérifient que le fond est bien DÉCORATIF, qu'il
+   n'anime que des propriétés composées, et qu'il se tait quand le
+   système demande moins de mouvement.
+   ==================================================================== */
+
+console.log('3 ter. Le fond du bandeau (carte de veille)');
+{
+  const page = await navigateur.newPage({ viewport: { width: 1440, height: 900 } });
+  await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  await sansSequence(page);
+
+  const f = await page.evaluate(() => {
+    const fond = document.querySelector('.fond');
+    const carte = document.querySelector('.carte');
+    const pts = [...document.querySelectorAll('.veille')];
+    const anims = pts.map((p) => getComputedStyle(p).animationName);
+    const ondes = [...document.querySelectorAll('.onde')];
+    return {
+      fondCache: fond ? fond.getAttribute('aria-hidden') === 'true' : false,
+      inerte: fond ? getComputedStyle(fond).pointerEvents === 'none' : false,
+      nbChemins: carte ? carte.querySelectorAll('path').length : 0,
+      nbPoints: pts.length,
+      nbOndes: ondes.length,
+      animsPoints: [...new Set(anims)],
+      /* Les nappes ne doivent plus exister nulle part. */
+      restesNappes: document.querySelectorAll('.nappe, .nappes, .voile').length,
+    };
+  });
+
+  t('Le fond est décoratif (aria-hidden)', f.fondCache);
+  t('Le fond ne capte aucun pointeur', f.inerte);
+  t('La carte est un seul chemin', f.nbChemins === 1, `${f.nbChemins} chemin(s)`);
+  t('Huit points de veille', f.nbPoints === 8, `${f.nbPoints} trouvé(s)`);
+  t('Trois points émettent une onde', f.nbOndes === 3, `${f.nbOndes} trouvée(s)`);
+  t('Les points respirent', f.animsPoints.includes('veille-respire'), f.animsPoints.join(', '));
+  t('Plus aucune nappe de télémétrie', f.restesNappes === 0, `${f.restesNappes} reste(s)`);
+
+  /* Seules `opacity` et `transform` ont le droit d'être animées : c'est
+     la règle du dépôt depuis la v2, et elle a déjà coûté deux fois. */
+  const proprietes = await page.evaluate(() => {
+    const noms = new Set();
+    for (const feuille of document.styleSheets) {
+      let regles;
+      try { regles = feuille.cssRules; } catch { continue; }
+      for (const r of regles) {
+        if (r.type !== CSSRule.KEYFRAMES_RULE) continue;
+        if (!/veille/.test(r.name)) continue;
+        for (const img of r.cssRules) {
+          for (const p of img.style) noms.add(p);
+        }
+      }
+    }
+    return [...noms];
+  });
+  t(
+    'Le fond n\'anime que des propriétés composées',
+    proprietes.every((p) => p === 'opacity' || p === 'transform'),
+    proprietes.join(', ')
+  );
+  await page.close();
+}
+
+/* Mouvement réduit : la carte ne disparaît pas, elle s'immobilise. */
+{
+  const ctx = await navigateur.newContext({
+    viewport: { width: 1440, height: 900 },
+    reducedMotion: 'reduce',
+  });
+  const page = await ctx.newPage();
+  await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  await sansSequence(page);
+  const r = await page.evaluate(() => {
+    const p = document.querySelector('.veille');
+    const c = getComputedStyle(p);
+    return { anim: c.animationName, opacite: parseFloat(c.opacity) };
+  });
+  t('Mouvement réduit : les points cessent de respirer', r.anim === 'none', r.anim);
+  t('Mouvement réduit : les points restent visibles', r.opacite > 0.2, String(r.opacite));
+  await ctx.close();
+}
+
 /* ================= 4. En-têtes de sécurité ================= */
 
 console.log('4. En-têtes de sécurité réellement servis');
