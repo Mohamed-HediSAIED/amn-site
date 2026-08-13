@@ -169,6 +169,56 @@ if (!existsSync(join(RACINE, 'assets', 'og.png'))) {
   ko('assets/og.png absent — lancer : node scripts/generer-images.mjs');
 }
 
+/* ---------- Ce qui n'appartient pas au code ----------
+   v7 — les attentes étaient documentées, mais CHACUNE DANS SON COIN :
+   les sept champs dans mentions-legales.html, la garantie de transfert
+   dans confidentialite.html, le logo dans un commentaire au sommet de
+   assets/logo.svg, le message vocal dans assets/audio/LISEZ-MOI.txt, et
+   les variables du formulaire nulle part. Il fallait ouvrir cinq
+   fichiers pour savoir ce qui restait à faire. Ce script est celui
+   qu'on lance avant de mettre en ligne : c'est donc lui qui doit tout
+   dire, y compris ce qu'il ne peut pas vérifier lui-même. */
+
+{
+  const logo = readFileSync(join(RACINE, 'assets', 'logo.svg'), 'utf8');
+  if (/GABARIT|EMPLACEMENT DU LOGO/.test(logo)) {
+    todo(
+      'Le logo est encore le GABARIT livré avec le site.\n' +
+        '     Remplacer assets/logo.svg par le vrai fichier — rien d\'autre à toucher.\n' +
+        '     Si le rapport largeur/hauteur change, ajuster width/height sur les\n' +
+        '     balises <img class="logo-mark"> (voir README §Logo).'
+    );
+  }
+
+  const audio = ['accueil.m4a', 'accueil.mp3']
+    .some((f) => existsSync(join(RACINE, 'assets', 'audio', f)));
+  const branche = Object.values(html).some((src) => /<body[^>]*data-piece=/.test(src));
+  if (!audio && !branche) {
+    todo(
+      'Le message vocal d\'accueil n\'est pas déposé (facultatif).\n' +
+        '     Mode d\'emploi : assets/audio/LISEZ-MOI.txt. Tant qu\'il manque, le bloc\n' +
+        '     reste masqué et AUCUNE requête n\'est faite — il n\'y a donc rien de cassé.'
+    );
+  } else if (audio && !branche) {
+    ko(
+      'Un fichier audio est déposé mais <body> ne porte pas data-piece :\n' +
+        '     le message ne sera jamais joué. Voir assets/audio/LISEZ-MOI.txt.'
+    );
+  } else if (!audio && branche) {
+    ko(
+      '<body> porte data-piece mais aucun fichier audio n\'est déposé :\n' +
+        '     le visiteur verra un bouton mort. Déposer le fichier ou retirer l\'attribut.'
+    );
+  }
+
+  todo(
+    'Le formulaire de contact n\'envoie rien tant que le projet Vercel n\'a pas ses\n' +
+      '     variables : RESEND_API_KEY + CONTACT_TO, ou CONTACT_WEBHOOK_URL.\n' +
+      '     Sans elles, la demande est acceptée, journalisée côté serveur… et perdue.\n' +
+      '     Ce script ne peut pas le vérifier d\'ici : c\'est à contrôler dans Vercel.'
+  );
+}
+
 /* ---------- Rapport ---------- */
 
 console.log(`\n${pages.length} pages contrôlées.\n`);

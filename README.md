@@ -31,6 +31,13 @@ de navigation est du CSS et une centaine de lignes dans `site.js`.
 > Pourquoi les coins « appliqués » se lisaient quand même carrés, pourquoi
 > `mask-image` coûtait 30 % des images, et le seul écart volontaire avec le
 > produit (le grain) avec son chiffrage : **`docs/direction-v6.md`**.
+>
+> Le fond du bandeau — une carte du monde presque noire, immobile, avec
+> huit points qui respirent — remplace les nappes de télémétrie, jugées
+> trop lumineuses. Pourquoi le prix par personne au-delà de cinq n'a PAS
+> été publié (il croise le forfait agence à treize personnes), et les
+> trois trous de l'assistant trouvés en cherchant les questions voisines :
+> **`docs/direction-v7.md`**.
 > L'historique des directions précédentes reste dans `docs/direction-v2…v5.md`.
 
 ### Le message vocal d'accueil
@@ -95,7 +102,7 @@ node scripts/verifier-avant-mise-en-ligne.mjs   # 1 s, sans dépendance
 node scripts/verifier-navigateur.mjs            # ~3 min, Chromium réel
 ```
 
-Le second lance **435 contrôles** : 9 pages × 5 largeurs (console du
+Le second lance **462 contrôles** : 9 pages × 5 largeurs (console du
 navigateur, requêtes en échec, débordement horizontal, appels à des tiers),
 accessibilité (lien d'évitement, focus, contrastes calculés sur les couleurs
 réellement rendues, y compris sur la page prix), **le monochrome** (la teinte

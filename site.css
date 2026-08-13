@@ -1479,7 +1479,9 @@ section[id] { scroll-margin-top: 84px; }
   font-size: .96rem;
   line-height: 1.55;
 }
-.msg h3 { margin-bottom: 8px; }
+/* Les blocs d'état portent un h2 depuis la v7 : en h3 ils créaient
+   un saut h1 → h3 dans le plan du document de la page contact. */
+.msg h2 { margin-bottom: 8px; font-size: 1.25rem; }
 .msg p { color: var(--text-2); }
 .msg-ok { border-left: 3px solid var(--accent); }
 .msg-err { border-left: 3px solid var(--alert); }   /* rouge = alerte, seul emploi */
@@ -1777,17 +1779,32 @@ section[id] { scroll-margin-top: 84px; }
   color: var(--text-3);
 }
 
-.tarif-qui { margin-top: 8px; font-size: .93rem; line-height: 1.5; color: var(--text-2); }
+.tarif-qui {
+  margin-top: 8px;
+  font-size: .93rem;
+  line-height: 1.5;
+  color: var(--text-2);
+}
 
+/* Le chiffre est le DERNIER élément de la carte et il est poussé en
+   bas : c'est la seule façon d'aligner les trois prix, puisque ni les
+   descriptions ni les listes n'ont la même hauteur d'un forfait à
+   l'autre. Comparer trois chiffres d'un coup d'œil, c'est tout ce qu'on
+   demande à une grille tarifaire. */
 .tarif-prix {
-  margin-top: 22px;
-  padding-top: 18px;
+  margin-top: auto;
+  padding-top: 20px;
   border-top: 1px solid var(--line);
   display: flex;
   align-items: baseline;
   gap: 7px;
   flex-wrap: wrap;
 }
+/* « PAR MOIS, HT » passe TOUJOURS à la ligne. Sans ça, « 35 € » est
+   assez court pour que la mention tienne à côté alors que « 109 € » et
+   « 249 € » la renvoient dessous : le prix du premier forfait tombait
+   une ligne plus bas que les deux autres. */
+.tarif:not(.tarif--large) .tarif-prix > span { flex: 0 0 100%; }
 .tarif-prix b {
   font-family: var(--f-mono);
   font-size: 2.5rem;
@@ -1809,7 +1826,7 @@ section[id] { scroll-margin-top: 84px; }
 }
 .tarif-prix .devis { font-size: 1.32rem; letter-spacing: -.02em; }
 
-.tarif ul { list-style: none; margin-top: 20px; display: grid; gap: 9px; }
+.tarif ul { list-style: none; margin-top: 18px; display: grid; gap: 9px; }
 .tarif li {
   font-size: .92rem;
   line-height: 1.45;
