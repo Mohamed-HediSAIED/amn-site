@@ -270,7 +270,41 @@
 
     var BANQUE = [
       { cles: ['prix', 'tarif', 'tarifs', 'combien', 'cout', 'coute', 'couter', 'cher', 'budget', 'euros'],
-        rep: 'Les prix sont publics : <b>35 € par mois</b> en solo, <b>109 €</b> pour une équipe jusqu\'à cinq, <b>249 €</b> pour une agence, et sur devis au-delà. Hors taxes. L\'option commerce ajoute 25 €. Le détail est sur la <a href="/prix">page prix</a>.' },
+        rep: 'Les prix sont publics, et ils suivent l\'effectif : <b>35 € par mois</b> pour une personne, <b>109 €</b> de deux à cinq, et <b>sur devis à partir de six</b>. Le forfait agence, <b>249 €</b>, ne se range pas par effectif : il est pour ceux qui gèrent des accès pour leurs propres clients. Hors taxes, l\'option commerce ajoute 25 €. Le détail est sur la <a href="/prix">page prix</a>.' },
+      /* v7 — L'ANGLE MORT DES EFFECTIFS.
+         Un visiteur a demandé « j'ai une équipe de 24 personnes, quel
+         abonnement ? ». L'assistant a refusé d'inventer, ce qui était le
+         bon réflexe, mais la grille elle-même ne répondait pas. Elle a
+         été corrigée (page prix : un repère d'effectif sur les quatre
+         forfaits), donc la réponse peut maintenant être utile SANS
+         annoncer un chiffre que personne n'a validé : on dit où la
+         personne tombe, et ce qui fera le montant. */
+      { cles: ['personne', 'personnes', 'salarie', 'salaries', 'employe', 'employes',
+               'equipe', 'effectif', 'collaborateur', 'collaborateurs', 'utilisateur',
+               'utilisateurs', 'poste', 'postes', 'plusieurs', 'sommes',
+               /* « je suis tout seul » et « on est trois » tombaient dans le
+                  défaut : personne n'écrit son effectif en chiffres à tous
+                  les coups. On attrape aussi les nombres en toutes lettres.
+                  « neuf » est volontairement absent — il veut dire « nouveau »
+                  au moins aussi souvent qu'il compte. */
+               'seul', 'seule', 'solo', 'independant', 'independante', 'unique',
+               'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'dix',
+               'douze', 'quinze', 'vingt', 'trentaine', 'on est', 'nous sommes'],
+        rep: 'Ça dépend de combien vous êtes. <b>Une personne</b> : 35 € par mois. <b>De deux à cinq</b> : 109 €. <b>À partir de six</b>, c\'est sur devis — pas par prudence, mais parce qu\'un prix affiché serait faux pour la moitié des structures de cette taille. Trois choses font le montant : combien vous êtes, combien de choses il y a à surveiller derrière (domaines, boîtes mail, certificats), et ce qu\'il y a à reprendre d\'un existant. Dites ces trois choses dans votre message, vous aurez un chiffre dans la réponse. À part : le forfait <b>agence à 249 €</b> ne dépend pas de l\'effectif, il est pour ceux qui gèrent des accès pour leurs propres clients.' + VERS_CONTACT },
+      /* v7 — le forfait AGENCE n'avait aucune réponse à lui : une agence
+         qui demandait « et moi ? » tombait dans le défaut, alors que la
+         page prix répond depuis le début. */
+      { cles: ['agence', 'agences', 'revendeur', 'prestataire', 'sous traitant',
+               'mes clients', 'pour mes clients', 'pour des clients', 'parc', 'parcs',
+               'plusieurs clients', 'plusieurs sites', 'infogerance'],
+        rep: 'Le forfait <b>agence, 249 € par mois</b>, est fait pour ça : vous avez vos propres clients, et ce qui tourne pour eux tourne sous votre nom. Il ne dépend pas de votre effectif — c\'est le seul forfait qui se définit par le métier et pas par le nombre de personnes. Il couvre votre équipe et les organisations que vous suivez, avec la supervision de plusieurs parcs à la fois. Le détail est sur la <a href="/prix">page prix</a>.' },
+      /* v7 — l'option commerce était citée dans la réponse « prix » mais
+         n'avait pas d'entrée : « je vends en ligne » tombait dans le
+         défaut, ou pire, sur « il n'y a rien à payer sur ce site ». */
+      { cles: ['commerce', 'boutique', 'ecommerce', 'e commerce', 'vends', 'vendre',
+               'vente', 'ventes', 'vends en ligne', 'boutique en ligne', 'vente en ligne',
+               'shopify', 'prestashop', 'woocommerce', 'acheteurs'],
+        rep: 'Si vous vendez en ligne, il y a une surface de plus à surveiller : la boutique, les paiements, ce qui touche aux données de vos acheteurs. C\'est l\'<b>option commerce, + 25 € par mois</b>. Elle <b>s\'ajoute</b> au forfait que vous avez — ce n\'est pas un forfait à part, et elle ne remplace rien. Le détail est sur la <a href="/prix">page prix</a>.' },
       { cles: ['association', 'associatif', 'asso', 'loi 1901', 'remise', 'reduction', 'interet general'],
         rep: 'Associations et structures d\'intérêt général : <b>de 30 à 50 % de remise</b>, selon la taille et les moyens, sur simple justificatif (récépissé ou numéro RNA). Dites-le dans votre message, la remise est appliquée avant qu\'on vous annonce un chiffre.' },
       { cles: ['delai', 'delais', 'reponse', 'repondez', 'repondre', 'combien de temps', 'attendre', 'rapidite', '48'],

@@ -1758,6 +1758,25 @@ section[id] { scroll-margin-top: 84px; }
 }
 .tarif > .mono { display: block; color: var(--text-3); }
 .tarif h3 { margin-top: 12px; font-size: 1.22rem; }
+/* L'EFFECTIF, sur chaque forfait — v7.
+   Un visiteur a demandé à l'assistant « j'ai une équipe de 24 personnes,
+   quel abonnement ? » et l'assistant n'a pas su répondre. Le trou
+   n'était pas dans l'assistant : la grille MÉLANGEAIT DEUX AXES. Solo et
+   Petite équipe se définissent par un nombre de personnes, Agence par un
+   métier (« vous en gérez pour d'autres »), et « au-delà » se lisait
+   comme « au-delà de l'agence » plutôt que « au-delà de cinq ». Une
+   entreprise de 24 personnes qui n'est pas une agence ne tombait donc
+   nulle part. Le repère d'effectif rend l'axe explicite sur les quatre
+   cartes : on se place en deux secondes. */
+.tarif-taille {
+  margin-top: 6px;
+  font-family: var(--f-mono);
+  font-size: .68rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
 .tarif-qui { margin-top: 8px; font-size: .93rem; line-height: 1.5; color: var(--text-2); }
 
 .tarif-prix {

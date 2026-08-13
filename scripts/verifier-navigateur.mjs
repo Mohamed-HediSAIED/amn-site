@@ -1218,6 +1218,77 @@ console.log('3 ter. Le fond du bandeau (carte de veille)');
   await ctx.close();
 }
 
+/* ================= 3 quater. L'assistant, question par question =======
+   Un visiteur a demandé « j'ai une équipe de 24 personnes, quel
+   abonnement ? ». L'assistant a refusé d'inventer — bon réflexe — mais
+   la grille tarifaire elle-même ne répondait pas. En cherchant les
+   questions VOISINES, trois autres trous sont apparus : « je suis tout
+   seul » (effectif écrit en toutes lettres), « je suis une agence »
+   (le forfait agence n'avait aucune réponse à lui) et « je vends en
+   ligne » (l'option commerce non plus).
+
+   Ce contrôle POSE les questions dans le navigateur et lit la réponse
+   rendue. Les sujets non tranchés (engagement, résiliation, essai,
+   remboursement) doivent AU CONTRAIRE tomber sur le renvoi au
+   formulaire : le silence y est délibéré, et un contrôle qui l'oublie
+   ouvrirait la porte à une promesse que personne n'a validée.
+   ==================================================================== */
+
+console.log('3 quater. L’assistant simulé, question par question');
+{
+  const ATTENDUES = [
+    ["j'ai une équipe de 24 personnes, quel abonnement ?", 'reponse'],
+    ['on est 8 dans la boîte, ça fait combien ?', 'reponse'],
+    ['nous sommes 12 salariés', 'reponse'],
+    ['je suis tout seul', 'reponse'],
+    ['on est trois', 'reponse'],
+    ['je suis une agence', 'reponse'],
+    ['je vends en ligne', 'reponse'],
+    ['combien ça coûte', 'reponse'],
+    ['vous surveillez quoi exactement', 'reponse'],
+    ['vous gardez mes données ?', 'reponse'],
+    ['est-ce que vous êtes une IA ?', 'reponse'],
+    ['je suis une association', 'reponse'],
+    /* Non tranchés : le renvoi au formulaire est la BONNE réponse. */
+    ["il y a une période d'essai gratuite ?", 'defaut'],
+    ['quel est le préavis de résiliation', 'defaut'],
+    ['vous remboursez si je ne suis pas content', 'defaut'],
+    ['vous faites du référencement google ?', 'defaut'],
+  ];
+
+  const page = await navigateur.newPage({ viewport: { width: 1280, height: 950 } });
+  await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  await sansSequence(page);
+  await page.locator('.ajm-invite').click();
+  await page.waitForFunction(() => document.querySelector('.ajm')?.open === true);
+
+  const MARQUE = /pas de réponse préparée|je ne vais pas en inventer|je n'ai pas de réponse/i;
+  for (const [q, attendu] of ATTENDUES) {
+    await page.fill('#ajm-q', q);
+    await page.press('#ajm-q', 'Enter');
+    await page.waitForTimeout(320);
+    const rep = await page.evaluate(() => {
+      const b = [...document.querySelectorAll('.ajm-bulle--lui')];
+      return b.length ? b[b.length - 1].textContent.trim() : '';
+    });
+    const obtenu = MARQUE.test(rep) ? 'defaut' : 'reponse';
+    t(`Assistant — « ${q} » → ${attendu}`, obtenu === attendu, `obtenu : ${obtenu}`);
+  }
+
+  /* Aucune réponse préparée ne doit annoncer un montant qui ne figure
+     pas sur la page prix. C'est la garde contre l'invention de prix. */
+  const montants = await page.evaluate(() =>
+    [...document.querySelectorAll('.ajm-bulle--lui')]
+      .flatMap((b) => (b.textContent.match(/\d+(?:[.,]\d+)?\s*€/g) || []))
+      .map((m) => m.replace(/\s+/g, ' ').trim())
+  );
+  const AUTORISES = ['35 €', '109 €', '249 €', '25 €'];
+  const inconnus = [...new Set(montants)].filter((m) => !AUTORISES.includes(m));
+  t('Assistant — aucun montant hors grille publiée', inconnus.length === 0, inconnus.join(', '));
+
+  await page.close();
+}
+
 /* ================= 4. En-têtes de sécurité ================= */
 
 console.log('4. En-têtes de sécurité réellement servis');
