@@ -50,6 +50,30 @@ Tant que l'attribut n'est pas posé, le bloc reste caché, **aucune requête n'e
 faite** et rien ne s'affiche. Jamais de synthèse vocale : le site passe son
 temps à dire qu'il n'est pas fabriqué par une machine.
 
+### Préversion ou public
+
+Tant que la structure n'est pas immatriculée, les mentions légales sont
+vides — et un site professionnel indexé sans mentions légales n'est pas un
+détail de finition. Un interrupteur bascule tout d'un coup :
+
+```sh
+node scripts/preversion.mjs        # dit seulement où on en est
+node scripts/preversion.mjs on     # non indexable : on peut déployer et montrer
+node scripts/preversion.mjs off    # indexable : le jour de l'ouverture
+```
+
+Trois verrous, parce qu'un seul ne suffit pas : `meta robots` sur chaque
+page, `robots.txt` en `Disallow: /`, et l'en-tête `X-Robots-Tag`. Seul le
+troisième est lu à tous les coups — `robots.txt` empêche d'EXPLORER, pas
+d'INDEXER, et la balise `meta` ne se lit que si la page est explorée.
+
+`verifier-avant-mise-en-ligne.mjs` lit le mode et change de sévérité : en
+préversion les mentions vides sont un rappel, **en public c'est une erreur
+qui fait échouer le contrôle**. On ne peut donc pas ouvrir le site en
+laissant les champs vides sans que quelque chose crie.
+
+L'aller-retour `on` puis `off` rend le dépôt identique au caractère près.
+
 ### Les polices
 
 **Space Grotesk et JetBrains Mono** — celles du produit — auto-hébergées,

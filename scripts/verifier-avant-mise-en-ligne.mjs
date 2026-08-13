@@ -31,6 +31,18 @@ const html = Object.fromEntries(pages.map((p) => [p, readFileSync(join(RACINE, p
 const route = (f) => (f === 'index.html' ? '/' : '/' + f.replace(/\.html$/, ''));
 
 const origine = (html['index.html'].match(/<link rel="canonical" href="(https?:\/\/[^/"]+)/) || [])[1];
+
+/* Le MODE, lu une fois et tout de suite : il conditionne la sévérité de
+   plusieurs contrôles plus bas. Déclaré ici et pas à l'endroit où il
+   sert d'abord — une constante employée avant sa ligne de déclaration
+   lève une ReferenceError, et c'est exactement ce qui est arrivé en
+   l'écrivant. Interrupteur : node scripts/preversion.mjs on|off */
+const preversion = JSON.parse(readFileSync(join(RACINE, 'vercel.json'), 'utf8'))
+  .headers.some((b) => b.headers.some((h) => h.key === 'X-Robots-Tag' && /noindex/.test(h.value)));
+
+console.log(preversion
+  ? '\n▪ Mode PRÉVERSION — le site n\'est pas indexable.'
+  : '\n▪ Mode PUBLIC — le site est indexable.');
 if (!origine) ko('index.html : aucune balise canonical.');
 
 /* ---------- 1. Balises de tête ---------- */
@@ -101,14 +113,32 @@ for (const f of pages) {
   const indexable = !/<meta name="robots" content="[^"]*noindex/i.test(src);
   const url = origine + route(f);
   if (indexable && !dansSitemap.has(url)) ko(`${f} est indexable mais absente de sitemap.xml.`);
-  if (!indexable && dansSitemap.has(url)) ko(`${f} est en noindex mais présente dans sitemap.xml.`);
+  /* En préversion tout le site est en noindex ET robots.txt ne déclare
+     plus le plan : la présence d'une URL dans sitemap.xml n'est plus une
+     contradiction, c'est un fichier que plus rien ne désigne. En mode
+     public, l'incohérence redevient une erreur. */
+  if (!indexable && dansSitemap.has(url) && !preversion) {
+    ko(`${f} est en noindex mais présente dans sitemap.xml.`);
+  }
 }
 for (const url of dansSitemap) {
   if (!url.startsWith(origine)) ko(`sitemap.xml : « ${url} » n'est pas sur ${origine}.`);
 }
 
 const robots = readFileSync(join(RACINE, 'robots.txt'), 'utf8');
-if (!robots.includes(`${origine}/sitemap.xml`)) {
+if (preversion) {
+  /* En préversion, robots.txt ne DOIT PAS déclarer le plan du site :
+     désigner une liste d'URLs qu'on interdit par ailleurs d'explorer et
+     d'indexer serait se contredire. L'erreur s'inverse donc. */
+  if (robots.includes('sitemap.xml')) {
+    ko('robots.txt déclare encore le plan du site alors que la préversion est active.\n' +
+       '     Rétablir :  node scripts/preversion.mjs on');
+  }
+  if (!/^Disallow:\s*\/\s*$/m.test(robots)) {
+    ko('Préversion active mais robots.txt n\'interdit pas l\'exploration.\n' +
+       '     Rétablir :  node scripts/preversion.mjs on');
+  }
+} else if (!robots.includes(`${origine}/sitemap.xml`)) {
   ko(`robots.txt ne pointe pas vers ${origine}/sitemap.xml.`);
 }
 
@@ -151,10 +181,18 @@ for (const [f, src] of Object.entries(html)) {
   if (/\sstyle="/.test(src)) ko(`${f} : attribut style= en ligne (interdit par la CSP).`);
 }
 
-/* ---------- 5. Ce qui manque à Aaron ---------- */
+/* ---------- 5. Ce qui reste à faire ----------
+   La sévérité dépend du MODE. Tant que la structure n'est pas
+   immatriculée, le site part en préversion non indexable : des mentions
+   légales vides y sont normales, on les rappelle sans bloquer. En mode
+   public elles deviennent une ERREUR — un site professionnel indexé
+   sans mentions légales n'est pas une négligence de finition, c'est un
+   manquement. Le contrôle doit refuser de passer.
+   Interrupteur : node scripts/preversion.mjs on|off */
+
 
 if (origine.endsWith('.example')) {
-  todo(
+  (preversion ? todo : ko)(
     `Le site pointe encore sur l'adresse de gabarit ${origine}.\n` +
       '     Après le premier déploiement :  node scripts/definir-domaine.mjs https://ADRESSE-REELLE'
   );
@@ -162,7 +200,15 @@ if (origine.endsWith('.example')) {
 
 for (const [f, src] of Object.entries(html)) {
   const n = (src.match(/class="todo"/g) || []).length;
-  if (n) todo(`${f} : ${n} mention(s) « à compléter » encore visible(s) en production.`);
+  if (!n) continue;
+  if (preversion) {
+    todo(`${f} : ${n} mention(s) « à compléter » — normal en préversion, à remplir avant l'ouverture.`);
+  } else {
+    ko(
+      `${f} : ${n} mention(s) « à compléter » sur un site INDEXABLE.\n` +
+        "     Remplir les champs, ou repasser en préversion :  node scripts/preversion.mjs on"
+    );
+  }
 }
 
 if (!existsSync(join(RACINE, 'assets', 'og.png'))) {
@@ -212,9 +258,11 @@ if (!existsSync(join(RACINE, 'assets', 'og.png'))) {
   }
 
   todo(
-    'Le formulaire de contact n\'envoie rien tant que le projet Vercel n\'a pas ses\n' +
-      '     variables : RESEND_API_KEY + CONTACT_TO, ou CONTACT_WEBHOOK_URL.\n' +
-      '     Sans elles, la demande est acceptée, journalisée côté serveur… et perdue.\n' +
+    'Le formulaire de contact ne peut rien envoyer tant que le projet Vercel n\'a pas\n' +
+      '     ses variables : RESEND_API_KEY + CONTACT_TO, ou CONTACT_WEBHOOK_URL.\n' +
+      '     Rien n\'est perdu en silence — vérifié : sans canal, l\'API répond 503 et le\n' +
+      '     visiteur lit « votre message n\'a pas été envoyé ». Mais le formulaire est\n' +
+      '     alors visiblement hors service : à régler avant de montrer le site.\n' +
       '     Ce script ne peut pas le vérifier d\'ici : c\'est à contrôler dans Vercel.'
   );
 }

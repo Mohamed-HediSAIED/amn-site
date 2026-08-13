@@ -1,5 +1,4 @@
+# PRÉVERSION — le site n'est pas encore public.
+# Remis en état par : node scripts/preversion.mjs off
 User-agent: *
-Allow: /
-Disallow: /api/
-
-Sitemap: https://amn-devsec.example/sitemap.xml
+Disallow: /
