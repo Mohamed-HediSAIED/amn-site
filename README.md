@@ -50,6 +50,31 @@ Tant que l'attribut n'est pas posé, le bloc reste caché, **aucune requête n'e
 faite** et rien ne s'affiche. Jamais de synthèse vocale : le site passe son
 temps à dire qu'il n'est pas fabriqué par une machine.
 
+### Ce qui n'est PAS vérifié : les autres moteurs
+
+Les 462 contrôles tournent sur **Chromium uniquement**. Firefox et WebKit —
+le moteur de Safari, donc de tous les navigateurs iPhone — ne sont pas
+installables dans l'environnement de développement : le proxy sortant bloque
+le domaine de téléchargement de Playwright.
+
+**Le site n'a donc jamais été vu dans un vrai Safari.** C'est le trou de
+vérification le plus large du dépôt, et il ne se comblera qu'en ouvrant le
+site sur un iPhone réel une fois la préversion déployée.
+
+Ce qui a été fait à défaut : recenser les fonctionnalités CSS dont l'absence
+casserait quelque chose, plutôt que de supposer.
+
+| Fonctionnalité | Emplois | Conséquence si absente |
+| --- | --- | --- |
+| `aspect-ratio` | 1 (`.carte-boite`) | **catastrophique** — la carte du bandeau a zéro hauteur et les huit points s'écrasent sur une ligne. **Repli ajouté**, géométrie vérifiée identique au pixel près. |
+| `:has()` | 3 | dégradée — le blocage du défilement derrière la console de navigation ne s'applique plus ; une lueur de survol disparaît. Rien ne casse. |
+| `text-wrap: balance` | 2 | cosmétique — les titres se coupent moins joliment. |
+| `inset` | 7 | Safari 14.1+, antérieur au socle imposé par `aspect-ratio`. |
+| `mix-blend-mode`, `backdrop-filter` | **0** | n'apparaissent que dans des commentaires : retirés après mesure en v6. |
+
+Socle réel : **Safari 15 / iOS 15** (2021), imposé par `aspect-ratio` — et
+même en dessous, le repli tient.
+
 ### Préversion ou public
 
 Tant que la structure n'est pas immatriculée, les mentions légales sont
@@ -73,6 +98,11 @@ qui fait échouer le contrôle**. On ne peut donc pas ouvrir le site en
 laissant les champs vides sans que quelque chose crie.
 
 L'aller-retour `on` puis `off` rend le dépôt identique au caractère près.
+
+Une conséquence attendue : en préversion, **Lighthouse note le SEO à 69** au
+lieu de 100. Le seul audit qui échoue est `is-crawlable`, « page bloquée à
+l'indexation » — c'est le mode qui fonctionne, pas une régression. Mesuré
+dans les deux sens : 69 en préversion, 100 en public.
 
 ### Les polices
 

@@ -952,6 +952,25 @@ html:has(.console[open]) { overflow: hidden; }
   width: min(1240px, 104%);
   aspect-ratio: 1000 / 473;
 }
+
+/* Le SEUL point du site dont l'absence serait catastrophique plutôt que
+   dégradée. `.carte-boite` n'a pas de hauteur propre : elle la tire de
+   son rapport de forme. Sans `aspect-ratio`, la boîte fait ZÉRO pixel de
+   haut — la carte disparaît, et les huit points de veille, positionnés
+   en pourcentage de cette boîte, s'écrasent sur une ligne.
+
+   `aspect-ratio` est supporté depuis Safari 15 (2021), donc le risque
+   est faible ; c'est la CONSÉQUENCE qui justifie le filet, pas la
+   probabilité. Les moteurs Firefox et WebKit ne sont pas installables
+   dans l'environnement de développement (le proxy bloque le domaine de
+   téléchargement de Playwright) : ce repli n'a donc PAS pu être vérifié
+   dans un vrai Safari. Ce qui a été vérifié, c'est qu'il produit une
+   géométrie identique — même boîte au pixel près, contrôlée en forçant
+   la branche de repli. */
+@supports not (aspect-ratio: 1 / 1) {
+  .carte-boite::before { content: ''; display: block; padding-top: 47.3%; }
+  .carte { position: absolute; inset: 0; }
+}
 /* MESURÉ À L'ŒIL — première tentative à 13 % : la carte écrasait le
    titre et rendait le chapô pénible à lire. C'était exactement le
    défaut reproché aux nappes. « Presque noire » veut dire qu'on ne la
