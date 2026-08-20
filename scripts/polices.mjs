@@ -7,17 +7,32 @@
    que confidentialite.html affirme ne pas faire. Elles sont donc
    téléchargées une fois, découpées, et servies depuis le site.
 
-   Deux familles, toutes deux sous licence SIL Open Font License 1.1,
-   et ce sont CELLES DU PRODUIT — amn-desktop/src/index.css :
+   Trois familles, toutes sous licence SIL Open Font License 1.1.
+
+   DEUX VIENNENT DU PRODUIT — amn-desktop/src/index.css :
 
      --font-sans: 'Space Grotesk', ...
      --font-mono: 'JetBrains Mono', ...
 
-   La v3 les avait remplacées par Archivo + Martian Mono pour donner au
-   site « plus de caractère ». C'était l'erreur : le site n'a pas à
-   chercher son caractère, il porte celui du produit. Aucun axe de
-   largeur ici — Space Grotesk n'en a pas — donc la hiérarchie tient sur
-   la graisse et la taille.
+   Elles habillent tout ce par quoi le site cite le produit : le texte
+   courant, les étiquettes, la mosaïque des modules, les boutons.
+
+   LA TROISIÈME est celle du site, et seulement des titres : SPECTRAL,
+   de Production Type (Paris), dessinée pour la lecture à l'écran.
+
+   Pourquoi ne pas mettre Space Grotesk dans les titres, comme en v6 :
+   parce que Space Grotesk est devenue, en deux ans, la police que tout
+   générateur choisit quand on lui demande « moderne et un peu
+   caractériel ». Elle est aujourd'hui citée dans les listes de signes
+   qui trahissent un site fabriqué par une IA, au même titre qu'Inter.
+   Sur l'écran d'une application c'est sans conséquence ; en gros titre
+   sur une page de présentation, c'est une signature.
+
+   La v3 avait remplacé les deux polices du produit par Archivo +
+   Martian Mono « pour plus de caractère », et c'était l'erreur : le
+   site n'a pas à inventer un caractère contre le produit. Ce qui change
+   ici est plus étroit — les titres, et eux seuls, parlent de la voix du
+   site ; tout le reste continue de porter celle du produit.
 
    Prérequis (outil de développement, jamais déployé) :
      pip install fonttools brotli
@@ -25,7 +40,7 @@
      node scripts/polices.mjs
    ------------------------------------------------------------------ */
 import { execFile } from 'node:child_process';
-import { mkdir, writeFile, readFile, rm, stat } from 'node:fs/promises';
+import { mkdir, writeFile, readFile, readdir, rm, stat } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
@@ -48,9 +63,13 @@ const LATIN_EXT =
 
 const SOURCES = {
   grotesk:
-    'https://raw.githubusercontent.com/floriankarsten/space-grotesk/master/fonts/variable/SpaceGrotesk%5Bwght%5D.ttf',
+    'https://raw.githubusercontent.com/google/fonts/main/ofl/spacegrotesk/SpaceGrotesk%5Bwght%5D.ttf',
   jetbrains:
-    'https://raw.githubusercontent.com/JetBrains/JetBrainsMono/master/fonts/variable/JetBrainsMono%5Bwght%5D.ttf'
+    'https://raw.githubusercontent.com/JetBrains/JetBrainsMono/master/fonts/variable/JetBrainsMono%5Bwght%5D.ttf',
+  /* Spectral n'a pas de version variable : ce sont des fichiers par
+     graisse. Le site n'en emploie qu'une, la demi-grasse des titres. */
+  spectral:
+    'https://raw.githubusercontent.com/google/fonts/main/ofl/spectral/Spectral-SemiBold.ttf'
 };
 
 /* UN SEUL fichier par famille et par plage Unicode, qui GARDE son axe
@@ -78,6 +97,14 @@ const SORTIES = [
     famille: 'JetBrains Mono',
     graisses: '400 800',
     largeurs: null
+  },
+  {
+    nom: 'spectral-600',
+    source: 'spectral',
+    axes: null,              /* fichier statique : rien à instancier */
+    famille: 'Spectral',
+    graisses: '600',
+    largeurs: null
   }
 ];
 
@@ -99,15 +126,21 @@ for (const [nom, url] of Object.entries(SOURCES)) {
 
 let css =
   `/* Polices auto-hébergées — aucun appel à un serveur tiers (RGPD).\n` +
-  `   Space Grotesk (Florian Karsten) et JetBrains Mono (JetBrains),\n` +
-  `   SIL Open Font License 1.1. Ce sont les polices du produit.\n` +
-  `   Sous-ensembles latin + latin-ext. GÉNÉRÉE PAR scripts/polices.mjs,\n` +
-  `   ne pas éditer à la main. */\n`;
+  `   Space Grotesk (Florian Karsten) et JetBrains Mono (JetBrains) sont\n` +
+  `   les polices du PRODUIT ; Spectral (Production Type, Paris) est\n` +
+  `   celle des TITRES du site, et d'eux seuls. Les trois sous licence\n` +
+  `   SIL Open Font License 1.1. Sous-ensembles latin + latin-ext.\n` +
+  `   GÉNÉRÉE PAR scripts/polices.mjs, ne pas éditer à la main. */\n`;
 
 let total = 0;
+const produits = new Set();
 for (const s of SORTIES) {
-  const instance = join(TMP, `${s.nom}-inst.ttf`);
-  await py('fontTools.varLib.instancer', [join(TMP, `${s.source}.ttf`), ...s.axes, '-o', instance]);
+  const source = join(TMP, `${s.source}.ttf`);
+  let instance = source;
+  if (s.axes) {
+    instance = join(TMP, `${s.nom}-inst.ttf`);
+    await py('fontTools.varLib.instancer', [source, ...s.axes, '-o', instance]);
+  }
 
   for (const [suffixe, plage] of [
     ['latin-ext', LATIN_EXT],
@@ -123,6 +156,7 @@ for (const s of SORTIES) {
       '--no-hinting',
       '--desubroutinize'
     ]);
+    produits.add(fichier);
     const { size } = await stat(join(DEST, fichier));
     total += size;
     console.log(`  ${fichier.padEnd(34)} ${String(size).padStart(7)} o`);
@@ -142,16 +176,20 @@ await writeFile(join(RACINE, 'assets', 'fonts.css'), css);
 await rm(TMP, { recursive: true, force: true });
 
 /* Les anciennes polices ne doivent pas rester : elles seraient servies
-   sans être utilisées, et personne ne s'en apercevrait. */
-for (const vieux of [
-  'space-grotesk-400700-latin.woff2',
-  'space-grotesk-400700-latin-ext.woff2',
-  'jetbrains-mono-400-latin.woff2',
-  'jetbrains-mono-400-latin-ext.woff2'
-]) {
-  await rm(join(DEST, vieux), { force: true });
+   sans être utilisées, et personne ne s'en apercevrait.
+
+   Cette liste était auparavant écrite à la main, et elle contenait
+   EXACTEMENT les fichiers que le script venait d'écrire — lancer la
+   génération effaçait donc son propre résultat. On efface maintenant
+   ce qui n'a pas été produit pendant ce tour, ce qui ne peut pas
+   se désynchroniser. */
+for (const f of await readdir(DEST)) {
+  if (f.endsWith('.woff2') && !produits.has(f)) {
+    await rm(join(DEST, f), { force: true });
+    console.log(`  (retiré) ${f}`);
+  }
 }
 
-console.log(`\nTotal : ${total} o  (v2 : Space Grotesk + JetBrains Mono = 84 284 o)`);
+console.log(`\nTotal : ${total} o`);
 console.log("N'oublie pas : la liste des polices est citée dans mentions-legales.html.");
 await readFile(join(RACINE, 'assets', 'fonts.css'), 'utf8');

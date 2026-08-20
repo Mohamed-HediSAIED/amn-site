@@ -84,6 +84,9 @@
   /* Les deux polices du produit (amn-desktop/src/index.css). */
   --f-sans: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --f-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* La voix DU SITE, réservée aux deux premiers niveaux de titre.
+     Voir scripts/polices.mjs pour la raison du changement. */
+  --f-titre: Spectral, 'Iowan Old Style', Georgia, serif;
 
   /* Rayons — échelle Tailwind v4, celle qu'emploie le produit. Les
      CONTENEURS sont arrondis, les BOUTONS et les CHAMPS restent carrés
@@ -259,22 +262,30 @@ h1, h2, h3, h4 {
   text-wrap: balance;
 }
 
-/* Space Grotesk n'a PAS d'axe de largeur : les trois `font-stretch` de
-   la v3 ne faisaient plus rien. La hiérarchie repose donc sur la
-   graisse et la taille — c'est déjà comme ça que le produit s'y prend
-   (« Bonsoir, Aaron. » est `text-4xl font-semibold sm:text-5xl`, et
-   rien d'autre ne monte aussi haut). */
+/* LES DEUX PREMIERS NIVEAUX SONT EN SERIF, le reste en Space Grotesk.
+
+   Ce partage n'est pas décoratif. Les titres sont ce que le site dit
+   en son nom ; les titres de carte (h3), les étiquettes et la mosaïque
+   des modules sont ce par quoi il cite le produit, et ceux-là gardent
+   la police du produit.
+
+   Un empattement n'accepte pas le crénage serré d'un grotesque :
+   l'interlettrage négatif est réduit et l'interligne relevé. */
+h1, h2 {
+  font-family: var(--f-titre);
+  font-weight: 600;
+}
+
 h1 {
-  font-weight: 700;
-  font-size: clamp(2.05rem, 1.15rem + 3.9vw, 3.9rem);
-  letter-spacing: -.045em;
-  line-height: 1.01;
+  font-size: clamp(2rem, 1.1rem + 3.7vw, 3.6rem);
+  letter-spacing: -.022em;
+  line-height: 1.06;
 }
 
 h2 {
-  font-weight: 600;
-  font-size: clamp(1.5rem, 1.1rem + 1.8vw, 2.3rem);
-  letter-spacing: -.032em;
+  font-size: clamp(1.42rem, 1.05rem + 1.65vw, 2.15rem);
+  letter-spacing: -.015em;
+  line-height: 1.14;
 }
 
 h3 {
@@ -844,7 +855,7 @@ html:has(.console[open]) { overflow: hidden; }
 /* Les autres rayons du produit, appliqués là où ils vont :
    12 px sur les boîtes d'icône, pilule sur les puces, 6 px sur les
    petites étiquettes mono. Les boutons et les champs restent CARRÉS. */
-.mod-n, .seq-logo, .ico { border-radius: var(--r-xl); }
+.mod-n, .ico { border-radius: var(--r-xl); }
 .pastille, .puce, .rail a, .led { border-radius: 9999px; }
 .etq, .badge { border-radius: var(--r-md); }
 
@@ -912,204 +923,65 @@ html:has(.console[open]) { overflow: hidden; }
 .hero-note { margin-top: 18px; max-width: 64ch; margin-inline: auto; }
 .hero .mono { display: block; }
 
-/* ---------- LE FOND DU BANDEAU : une carte de veille ----------
-   Remplace les six nappes de télémétrie de la v6. Aaron les trouvait
-   TROP LUMINEUSES : six courbes qui défilaient en permanence, ça
-   bougeait partout et ça tirait l'œil loin du titre.
-
-   Ce qu'il a demandé à la place : « une salle de contrôle la nuit où
-   tout va bien ». Donc une carte du monde presque noire, immobile, et
-   de rares pulsations lentes. Le silence d'abord, le mouvement ensuite.
-
-   La carte est une MATRICE DE POINTS produite par un script sans aucune
-   dépendance : les continents sont des polygones simplifiés écrits à la
-   main en longitude/latitude, échantillonnés sur une grille 110 × 52.
-   Voir docs/direction-v7.md. Aucun fichier de données géographiques
-   n'est embarqué, et la carte est STATIQUE — elle ne coûte rien par
-   image, contrairement aux six couches qui défilaient.
-
-   HONNÊTETÉ — les points sont ILLUSTRATIFS. Ils sont posés sur des
-   régions d'hébergement courantes, parce qu'un site français vit
-   souvent sur un serveur à Francfort, à Dublin ou en Virginie. Le
-   bloc est `aria-hidden` et purement décoratif : aucun chiffre, aucune
-   étiquette, nulle part sur le site, ne prétend compter des sites
-   supervisés ni dire où ils sont. C'est un décor, pas une donnée. */
-.fond {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
+/* LA CAPTURE DU PRODUIT.
+   Elle est large, posée sous le titre, et coupée en bas par un dégradé
+   plutôt que par une bordure nette : l'image continue hors du cadre au
+   lieu de s'arrêter, ce qui évite d'en faire une vignette de plus.
+   `aspect-ratio` fige sa place avant le chargement — sans lui, tout ce
+   qui suit sauterait à l'arrivée de l'image. */
+.capture {
+  margin: clamp(38px, 5vw, 64px) auto 0;
+  max-width: var(--max);
+  padding-inline: clamp(16px, 4vw, 32px);
+  position: relative;
 }
-
-/* La carte et les points partagent EXACTEMENT la même boîte : sans ça,
-   les points en pourcentage ne tomberaient pas sur la géographie. */
-.carte-boite {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: min(1240px, 104%);
-  aspect-ratio: 1000 / 473;
-}
-
-/* Le SEUL point du site dont l'absence serait catastrophique plutôt que
-   dégradée. `.carte-boite` n'a pas de hauteur propre : elle la tire de
-   son rapport de forme. Sans `aspect-ratio`, la boîte fait ZÉRO pixel de
-   haut — la carte disparaît, et les huit points de veille, positionnés
-   en pourcentage de cette boîte, s'écrasent sur une ligne.
-
-   `aspect-ratio` est supporté depuis Safari 15 (2021), donc le risque
-   est faible ; c'est la CONSÉQUENCE qui justifie le filet, pas la
-   probabilité. Les moteurs Firefox et WebKit ne sont pas installables
-   dans l'environnement de développement (le proxy bloque le domaine de
-   téléchargement de Playwright) : ce repli n'a donc PAS pu être vérifié
-   dans un vrai Safari. Ce qui a été vérifié, c'est qu'il produit une
-   géométrie identique — même boîte au pixel près, contrôlée en forçant
-   la branche de repli. */
-@supports not (aspect-ratio: 1 / 1) {
-  .carte-boite::before { content: ''; display: block; padding-top: 47.3%; }
-  .carte { position: absolute; inset: 0; }
-}
-/* MESURÉ À L'ŒIL — première tentative à 13 % : la carte écrasait le
-   titre et rendait le chapô pénible à lire. C'était exactement le
-   défaut reproché aux nappes. « Presque noire » veut dire qu'on ne la
-   voit qu'au deuxième regard. */
-.carte {
+.capture img {
   width: 100%;
-  height: 100%;
-  display: block;
-  opacity: .30;
-}
-
-/* Un voile radial re-noircit le centre, là où se trouvent le titre et
-   le chapô. La carte reste lisible sur les bords, le texte ne se bat
-   contre rien. Statique : aucun coût par image.
-
-   Il est posé ENTRE la carte et les points, pas au-dessus des deux :
-   sinon il éteignait aussi les pulsations, et c'est justement elles
-   qui rendent la carte vivante. */
-.fond-voile {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 46% 58% at 50% 46%, var(--bg) 32%, transparent 78%),
-    linear-gradient(90deg, var(--bg), transparent 16%, transparent 84%, var(--bg));
-}
-
-/* ---- Les points de veille ----
-   Ils RESPIRENT, ils ne clignotent pas : 7 s par cycle, et jamais deux
-   en même temps. Seule l'opacité est animée — c'est composé, le fil
-   principal ne fait rien. */
-.veille {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  margin: -3px 0 0 -3px;
-  border-radius: 9999px;
-  background: var(--accent);
-  opacity: .22;
-  animation: veille-respire 7s ease-in-out infinite;
-}
-@keyframes veille-respire {
-  0%, 100% { opacity: .18; }
-  50%      { opacity: .72; }
-}
-
-/* Trois points sur huit émettent en plus une onde qui s'ouvre — le
-   « ping » d'une console de supervision. Limité à trois : chaque onde
-   est une couche composée de plus, et une carte où tout pulse redevient
-   exactement ce qu'Aaron ne voulait plus. */
-.onde {
-  position: absolute;
-  inset: -13px;
-  border-radius: 9999px;
-  border: 1px solid var(--accent);
-  opacity: 0;
-  animation: veille-onde 7s cubic-bezier(.22, .61, .36, 1) infinite;
-}
-@keyframes veille-onde {
-  0%       { transform: scale(.28); opacity: 0; }
-  12%      { opacity: .42; }
-  55%, 100% { transform: scale(1); opacity: 0; }
-}
-
-/* Les décalages : aucune pulsation ne tombe en même temps qu'une autre. */
-.v1 { left: 46.78%; top: 18.4%; animation-delay: 0.0s; }
-.v1 .onde { animation-delay: 0.0s; }
-.v2 { left: 49.24%; top: 21.75%; animation-delay: 1.7s; }
-.v2 .onde { animation-delay: 1.7s; }
-.v3 { left: 51.05%; top: 20.81%; animation-delay: 3.4s; }
-.v4 { left: 27.55%; top: 24.25%; animation-delay: 5.1s; }
-.v5 { left: 26.43%; top: 29.18%; animation-delay: 6.8s; }
-.v5 .onde { animation-delay: 6.8s; }
-.v6 { left: 35.25%; top: 75.78%; animation-delay: 8.5s; }
-.v7 { left: 78.23%; top: 57.2%; animation-delay: 10.2s; }
-.v8 { left: 91.77%; top: 83.49%; animation-delay: 11.9s; }
-/* Sur téléphone, la colonne est étroite et haute : le texte occupe
-   presque toute la largeur, et la carte se retrouve DERRIÈRE le chapô
-   au lieu d'être autour. Première version à 10 % : les points
-   traversaient « Un seul endroit pour votre agenda… », exactement le
-   défaut reproché aux nappes. Elle descend donc plus bas qu'au bureau,
-   et le voile se resserre sur la colonne de texte. */
-@media (max-width: 620px) {
-  .carte-boite { width: 190%; }
-  .carte { opacity: .24; }
-  .fond-voile {
-    background:
-      radial-gradient(ellipse 74% 46% at 50% 42%, var(--bg) 44%, transparent 88%),
-      linear-gradient(180deg, var(--bg), transparent 22%, transparent 80%, var(--bg));
-  }
-  .veille { opacity: .16; }
-}
-
-/* La consigne du dépôt : glisser oui, mais rien d'obligatoire. Sans
-   mouvement, les points restent visibles à mi-intensité — la carte ne
-   disparaît pas, elle se tait. */
-@media (prefers-reduced-motion: reduce) {
-  .veille { animation: none; opacity: .45; }
-  .onde { animation: none; opacity: .18; transform: scale(1); }
-}
-
-/* ---------- Le bandeau de chiffres ----------
-   Le procédé exact du produit : `gap-px` sur un fond couleur filet. Les
-   cellules sont en surface, l'écart d'un pixel laisse voir le fond — les
-   séparateurs SONT l'arrière-plan, jamais des bordures. */
-.stats {
-  margin: 44px auto 0;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  overflow: hidden;
+  height: auto;
+  aspect-ratio: 1120 / 512;
   border: 1px solid var(--line);
-  background: var(--line);
+  border-bottom: 0;
+  border-radius: var(--r-2xl) var(--r-2xl) 0 0;
+  -webkit-mask-image: linear-gradient(180deg, #000 62%, transparent);
+  mask-image: linear-gradient(180deg, #000 62%, transparent);
 }
-.stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  background: var(--surface);
-  padding: 16px 12px;
-}
-.stat b {
+.capture figcaption {
+  margin-top: -18px;
+  position: relative;
   font-family: var(--f-mono);
-  font-size: 1.75rem;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -.01em;
-  line-height: 1.1;
-}
-.stat span {
-  font-family: var(--f-mono);
-  font-size: .62rem;
-  letter-spacing: .18em;
-  text-transform: uppercase;
+  font-size: .66rem;
+  letter-spacing: .06em;
   color: var(--text-3);
   text-align: center;
-  line-height: 1.35;
+  line-height: 1.5;
 }
-@media (max-width: 560px) { .stats { grid-template-columns: 1fr; } }
+
+/* SUR TÉLÉPHONE, la capture réduite à 358 px devenait une tache grise :
+   une image de logiciel illisible ne prouve rien, elle redevient du
+   décor — exactement ce qu'on venait d'enlever. Elle garde donc une
+   largeur lisible et se fait balayer du doigt, comme un tableau large.
+   Le dégradé sur le bord droit dit qu'il y a une suite. */
+@media (max-width: 720px) {
+  .capture { padding-inline: 0; }
+  .capture-cadre {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    padding-inline: 16px;
+    scrollbar-width: none;
+  }
+  .capture-cadre::-webkit-scrollbar { display: none; }
+  .capture img {
+    width: 760px;
+    max-width: none;
+    aspect-ratio: 1120 / 512;
+    -webkit-mask-image: none;
+    mask-image: none;
+    border: 1px solid var(--line);
+    border-radius: var(--r-xl);
+  }
+  .capture figcaption { margin-top: 12px; padding-inline: 16px; }
+}
 
 /* Le bloc « deux côtés » — c'est le positionnement, rendu en mise en page. */
 .split {
@@ -1555,6 +1427,36 @@ section[id] { scroll-margin-top: 84px; }
 
 /* Mention à compléter : visible, pas discrète — un gabarit qui part en
    production est le premier signal de négligence. */
+/* La signature : qui répond, à quel titre, depuis où et depuis quand.
+   Quatre lignes qui pèsent plus, pour la crédibilité d'une page, que
+   n'importe quel paragraphe au-dessus. */
+.signature {
+  display: grid;
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  max-width: 620px;
+}
+.signature > div {
+  background: var(--surface);
+  padding: 14px 18px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+}
+.signature dt {
+  font-family: var(--f-mono);
+  font-size: .64rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  min-width: 11ch;
+}
+.signature dd { margin: 0; color: var(--text); }
+
 .todo {
   font-family: var(--f-mono);
   font-size: .8rem;
@@ -1890,222 +1792,6 @@ section[id] { scroll-margin-top: 84px; }
 .tarifs-pied b { color: var(--text-2); font-weight: 500; }
 
 /* ==================================================================
-   v4 — LA SÉQUENCE D'OUVERTURE
-   ==================================================================
-   Elle est écrite EN CSS de bout en bout, et son animation se termine
-   en l'effaçant (`forwards` + `visibility: hidden`). Conséquence : elle
-   se déroule et disparaît toute seule, même si JavaScript ne s'exécute
-   jamais. C'est la même règle que la console de navigation — le script
-   n'ajoute que du confort, il n'est jamais nécessaire.
-
-   Elle est posée PAR-DESSUS la page, qui est rendue normalement en
-   dessous. Le titre h1 est donc peint dès le premier rendu : la
-   séquence ne retarde pas la mesure de plus grand contenu affiché.
-   Une séquence qui masquerait le titre puis le révélerait à 2,2 s
-   ferait passer le LCP de 0,4 s à 2,2 s, et le chantier aurait gagné
-   un effet en perdant la performance.
-   ================================================================== */
-
-.seq {
-  position: fixed;
-  inset: 0;
-  z-index: 300;
-  background: var(--bg);
-  display: grid;
-  /* `place-items` centre DANS la rangée ; sans `align-content` les
-     rangées restent tassées en haut de la fenêtre. */
-  align-content: center;
-  justify-items: center;
-  gap: 20px;
-  grid-auto-rows: max-content;
-  /* DEUX animations, et c'est délibéré. Le fondu ne touche QUE
-     l'opacité : il reste donc composité, c'est-à-dire calculé hors du
-     fil principal. La première version mettait `visibility` et
-     `pointer-events` dans le même jeu d'images — deux propriétés que le
-     compositeur ne sait pas prendre en charge — et Chrome recalculait
-     alors le style de tout l'écran à chaque image. Mesuré : 278 ms de
-     style et mise en page, et la note de performance de l'accueil qui
-     tombait de 100 à 92 pendant que les autres pages restaient à 100.
-
-     Le retrait, lui, est une bascule unique posée à la fin. Une seule
-     recalculation, au lieu de vingt-cinq. */
-  animation: seq-sortie .75s cubic-bezier(.4, 0, .2, 1) 2.55s forwards;
-}
-/* `opacity` et `transform`, RIEN D'AUTRE — les deux seules propriétés
-   que le compositeur sait animer sans réveiller le fil principal.
-
-   La première version mettait `visibility` et `pointer-events` dans le
-   jeu d'images pour que le panneau cesse de capter les clics à la fin.
-   Chrome refuse alors de composer l'animation et recalcule le style de
-   tout l'écran à chaque image : 278 ms de style et mise en page, et la
-   note de performance de l'accueil qui tombait à 92 pendant que les
-   autres pages restaient à 100.
-
-   Le panneau s'efface donc d'abord, puis SORT du cadre. Une fois
-   au-dessus de la fenêtre il ne recouvre plus rien et ne capte plus
-   rien — le même résultat, obtenu par une propriété que la carte
-   graphique sait traiter toute seule. */
-/* SORTIE PAR GLISSEMENT SEUL, SANS FONDU. Un fondu rend le panneau
-   semi-transparent pendant 400 ms, et pendant ces 400 ms TOUT ce
-   qu'il contient est, pour un audit de contraste, du texte mélangé au
-   fond : la note d'accessibilité de l'accueil tombait à 96 alors que
-   les cinq autres pages étaient à 100, sans qu'aucun texte réel du
-   site soit en cause. Le rideau remonte donc d'un bloc, opaque du
-   début à la fin. `transform` seul : toujours composé, et plus
-   franc à l'œil qu'un fondu. */
-@keyframes seq-sortie {
-  to { transform: translateY(-101vh); }
-}
-
-.seq-cadre {
-  width: min(486px, calc(100vw - 2 * var(--gutter)));
-  padding: 22px 24px 26px;
-  background: var(--surface);
-  border: 1px solid var(--line-strong);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .06),
-    0 24px 60px -12px rgba(0, 0, 0, .85);
-  animation: seq-cadre-in .34s cubic-bezier(.2, .7, .3, 1) both;
-}
-@keyframes seq-cadre-in {
-  from { opacity: 0; transform: translateY(10px) scale(.985); }
-}
-
-.seq-tag {
-  font-family: var(--f-mono);
-  font-size: .62rem;
-  font-weight: 500;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  color: var(--text-2);
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--line);
-  margin-bottom: 4px;
-}
-
-.seq-liste { list-style: none; display: grid; gap: 1px; }
-
-/* Une ligne de terminal. Le texte est écrit dans le HTML dès le
-   départ ; c'est le CACHE posé par-dessus qui recule pour le
-   découvrir. On n'anime donc jamais `width` — seulement `transform`,
-   la seule propriété que le compositeur sait traiter sans réveiller
-   le fil principal (la v4 a perdu 8 points de note en l'oubliant). */
-.seq-l {
-  position: relative;
-  font-family: var(--f-mono);
-  font-size: .72rem;
-  line-height: 1.85;
-  white-space: pre;
-  overflow: hidden;
-  color: var(--text-2);
-}
-.seq-l--cmd { color: var(--text); }
-.seq-v { color: var(--text); font-weight: 500; }
-.seq-l--ok .seq-v { color: var(--accent); }
-.seq-l--fin { color: var(--accent); margin-top: 6px; }
-
-/* LA FRAPPE SE FAIT PAR DÉCOUPE, PAS PAR RECOUVREMENT.
-   Première version : un cache opaque glissait sur le texte. Ça marche
-   à l'œil, mais l'audit d'accessibilité échantillonne pendant le
-   passage et voit du texte à moitié recouvert — c'est-à-dire, par
-   construction, du texte à contraste insuffisant. Note tombée à 96.
-
-   Ici c'est le texte lui-même qui est DÉCOUPÉ : un glyphe est soit
-   rendu en entier, soit pas rendu du tout, jamais à moitié. Il n'y a
-   plus d'état intermédiaire à mesurer. Le curseur, lui, reste une
-   `transform` — la carte graphique s'en occupe. */
-.seq-txt {
-  display: inline-block;
-  clip-path: inset(0 100% 0 0);
-  animation: seq-frappe .34s steps(38) both;
-}
-@keyframes seq-frappe { to { clip-path: inset(0 -2px 0 0); } }
-
-.seq-cache {
-  position: absolute;
-  left: 0; top: .18em; bottom: .18em;
-  width: 7px;
-  background: var(--accent);
-  animation: seq-curseur .34s steps(38) both;
-}
-@keyframes seq-curseur { to { transform: translateX(calc(100% * 38 + 1px)); } }
-
-/* Le décalage ligne par ligne. En `nth-child` : la CSP du site
-   interdit les attributs `style=`, donc pas de `--i` en ligne. */
-.seq-l:nth-child(1) .seq-txt,
-.seq-l:nth-child(1) .seq-cache { animation-delay: .10s }
-.seq-l:nth-child(2) .seq-txt,
-.seq-l:nth-child(2) .seq-cache { animation-delay: .40s }
-.seq-l:nth-child(3) .seq-txt,
-.seq-l:nth-child(3) .seq-cache { animation-delay: .62s }
-.seq-l:nth-child(4) .seq-txt,
-.seq-l:nth-child(4) .seq-cache { animation-delay: .84s }
-.seq-l:nth-child(5) .seq-txt,
-.seq-l:nth-child(5) .seq-cache { animation-delay: 1.06s }
-.seq-l:nth-child(6) .seq-txt,
-.seq-l:nth-child(6) .seq-cache { animation-delay: 1.28s }
-.seq-l:nth-child(7) .seq-txt,
-.seq-l:nth-child(7) .seq-cache { animation-delay: 1.50s }
-.seq-l:nth-child(8) .seq-txt,
-.seq-l:nth-child(8) .seq-cache { animation-delay: 1.78s }
-
-/* La réglette : sept crans, un par contrôle. Ce n'est PAS une barre
-   de téléchargement — rien ne se télécharge, on ne mime pas un
-   chargement qui n'existe pas. C'est un compte de contrôles passés. */
-.seq-reglette {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 16px;
-  padding-top: 14px;
-  border-top: 1px solid var(--line);
-}
-.seq-cran {
-  width: 14px; height: 6px;
-  background: var(--line-strong);
-  animation: seq-cran .18s ease both;
-}
-@keyframes seq-cran { from { background: var(--line-strong); } to { background: var(--accent); } }
-.seq-cran:nth-child(1) { animation-delay: .52s } .seq-cran:nth-child(2) { animation-delay: .74s }
-.seq-cran:nth-child(3) { animation-delay: .96s } .seq-cran:nth-child(4) { animation-delay: 1.18s }
-.seq-cran:nth-child(5) { animation-delay: 1.40s } .seq-cran:nth-child(6) { animation-delay: 1.62s }
-.seq-cran:nth-child(7) { animation-delay: 1.84s }
-.seq-reglette b {
-  margin-left: 8px;
-  font-family: var(--f-mono);
-  font-size: .58rem;
-  font-weight: 500;
-  letter-spacing: .03em;
-  text-transform: uppercase;
-  /* PAS d'animation d'opacité sur ce libellé. Un texte qu'on fait
-     apparaître en fondu est, pendant tout le fondu, un texte à
-     contraste insuffisant — et l'audit d'accessibilité le mesure
-     pendant le fondu. Le spectacle est dans la frappe, pas ici. */
-  color: var(--text-3);
-}
-@keyframes seq-ligne { from { opacity: 0; } }
-
-.seq-passer {
-  font-family: var(--f-mono);
-  font-size: .62rem;
-  letter-spacing: .02em;
-  color: var(--text-3);   /* voir ci-dessus : pas de fondu sur du texte */
-}
-
-/* Déjà vue dans cette visite : site.js pose la classe et il ne se
-   passe rien du tout. Pas d'animation à interrompre, pas d'image
-   peinte pour rien. */
-.seq--vue { display: none; }
-
-/* Mouvement réduit : la séquence n'existe pas. Elle est spectaculaire,
-   elle n'est pas informative — la même chose est écrite sur /service.
-   Rien ne se perd à la supprimer, et c'est plus honnête que de la
-   jouer en 1 ms. */
-@media (prefers-reduced-motion: reduce) {
-  .seq { display: none; }
-}
-
-/* ==================================================================
    v4 — CONTENU DÉPLIABLE
    ==================================================================
    Beaucoup de texte, et personne ne lit tout. Un résumé reste visible,
@@ -2411,7 +2097,7 @@ section[id] { scroll-margin-top: 84px; }
 
 /* À l'impression, ni l'onglet ni la séquence n'ont de sens. */
 @media print {
-  .ajm, .seq, .rail { display: none !important; }
+  .ajm, .rail { display: none !important; }
 }
 
 /* ==================================================================
@@ -2597,7 +2283,7 @@ section[id] { scroll-margin-top: 84px; }
    Un dossier, ça s'imprime. Noir sur blanc, cartouche compris, sans le
    chrome d'écran. C'est la preuve que le document existe vraiment. */
 @media print {
-  .seq, .ajm, .rail, .console, .hdr-cta, .piece-btn, .trace { display: none !important; }
+  .ajm, .rail, .console, .hdr-cta, .piece-btn, .trace { display: none !important; }
   html, body { background: #fff !important; color: #111 !important; }
   body { font-size: 11.5pt; }
   .dossier > .wrap { display: block !important; max-width: none; padding: 0; }

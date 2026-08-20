@@ -21,12 +21,16 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-<!-- Les DEUX polices du produit sont préchargées : Space Grotesk et
-     JetBrains Mono. Essai fait dans l'autre sens (la sans seule, pour
-     ne pas lui disputer la bande passante) : le premier affichage est
-     parti de 1 358 à 1 503 ms sur réseau bridé, parce que les
-     étiquettes mono sont dans le premier écran elles aussi. Mesuré,
-     pas supposé — voir scripts/mesurer-lighthouse.mjs. -->
+<!-- TROIS polices préchargées : Spectral d'abord (elle porte le titre,
+     donc le plus grand contenu affiché), puis Space Grotesk et
+     JetBrains Mono, toutes deux présentes dès le premier écran.
+
+     Le préchargement de la mono a été remis en question maintenant que
+     la capture du produit dispute la bande passante : le retirer libère
+     28 Ko et gagne 43 ms de LCP, mais coûte 131 ms de premier affichage
+     et 87 ms de blocage. Il reste. Mesuré, pas supposé — voir
+     scripts/mesurer-lighthouse.mjs. -->
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/spectral-600-latin.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/space-grotesk-400700-latin.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/jetbrains-mono-400-latin.woff2" crossorigin>
 <link rel="stylesheet" href="/assets/fonts.css">
@@ -35,47 +39,6 @@
 </head>
 <body>
 <a class="skip" href="#main">Aller au contenu</a>
-
-<!-- ==================================================================
-     LA SÉQUENCE D'OUVERTURE — mise sous tension
-     ==================================================================
-     Un terminal qui tape, puis le dossier. Les six lignes de contrôle
-     portent sur LA PAGE QU'ON REGARDE et sont vraies : deux d'entre
-     elles sont remesurées à l'exécution par site.js (appels à des
-     tiers réellement chargés, cookies réellement déposés), et le
-     compte d'en-têtes est comparé à vercel.json par la vérification.
-
-     LA FRAPPE EST EN CSS PUR. Chaque ligne porte un cache opaque qui
-     glisse vers la droite en `transform: translateX()` avec
-     `steps()` : aucune largeur animée, aucune écriture DOM pendant la
-     frappe, tout est composé par la carte graphique. Les dots de
-     conduite alignent toutes les lignes sur la même longueur, donc un
-     seul `steps()` suffit pour toutes.
-
-     La séquence se joue et se retire SANS JavaScript (elle sort par
-     `opacity` puis `translateY`, jamais par `visibility`). Le <h1> est
-     peint dessous dès la première image : la séquence ne retarde pas
-     la mesure de plus grand contenu affiché.
-     ================================================================== -->
-<div class="seq" aria-hidden="true">
-  <div class="seq-cadre arrondi">
-    <p class="seq-tag">amn devsec — mise sous tension</p>
-    <ul class="seq-liste">
-      <li class="seq-l seq-l--cmd"><span class="seq-txt">$ amn superviser --cible cette-page</span><span class="seq-cache" aria-hidden="true"></span></li>
-      <li class="seq-l seq-l--ok"><span class="seq-txt">appels à des tiers ............ <b class="seq-v" data-mesure="tiers">0</b></span><span class="seq-cache" aria-hidden="true"></span></li>
-      <li class="seq-l seq-l--ok"><span class="seq-txt">cookies déposés ............... <b class="seq-v" data-mesure="cookies">0</b></span><span class="seq-cache" aria-hidden="true"></span></li>
-      <li class="seq-l seq-l--ok"><span class="seq-txt">en-têtes de sécurité .......... <b class="seq-v" data-seq-entetes>7 / 7</b></span><span class="seq-cache" aria-hidden="true"></span></li>
-      <li class="seq-l seq-l--ok"><span class="seq-txt">polices ....................... <b class="seq-v">servies d’ici</b></span><span class="seq-cache" aria-hidden="true"></span></li>
-      <li class="seq-l seq-l--ok"><span class="seq-txt">journal d’accès ............... <b class="seq-v">côté serveur</b></span><span class="seq-cache" aria-hidden="true"></span></li>
-      <li class="seq-l seq-l--ok"><span class="seq-txt">paiement en ligne ............. <b class="seq-v">aucun</b></span><span class="seq-cache" aria-hidden="true"></span></li>
-      <li class="seq-l seq-l--fin"><span class="seq-txt">6 feuillets sous tension</span><span class="seq-cache" aria-hidden="true"></span></li>
-    </ul>
-    <p class="seq-reglette"><span class="seq-cran"></span><span class="seq-cran"></span><span class="seq-cran"></span><span class="seq-cran"></span><span class="seq-cran"></span><span class="seq-cran"></span><span class="seq-cran"></span><b>contrôles 7 / 7</b></p>
-    <img class="seq-logo" src="/assets/logo.svg" alt="" width="104" height="40">
-  </div>
-  <span class="seq-passer">Une touche ou un clic pour passer</span>
-</div>
-
 
 <header class="hdr">
   <div class="wrap hdr-in">
@@ -146,29 +109,11 @@
       <li><a href="#debut">01<span class="rail-lbl">Le sujet</span></a></li>
       <li><a href="#apercu">02<span class="rail-lbl">Ce qu'on fait</span></a></li>
       <li><a href="#parcours">03<span class="rail-lbl">Comment ça se passe</span></a></li>
-      <li><a href="#limites">04<span class="rail-lbl">Ce qu'on ne fait pas</span></a></li>
-      <li><a href="#acces">05<span class="rail-lbl">Demander un accès</span></a></li>
+      <li><a href="#acces">04<span class="rail-lbl">Demander un accès</span></a></li>
     </ol>
   </nav>
 
   <section class="hero" id="debut">
-    <!-- LE FOND : une carte de veille, presque noire.
-         Les six nappes de télémétrie de la v6 sont parties — trop
-         lumineuses, ça bougeait partout. Ici la carte est IMMOBILE et
-         huit points respirent lentement, jamais deux en même temps.
-         Trois d'entre eux émettent une onde.
-
-         Les points sont ILLUSTRATIFS et posés sur des régions
-         d'hébergement courantes. Le bloc est décoratif (aria-hidden) :
-         nulle part le site ne prétend compter des sites supervisés ni
-         dire où ils se trouvent. Voir docs/direction-v7.md. -->
-    <div class="fond" aria-hidden="true">
-      <div class="carte-boite">
-        <svg class="carte" viewBox="0 0 110 52" fill="none" aria-hidden="true"><path d="M83 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-10 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-51 1h.01m35 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-94 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m9 0h.01m1 0h.01m1 0h.01m1 0h.01m8 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m18 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m4 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-101 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m3 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m16 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m3 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-107 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m2 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m6 0h.01m1 0h.01m1 0h.01m9 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m4 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-106 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m3 0h.01m1 0h.01m1 0h.01m17 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m4 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-101 1h.01m1 0h.01m4 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m18 0h.01m3 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m5 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-92 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m17 0h.01m1 0h.01m4 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m5 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-90 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m17 0h.01m1 0h.01m1 0h.01m1 0h.01m2 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m5 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-84 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m17 0h.01m1 0h.01m1 0h.01m2 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m5 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-83 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m18 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m4 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-83 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m17 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m4 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-82 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m19 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m2 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m5 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m4 0h.01m-84 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m20 0h.01m1 0h.01m1 0h.01m1 0h.01m4 0h.01m2 0h.01m1 0h.01m1 0h.01m6 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m4 0h.01m-82 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m21 0h.01m1 0h.01m15 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m5 0h.01m-81 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m24 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m11 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m4 0h.01m-79 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m23 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m9 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-74 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m23 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m5 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-73 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m26 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m6 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-71 1h.01m1 0h.01m1 0h.01m1 0h.01m27 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m8 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-71 1h.01m1 0h.01m1 0h.01m1 0h.01m27 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m10 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-69 1h.01m1 0h.01m1 0h.01m3 0h.01m23 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m11 0h.01m1 0h.01m1 0h.01m1 0h.01m4 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-64 1h.01m1 0h.01m1 0h.01m23 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m11 0h.01m1 0h.01m1 0h.01m5 0h.01m1 0h.01m1 0h.01m1 0h.01m5 0h.01m-65 1h.01m22 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m11 0h.01m1 0h.01m6 0h.01m1 0h.01m1 0h.01m5 0h.01m1 0h.01m-65 1h.01m21 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m11 0h.01m7 0h.01m1 0h.01m1 0h.01m5 0h.01m1 0h.01m-65 1h.01m1 0h.01m2 0h.01m1 0h.01m1 0h.01m1 0h.01m16 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m9 0h.01m7 0h.01m1 0h.01m6 0h.01m1 0h.01m-63 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m16 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-39 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m16 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-38 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m19 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m18 0h.01m-56 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m19 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m20 0h.01m1 0h.01m-58 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m16 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m20 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-66 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m16 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m21 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-67 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m16 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m26 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-64 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m16 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-34 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m16 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m29 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-66 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m17 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m3 0h.01m1 0h.01m24 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-67 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m18 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m4 0h.01m1 0h.01m24 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-67 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m19 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m4 0h.01m1 0h.01m22 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-68 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m20 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m5 0h.01m21 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-69 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m21 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m26 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-70 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m21 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m27 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-70 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m23 0h.01m1 0h.01m1 0h.01m1 0h.01m27 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-69 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m24 0h.01m36 0h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m-69 1h.01m1 0h.01m1 0h.01m1 0h.01m1 0h.01m62 0h.01m1 0h.01m1 0h.01m1 0h.01m-70 1h.01m1 0h.01m1 0h.01m1 0h.01m75 0h.01m-78 1h.01m1 0h.01m1 0h.01m1 0h.01m74 0h.01m-77 1h.01m1 0h.01m1 0h.01m74 0h.01m-76 1h.01m1 0h.01m1 0h.01m-2 1h.01m1 0h.01m-1 1h.01m1 0h.01" stroke="#ededed" stroke-width=".28" stroke-linecap="round"/></svg><span class="fond-voile"></span>
-        <span class="veille v1 veille--ping"><span class='onde'></span></span><span class="veille v2 veille--ping"><span class='onde'></span></span><span class="veille v3"></span><span class="veille v4"></span><span class="veille v5 veille--ping"><span class='onde'></span></span><span class="veille v6"></span><span class="veille v7"></span><span class="veille v8"></span>
-      </div>
-    </div>
-    </div>
     <div class="wrap colonne hero-in">
     <p class="mono">Pour les structures sans équipe technique</p>
     <h1>Votre activité dans <span class="mark">un seul outil</span>, surveillé par nous.</h1>
@@ -178,15 +123,29 @@
       <a class="btn btn-ghost" href="/methode">Comment ça se passe</a>
     </div>
     <p class="mono-sm hero-note">Rien à payer ici. Un accès ne s'ouvre jamais tout seul.</p>
-
-    <!-- Le bandeau de chiffres du produit : `gap-px` sur un fond couleur
-         filet, donc les séparateurs SONT l'arrière-plan. Trois chiffres
-         vrais et vérifiables — pas de fausse métrique client. -->
-    <div class="stats arrondi elev-1">
-      <div class="stat"><b>10</b><span>modules livrés</span></div>
-      <div class="stat"><b>5</b><span>axes supervisés</span></div>
-      <div class="stat"><b>48 h</b><span>délai de réponse</span></div>
     </div>
+
+    <!-- LA CAPTURE DU PRODUIT.
+         Elle remplace la carte du monde en pointillés et le bandeau de
+         chiffres ronds qui tenaient cette place. Les deux étaient du
+         décor abstrait, et le décor abstrait à la place d'une image
+         réelle est l'un des signes les plus cités des sites fabriqués
+         par une IA : la machine n'a pas de produit à photographier,
+         donc elle dessine des formes.
+
+         Ici il y a un produit. C'est le registre des sites de
+         l'application, capture d'écran non retouchée, avec ses données
+         de test — voir le rappel dans verifier-avant-mise-en-ligne. -->
+    <figure class="capture">
+      <div class="capture-cadre">
+      <img src="/assets/produit-registre.jpg" width="1120" height="512" loading="eager" decoding="async" fetchpriority="high"
+           srcset="/assets/produit-registre-560.jpg 560w, /assets/produit-registre.jpg 1120w"
+           sizes="(min-width: 1200px) 1088px, calc(100vw - 32px)"
+           alt="Le registre des sites dans AMN Desktop : trois sites suivis, une discussion interne rattachée à l'un d'eux, et une note de score.">
+      </div>
+      <figcaption>AMN Desktop — le registre des sites, avec les notes internes rattachées à chaque site.</figcaption>
+    </figure>
+    <div class="wrap colonne">
 
     <!-- PIÈCE JOINTE — le mot de l'émetteur.
          Le bloc est `hidden` dans le HTML servi et ne se révèle que si
@@ -287,19 +246,6 @@
     <p class="btn-row more"><a class="btn btn-ghost" href="/methode">Pourquoi ce n'est pas instantané</a></p>
   </section>
 
-  <section class="wrap section" id="limites">
-
-    <div class="sec-head">
-      <h2>Ce qu'on ne fait pas</h2>
-    </div>
-
-    <ul class="nots">
-      <li><span><b>Aucun accès en libre-service.</b> Chaque accès est nominatif et révocable.</span></li>
-      <li><span><b>Aucun logo de client ni avis inventé sur ce site.</b> Les vrais seront signés.</span></li>
-      <li><span><b>Aucune promesse de « 100&nbsp;% sécurisé ».</b> On dit ce qu'on surveille et ce qu'on fait quand ça sonne.</span></li>
-    </ul>
-  </section>
-
   <section class="wrap section" id="acces">
 
     <div class="cta cta--plein arrondi">
@@ -330,16 +276,15 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       </span>
       <span class="ajm-invite-txt">
-        <b>Une question ? Les réponses sont déjà écrites.</b>
-        <span class="ajm-invite-p">Prix, délais, ce qu'on surveille, vos données.</span>
-        <span class="etq">Aucun modèle · aucune donnée envoyée</span>
+        <b>Questions fréquentes</b>
+        <span class="ajm-invite-p">Prix, effectif, délais, ce qu'on surveille, vos données.</span>
       </span>
       <span class="ajm-invite-btn"><span class="ajm-ferme">Ouvrir</span><span class="ajm-ouvert">Fermer</span></span>
     </summary>
     <div class="ajm-panel">
-      <p class="ajm-tete">Les réponses sont écrites à l'avance. Hors de ce cadre, je renvoie au formulaire.</p>
+      <p class="ajm-tete">Si votre question n'est pas traitée ici, écrivez-nous.</p>
       <div class="ajm-fil" role="log" aria-live="polite" aria-label="Conversation">
-        <p class="ajm-bulle ajm-bulle--lui">Bonjour. Je réponds sur les prix, les délais, ce qu'on surveille et vos données.</p>
+        <p class="ajm-bulle ajm-bulle--lui">Tapez un mot-clé : prix, effectif, délais, supervision, données, accès.</p>
       </div>
       <form class="ajm-form" action="/contact" method="get">
         <label class="hp" for="ajm-q">Votre question</label>

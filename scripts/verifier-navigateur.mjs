@@ -80,16 +80,6 @@ const PAGES = readdirSync(RACINE)
 
 const LARGEURS = [320, 390, 768, 1024, 1440];
 
-/* La séquence d'ouverture recouvre l'accueil pendant 2,15 s. Les
-   contrôles qui ne la visent pas doivent l'écarter d'abord, sinon
-   c'est elle qui reçoit leurs clics. */
-const sansSequence = (page) =>
-  page.evaluate(() => {
-    const s = document.querySelector('.seq');
-    if (s) s.classList.add('seq--vue');
-    try { sessionStorage.setItem('amn-seq', '1'); } catch (e) { /* stockage refusé */ }
-  });
-
 /* ================= 1. Pages × largeurs ================= */
 
 console.log(`\n1. ${PAGES.length} pages × ${LARGEURS.length} largeurs`);
@@ -139,12 +129,22 @@ for (const largeur of LARGEURS) {
       const polices = await page.evaluate(() => ({
         sg: document.fonts.check('600 16px "Space Grotesk"'),
         jb: document.fonts.check('400 12px "JetBrains Mono"'),
-        h1: getComputedStyle(document.querySelector('h1')).fontFamily
+        sp: document.fonts.check('600 32px Spectral'),
+        h1: getComputedStyle(document.querySelector('h1')).fontFamily,
+        corps: getComputedStyle(document.body).fontFamily
       }));
       t(`${chemin} — Space Grotesk chargée`, polices.sg);
       t(`${chemin} — JetBrains Mono chargée`, polices.jb);
-      t(`${chemin} — le titre emploie bien Space Grotesk`,
-        /Space Grotesk/.test(polices.h1), polices.h1);
+      t(`${chemin} — Spectral chargée`, polices.sp);
+      /* Le partage des rôles : le titre parle au nom du SITE, le texte
+         courant cite le PRODUIT. Space Grotesk en gros titre est
+         devenue l'un des signes qui trahissent un site fabriqué par une
+         IA ; elle reste partout ailleurs, où c'est la police du
+         produit qui a un sens. */
+      t(`${chemin} — le titre est en Spectral`,
+        /Spectral/.test(polices.h1) && !/Space Grotesk/.test(polices.h1), polices.h1);
+      t(`${chemin} — le texte courant reste en Space Grotesk`,
+        /Space Grotesk/.test(polices.corps), polices.corps);
 
       const h1 = await page.locator('h1').count();
       t(`${chemin} — exactement un h1`, h1 === 1, `trouvé ${h1}`);
@@ -160,7 +160,6 @@ console.log('2. Accessibilité');
 {
   const page = await navigateur.newPage({ viewport: { width: 1440, height: 900 } });
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
-  await sansSequence(page);
 
   await page.keyboard.press('Tab');
   const premierFocus = await page.evaluate(() => {
@@ -215,8 +214,7 @@ const CIBLES_CONTRASTE = {
     /* v6 — les nouveaux éléments entrent dans la boucle EN MÊME TEMPS
        qu'ils entrent dans la page. La v5 avait appris ça à ses dépens :
        la suite passait à 424 pendant que Lighthouse tombait à 96. */
-    ['chiffre du bandeau', '.stat b'],
-    ['libellé du bandeau', '.stat span']
+    ['légende de la capture', '.capture figcaption']
   ],
   '/contact': [
     ['libellé de champ', '.field .lbl'],
@@ -427,7 +425,6 @@ for (const largeur of [390, 1440]) {
   page.on('console', (m) => m.type() === 'error' && erreurs.push(m.text()));
   page.on('pageerror', (e) => erreurs.push(String(e)));
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
-  await sansSequence(page);
   await page.locator('.console > summary').click();
   await page.mouse.move(1360, 180);
   await page.waitForTimeout(250);
@@ -473,7 +470,6 @@ for (const largeur of [390, 1440]) {
   const ctx = await navigateur.newContext({ reducedMotion: 'reduce', viewport: { width: 1440, height: 900 } });
   const page = await ctx.newPage();
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
-  await sansSequence(page);
   const duree = await page.evaluate(() =>
     getComputedStyle(document.querySelector('.btn-primary')).transitionDuration
   );
@@ -495,7 +491,6 @@ for (const largeur of [390, 1440]) {
 {
   const page = await navigateur.newPage({ viewport: { width: 1440, height: 900 } });
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
-  await sansSequence(page);
   await page.locator('.console > summary').click();
   await page.waitForTimeout(500);
   const mesures = await page.evaluate(() => {
@@ -546,7 +541,6 @@ for (const largeur of [390, 1440]) {
 {
   const page = await navigateur.newPage({ viewport: { width: 1440, height: 900 } });
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
-  await sansSequence(page);
   t('Règle de section affichée sur grand écran', await page.locator('.rail').isVisible());
 
   const ancres = await page.evaluate(() =>
@@ -556,20 +550,29 @@ for (const largeur of [390, 1440]) {
       nom: a.textContent.trim()
     }))
   );
-  t('Règle de section : cinq repères', ancres.length === 5, String(ancres.length));
+  /* Le compte était figé à cinq. Le jour où une section est retirée,
+     un nombre en dur ne dit pas « la règle est fausse », il dit « le
+     contrôle est périmé ». On compare donc le rail aux sections qui
+     existent vraiment : c'est la propriété qu'on veut tenir. */
+  const sections = await page.evaluate(() =>
+    [...document.querySelectorAll('main > section[id]')].map((s) => '#' + s.id));
+  t('Règle de section : au moins quatre repères', ancres.length >= 4, String(ancres.length));
+  t('Règle de section : un repère par section, et pas un de plus',
+    ancres.length === sections.length && sections.every((id) => ancres.some((a) => a.href.endsWith(id))),
+    `rail ${ancres.map((a) => a.href.replace(/^.*#/, '#')).join(' ')} · sections ${sections.join(' ')}`);
   t('Règle de section : chaque repère vise une section existante', ancres.every((a) => a.cible),
     ancres.filter((a) => !a.cible).map((a) => a.href).join(', '));
   t('Règle de section : les liens ne s\'appellent pas juste « 01 »',
     ancres.every((a) => a.nom.replace(/[0-9\s]/g, '').length > 3), ancres.map((a) => a.nom).join(' | '));
 
-  await page.evaluate(() => document.getElementById('limites').scrollIntoView());
+  await page.evaluate(() => document.getElementById('parcours').scrollIntoView());
   await page.waitForTimeout(400);
   t('Règle de section : la section courante est signalée au défilement',
-    (await page.locator('.rail a[href="#limites"][aria-current="true"]').count()) === 1);
+    (await page.locator('.rail a[href="#parcours"][aria-current="true"]').count()) === 1);
 
   /* Une ancre ne doit pas placer le titre derrière le bandeau collant. */
   await page.evaluate(() => (document.documentElement.scrollTop = 0));
-  await page.locator('.rail a[href="#parcours"]').click();
+  await page.locator('.rail a[href="#apercu"]').click();
   await page.waitForTimeout(300);
   const sousBandeau = await page.evaluate(() => {
     const h = document.querySelector('.hdr').getBoundingClientRect().bottom;
@@ -587,114 +590,7 @@ for (const largeur of [390, 1440]) {
 
 /* ================= 2 ter. v4 ================= */
 
-console.log('2 ter. Séquence, dépliables, assistant');
-
-/* ---- La séquence d'ouverture ---- */
-{
-  /* Elle doit tenir sa promesse : ce qu'elle AFFICHE doit être vrai.
-     Le compte d'en-têtes de sécurité écrit dans le HTML est comparé à
-     ce que le serveur envoie réellement. Si quelqu'un touche à
-     vercel.json sans corriger l'accueil, ça casse ici. */
-  const r = await fetch(BASE + '/');
-  const html = await r.text();
-  const annonce = Number((html.match(/data-seq-entetes>(\d+)\s*\/\s*(\d+)</) || [])[1]);
-
-  /* La référence est vercel.json, pas la réponse locale : l'affirmation
-     de l'accueil porte sur le site DÉPLOYÉ, et c'est ce fichier qui
-     décide de ce que la production envoie. Le serveur local, lui,
-     retire volontairement Strict-Transport-Security — il n'a aucun sens
-     en HTTP et ferait basculer tout localhost en HTTPS. Comparer à la
-     réponse locale ferait donc échouer une affirmation vraie. */
-  const vercel = JSON.parse(readFileSync(join(RACINE, 'vercel.json'), 'utf8'));
-  const declares = vercel.headers.find((h) => h.source === '/(.*)').headers.map((h) => h.key);
-  t("Séquence : le nombre d'en-têtes annoncé est celui que vercel.json déploie",
-    annonce === declares.length, `annoncé ${annonce}, déclarés ${declares.length}`);
-
-  const manquants = declares.filter((h) => !r.headers.get(h) && h !== 'Strict-Transport-Security');
-  t('Séquence : le serveur local envoie tous ces en-têtes (HSTS mis à part)',
-    manquants.length === 0, manquants.join(', '));
-  t('Séquence : les lignes de contrôle sont dans le HTML servi',
-    html.includes('appels à des tiers') && html.includes('cookies déposés'));
-  /* La frappe est en CSS : le texte doit être ENTIER dans le document,
-     jamais écrit lettre par lettre par un script. C'est ce qui la rend
-     lisible sans JavaScript et par un lecteur d'écran. */
-  t('Séquence : le texte tapé est déjà complet dans le HTML',
-    html.includes('$ amn superviser --cible cette-page') && html.includes('6 feuillets sous tension'));
-}
-{
-  const ctx = await navigateur.newContext({ viewport: { width: 1280, height: 800 } });
-  const page = await ctx.newPage();
-  const erreurs = [];
-  page.on('pageerror', (e) => erreurs.push(String(e)));
-  await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
-
-  t('Séquence : visible au premier chargement',
-    await page.locator('.seq').isVisible());
-  /* Le titre est peint SOUS la séquence, pas caché derrière elle : sans
-     ça le plus grand contenu affiché serait mesuré à 2,2 s. */
-  t('Séquence : le titre est déjà rendu dessous',
-    await page.evaluate(() => {
-      const h = document.querySelector('h1');
-      return h.getBoundingClientRect().height > 0 && getComputedStyle(h).visibility === 'visible';
-    }));
-
-  await page.waitForTimeout(1400);
-  const mesures = await page.evaluate(() =>
-    [...document.querySelectorAll('[data-mesure]')].map((e) => e.dataset.mesure + '=' + e.textContent)
-  );
-  t('Séquence : les valeurs sont mesurées à l\'exécution',
-    mesures.indexOf('tiers=0') > -1 && mesures.indexOf('cookies=0') > -1, mesures.join(' '));
-
-  await page.waitForTimeout(2200);
-  t('Séquence : elle s\'efface toute seule',
-    await page.evaluate(() => {
-      const s = document.querySelector('.seq');
-      const cs = getComputedStyle(s);
-      const r = s.getBoundingClientRect();
-      /* Effacée, ou sortie du cadre : les deux comptent. */
-      return cs.display === 'none' || cs.visibility === 'hidden' ||
-             cs.opacity === '0' || r.bottom <= 0;
-    }));
-  t('Séquence : la page redevient cliquable',
-    await page.evaluate(() => {
-      const b = document.querySelector('.hero .btn-primary').getBoundingClientRect();
-      const el = document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2);
-      return !!(el && el.closest('.btn-primary'));
-    }));
-
-  /* Une seule fois par visite : on navigue vraiment, puis on revient. */
-  await page.goto(BASE + '/service', { waitUntil: 'domcontentloaded' });
-  await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
-  await page.waitForTimeout(250);
-  t('Séquence : pas rejouée ailleurs dans la même visite',
-    await page.evaluate(() => document.querySelector('.seq').classList.contains('seq--vue')));
-  t('Séquence : aucune erreur', erreurs.length === 0, erreurs.join(' | '));
-  await ctx.close();
-}
-{
-  /* Sans JavaScript, elle doit se jouer ET se retirer d'elle-même :
-     c'est le CSS qui la termine, pas le script. */
-  const ctx = await navigateur.newContext({ javaScriptEnabled: false, viewport: { width: 1280, height: 800 } });
-  const page = await ctx.newPage();
-  await page.goto(BASE + '/', { waitUntil: 'load' });
-  await page.waitForTimeout(3700);
-  t('Séquence : sans JavaScript, elle se retire seule',
-    await page.evaluate(() => {
-      const s = document.querySelector('.seq');
-      const cs = getComputedStyle(s);
-      return cs.visibility === 'hidden' || cs.opacity === '0' ||
-             s.getBoundingClientRect().bottom <= 0;
-    }));
-  await ctx.close();
-}
-{
-  const ctx = await navigateur.newContext({ reducedMotion: 'reduce', viewport: { width: 1280, height: 800 } });
-  const page = await ctx.newPage();
-  await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
-  t('Séquence : supprimée si le système demande moins de mouvement',
-    (await page.evaluate(() => getComputedStyle(document.querySelector('.seq')).display)) === 'none');
-  await ctx.close();
-}
+console.log('2 ter. Dépliables et assistant');
 
 /* ---- Le contenu dépliable ---- */
 for (const chemin of ['/service', '/methode', '/confidentialite']) {
@@ -1132,93 +1028,80 @@ console.log('3 bis. Monochrome (aucune trace d’ambre)');
   }
 }
 
-/* ================= 3 ter. Le fond du bandeau =========================
-   La v6 avait six nappes de télémétrie qui défilaient ; Aaron les
-   trouvait trop lumineuses. La v7 les remplace par une carte immobile et
-   huit points qui respirent.
+/* ================= 3 ter. La capture du produit ======================
+   Le fond de bandeau — six nappes en v6, une carte du monde en pointillés
+   en v7 — a été retiré, et le bandeau de chiffres ronds avec lui. Les
+   deux étaient du décor abstrait à la place d'une image réelle, ce que
+   les inventaires de « sites fabriqués par une IA » citent en premier :
+   faute de produit à photographier, la machine dessine des formes.
 
-   Ces contrôles existent parce que la leçon de la v5 tient toujours :
-   « un contrôle qui ne regarde pas les nouveaux éléments ne protège que
-   le passé ». Ils vérifient que le fond est bien DÉCORATIF, qu'il
-   n'anime que des propriétés composées, et qu'il se tait quand le
-   système demande moins de mouvement.
+   Une vraie capture de l'application les remplace. Ces contrôles
+   vérifient qu'elle est SERVIE, qu'elle a une alternative textuelle, et
+   surtout qu'elle réserve sa place avant d'arriver — une image sans
+   dimensions déclarées ferait sauter toute la page à son chargement, et
+   c'est exactement ce que mesure le décalage cumulé.
    ==================================================================== */
 
-console.log('3 ter. Le fond du bandeau (carte de veille)');
+console.log('3 ter. La capture du produit');
 {
   const page = await navigateur.newPage({ viewport: { width: 1440, height: 900 } });
+  const codes = [];
+  page.on('response', (r) => { if (/produit-registre/.test(r.url())) codes.push(r.status()); });
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
-  await sansSequence(page);
 
-  const f = await page.evaluate(() => {
-    const fond = document.querySelector('.fond');
-    const carte = document.querySelector('.carte');
-    const pts = [...document.querySelectorAll('.veille')];
-    const anims = pts.map((p) => getComputedStyle(p).animationName);
-    const ondes = [...document.querySelectorAll('.onde')];
+  const c = await page.evaluate(() => {
+    const img = document.querySelector('.capture img');
+    if (!img) return null;
+    const r = img.getBoundingClientRect();
     return {
-      fondCache: fond ? fond.getAttribute('aria-hidden') === 'true' : false,
-      inerte: fond ? getComputedStyle(fond).pointerEvents === 'none' : false,
-      nbChemins: carte ? carte.querySelectorAll('path').length : 0,
-      nbPoints: pts.length,
-      nbOndes: ondes.length,
-      animsPoints: [...new Set(anims)],
-      /* Les nappes ne doivent plus exister nulle part. */
-      restesNappes: document.querySelectorAll('.nappe, .nappes, .voile').length,
+      alt: (img.getAttribute('alt') || '').trim().length,
+      largeurDeclaree: img.getAttribute('width'),
+      hauteurDeclaree: img.getAttribute('height'),
+      ratioCss: getComputedStyle(img).aspectRatio,
+      chargee: img.complete && img.naturalWidth > 0,
+      naturelle: img.naturalWidth,
+      affichee: Math.round(r.width),
+      legende: (document.querySelector('.capture figcaption')?.textContent || '').trim().length,
     };
   });
+  t('La capture est dans la page', c !== null);
+  t('La capture est réellement servie', codes.length > 0 && codes.every((s) => s === 200), codes.join(', '));
+  t('La capture est chargée', !!c?.chargee, `naturelle ${c?.naturelle}px`);
+  t('La capture a une alternative textuelle utile', (c?.alt || 0) > 40, `${c?.alt} caractères`);
+  t('La capture a une légende', (c?.legende || 0) > 20, `${c?.legende} caractères`);
+  t('La capture déclare ses dimensions', !!c?.largeurDeclaree && !!c?.hauteurDeclaree,
+    `${c?.largeurDeclaree}x${c?.hauteurDeclaree}`);
+  t('La capture réserve sa place (aspect-ratio)', /1120\s*\/\s*512/.test(c?.ratioCss || ''), c?.ratioCss);
+  /* Servir 1120 px pour en afficher 400 serait du poids gaspillé ; en
+     servir 600 pour en afficher 1100 serait flou. On vérifie que la
+     source est au moins aussi large que l'affichage, sans excès. */
+  t('La capture est servie à une taille raisonnable',
+    (c?.naturelle || 0) >= (c?.affichee || 0) && (c?.naturelle || 0) <= (c?.affichee || 0) * 2.4,
+    `${c?.naturelle}px servis pour ${c?.affichee}px affichés`);
 
-  t('Le fond est décoratif (aria-hidden)', f.fondCache);
-  t('Le fond ne capte aucun pointeur', f.inerte);
-  t('La carte est un seul chemin', f.nbChemins === 1, `${f.nbChemins} chemin(s)`);
-  t('Huit points de veille', f.nbPoints === 8, `${f.nbPoints} trouvé(s)`);
-  t('Trois points émettent une onde', f.nbOndes === 3, `${f.nbOndes} trouvée(s)`);
-  t('Les points respirent', f.animsPoints.includes('veille-respire'), f.animsPoints.join(', '));
-  t('Plus aucune nappe de télémétrie', f.restesNappes === 0, `${f.restesNappes} reste(s)`);
-
-  /* Seules `opacity` et `transform` ont le droit d'être animées : c'est
-     la règle du dépôt depuis la v2, et elle a déjà coûté deux fois. */
-  const proprietes = await page.evaluate(() => {
-    const noms = new Set();
-    for (const feuille of document.styleSheets) {
-      let regles;
-      try { regles = feuille.cssRules; } catch { continue; }
-      for (const r of regles) {
-        if (r.type !== CSSRule.KEYFRAMES_RULE) continue;
-        if (!/veille/.test(r.name)) continue;
-        for (const img of r.cssRules) {
-          for (const p of img.style) noms.add(p);
-        }
-      }
-    }
-    return [...noms];
-  });
-  t(
-    'Le fond n\'anime que des propriétés composées',
-    proprietes.every((p) => p === 'opacity' || p === 'transform'),
-    proprietes.join(', ')
-  );
+  /* Le fond décoratif ne doit pas revenir par une passe d'« amélioration ». */
+  const restes = await page.evaluate(() =>
+    ['.carte', '.veille', '.fond', '.stats', '.seq'].filter((s) => document.querySelector(s)));
+  t('Le décor abstrait et la séquence ne sont pas revenus', restes.length === 0, restes.join(' '));
   await page.close();
 }
 
-/* Mouvement réduit : la carte ne disparaît pas, elle s'immobilise. */
+/* Rien ne doit plus être écrit sur l'appareil du visiteur : la
+   confidentialité l'affirme maintenant sans réserve. */
 {
-  const ctx = await navigateur.newContext({
-    viewport: { width: 1440, height: 900 },
-    reducedMotion: 'reduce',
-  });
+  const ctx = await navigateur.newContext({ viewport: { width: 1280, height: 900 } });
   const page = await ctx.newPage();
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
-  await sansSequence(page);
-  const r = await page.evaluate(() => {
-    const p = document.querySelector('.veille');
-    const c = getComputedStyle(p);
-    return { anim: c.animationName, opacite: parseFloat(c.opacity) };
-  });
-  t('Mouvement réduit : les points cessent de respirer', r.anim === 'none', r.anim);
-  t('Mouvement réduit : les points restent visibles', r.opacite > 0.2, String(r.opacite));
+  await page.waitForTimeout(400);
+  const stock = await page.evaluate(() => ({
+    session: Object.keys(sessionStorage), local: Object.keys(localStorage), cookie: document.cookie,
+  }));
+  t('Aucune écriture en stockage de session', stock.session.length === 0, stock.session.join(', '));
+  t('Aucune écriture en stockage local', stock.local.length === 0, stock.local.join(', '));
+  t('Aucun cookie', stock.cookie === '', stock.cookie);
   await ctx.close();
 }
+
 
 /* ================= 3 quater. L'assistant, question par question =======
    Un visiteur a demandé « j'ai une équipe de 24 personnes, quel
@@ -1260,7 +1143,6 @@ console.log('3 quater. L’assistant simulé, question par question');
 
   const page = await navigateur.newPage({ viewport: { width: 1280, height: 950 } });
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
-  await sansSequence(page);
   await page.locator('.ajm-invite').click();
   await page.waitForFunction(() => document.querySelector('.ajm')?.open === true);
 

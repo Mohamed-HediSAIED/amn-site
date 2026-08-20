@@ -19,12 +19,9 @@
      2. `robots.txt` en `Disallow: /` ;
      3. l'en-tête `X-Robots-Tag: noindex, nofollow` dans vercel.json.
 
-   L'en-tête est posé dans un BLOC À PART, pas dans celui des en-têtes de
-   sécurité. Deux raisons : `X-Robots-Tag` n'est pas un en-tête de
-   sécurité, et la séquence d'ouverture de l'accueil annonce le nombre
-   d'en-têtes de sécurité déployés — un contrôle compare cette annonce à
-   vercel.json et échoue si elle ment. Glisser l'en-tête dans ce bloc
-   aurait donc fait dire au site une chose fausse.
+   L'en-tête est posé dans un BLOC À PART, pas dans celui des en-têtes
+   de sécurité : `X-Robots-Tag` n'est pas un en-tête de sécurité, et un
+   contrôle compte les en-têtes de sécurité réellement servis.
 
    Le troisième est le seul qui compte vraiment. `robots.txt` empêche
    d'EXPLORER, pas d'INDEXER : une URL découverte ailleurs peut se

@@ -21,12 +21,16 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-<!-- Les DEUX polices du produit sont préchargées : Space Grotesk et
-     JetBrains Mono. Essai fait dans l'autre sens (la sans seule, pour
-     ne pas lui disputer la bande passante) : le premier affichage est
-     parti de 1 358 à 1 503 ms sur réseau bridé, parce que les
-     étiquettes mono sont dans le premier écran elles aussi. Mesuré,
-     pas supposé — voir scripts/mesurer-lighthouse.mjs. -->
+<!-- TROIS polices préchargées : Spectral d'abord (elle porte le titre,
+     donc le plus grand contenu affiché), puis Space Grotesk et
+     JetBrains Mono, toutes deux présentes dès le premier écran.
+
+     Le préchargement de la mono a été remis en question maintenant que
+     la capture du produit dispute la bande passante : le retirer libère
+     28 Ko et gagne 43 ms de LCP, mais coûte 131 ms de premier affichage
+     et 87 ms de blocage. Il reste. Mesuré, pas supposé — voir
+     scripts/mesurer-lighthouse.mjs. -->
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/spectral-600-latin.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/space-grotesk-400700-latin.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/jetbrains-mono-400-latin.woff2" crossorigin>
 <link rel="stylesheet" href="/assets/fonts.css">
@@ -132,52 +136,13 @@
 
     <h2>Propriété intellectuelle</h2>
     <div class="prose">
-      <p>Les textes, la charte graphique et le code de ce site sont la propriété de son éditeur, à l'exception des polices de caractères Space Grotesk (Florian Karsten) et JetBrains Mono (JetBrains s.r.o.), distribuées sous licence SIL Open Font License 1.1 et hébergées directement sur ce site.</p>
+      <p>Les textes, la charte graphique et le code de ce site sont la propriété de son éditeur, à l'exception des polices de caractères Space Grotesk (Florian Karsten), JetBrains Mono (JetBrains s.r.o.) et Spectral (Production Type), distribuées sous licence SIL Open Font License 1.1 et hébergées directement sur ce site.</p>
     </div>
 
     <h2>Signaler un problème de sécurité</h2>
     <div class="prose">
       <p>Si vous constatez une faille sur ce site ou sur un service que nous opérons, écrivez-nous par le <a href="/contact">formulaire</a> en le mentionnant explicitement. Nous accusons réception, nous corrigeons, et nous ne poursuivons pas quelqu'un qui signale de bonne foi sans avoir cherché à nuire ni à accéder à des données.</p>
     </div>
-  </section>
-  <section class="wrap section ajm-zone" aria-label="Questions fréquentes">
-  <!-- ==================================================================
-       ASSISTANT À RÉPONSES PRÉPARÉES
-       ==================================================================
-       Aucun modèle de langage derrière, aucun appel réseau, aucun coût.
-       Des réponses écrites à la main dans site.js, choisies par mots-
-       clés. Ce qui n'est pas prévu renvoie au formulaire — jamais une
-       réponse improvisée qui ressemblerait à un engagement sur un prix,
-       un délai ou une garantie.
-
-       Sans JavaScript, le formulaire part vers /contact et un message le
-       dit. On ne laisse pas un champ qui a l'air de marcher.
-       ================================================================== -->
-  <details class="ajm">
-    <summary class="ajm-invite">
-      <span class="ajm-ico" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      </span>
-      <span class="ajm-invite-txt">
-        <b>Une question ? Les réponses sont déjà écrites.</b>
-        <span class="ajm-invite-p">Prix, délais, ce qu'on surveille, vos données.</span>
-        <span class="etq">Aucun modèle · aucune donnée envoyée</span>
-      </span>
-      <span class="ajm-invite-btn"><span class="ajm-ferme">Ouvrir</span><span class="ajm-ouvert">Fermer</span></span>
-    </summary>
-    <div class="ajm-panel">
-      <p class="ajm-tete">Les réponses sont écrites à l'avance. Hors de ce cadre, je renvoie au formulaire.</p>
-      <div class="ajm-fil" role="log" aria-live="polite" aria-label="Conversation">
-        <p class="ajm-bulle ajm-bulle--lui">Bonjour. Je réponds sur les prix, les délais, ce qu'on surveille et vos données.</p>
-      </div>
-      <form class="ajm-form" action="/contact" method="get">
-        <label class="hp" for="ajm-q">Votre question</label>
-        <input type="text" id="ajm-q" name="q" autocomplete="off" placeholder="Votre question…" maxlength="300">
-        <button type="submit">Demander</button>
-      </form>
-      <p class="ajm-sansjs">Sans JavaScript, ce champ vous emmène au <a href="/contact">formulaire</a>.</p>
-    </div>
-  </details>
   </section>
 
 </main>

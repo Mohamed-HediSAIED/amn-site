@@ -61,8 +61,15 @@ const SANS_PLAFOND = new Set(['mentions-legales.html', 'confidentialite.html']);
    chaîne, recopiée sur neuf pages, pesait dix-huit dans le total et
    noyait les vrais. Le seuil dit combien on tolère sur TOUT le site. */
 const TICS = [
+  /* Le tic visé est l'ANTITHÈSE — « c'est A, pas B » — pas
+     l'ÉNUMÉRATION — « ni profilage, pas de score, pas de décision ».
+     La seconde est du français ordinaire, et la page de confidentialité
+     en a besoin pour dire ce que le RGPD lui fait dire. On écarte donc
+     les occurrences déjà précédées d'une négation dans les trente
+     caractères qui précèdent : c'est une liste, pas un effet. */
   { nom: 'antithèse « X, pas Y »', seuil: 3,
     re: /,\s*(?:pas|jamais|non)\s+[a-zà-ÿ]/g,
+    ecarter: (avant) => /\b(?:ni|pas de|pas d'|aucun|aucune)\b[^.]{0,30}$/i.test(avant),
     note: 'le tic principal ; en garder une ou deux, jamais vingt' },
   { nom: 'tiret cadratin —', seuil: 8, re: /—/g,
     note: 'ponctuation de rédacteur, rare sous un vrai clavier' },
@@ -122,7 +129,11 @@ console.log(`\n  ${'assistant (site.js)'.padEnd(24)} ${String(motsAssistant).pad
 console.log('\nTOURNURES\n');
 const tout = [...corpus, ...reponses].join(' ');
 for (const t of TICS) {
-  const n = (tout.match(t.re) || []).length;
+  let n = 0;
+  for (const m of tout.matchAll(t.re)) {
+    if (t.ecarter && t.ecarter(tout.slice(Math.max(0, m.index - 40), m.index))) continue;
+    n++;
+  }
   const ok = n <= t.seuil;
   console.log(`  ${t.nom.padEnd(30)} ${String(n).padStart(3)}   seuil ${t.seuil} ${ok ? '' : '  ✗'}`);
   if (!ok) erreurs.push(`« ${t.nom} » : ${n} occurrences pour un seuil de ${t.seuil} — ${t.note}.`);

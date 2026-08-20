@@ -11,82 +11,6 @@
   'use strict';
 
   /* ================================================================
-     LA SÉQUENCE D'OUVERTURE
-     ================================================================
-     Le CSS fait tout le travail : la séquence se joue et s'efface
-     seule, sans une ligne d'ici. Ce bloc ajoute deux choses.
-
-     1. Les valeurs MESURÉES. « 0 appel à un tiers » et « 0 cookie »
-        sont écrits en dur dans le HTML parce qu'ils sont vrais, mais
-        tant qu'à faire une démonstration, autant la faire pour de
-        bon : on compte ce qui a réellement été chargé et ce qui est
-        réellement posé, et on réécrit la valeur. Si un jour quelqu'un
-        ajoute une balise tierce, le chiffre montera tout seul — et le
-        site se dénoncera lui-même plutôt que d'afficher un zéro faux.
-
-     2. Ne pas la rejouer à chaque page de la même visite. Le drapeau
-        vit dans sessionStorage : il meurt à la fermeture de l'onglet,
-        il ne contient qu'un « 1 », il n'identifie personne. C'est
-        écrit dans confidentialite.html — une page qui décrit autre
-        chose que la réalité est pire que pas de page du tout.
-     ================================================================ */
-  var seq = document.querySelector('.seq');
-  if (seq) {
-    var dejaVue = false;
-    try {
-      dejaVue = sessionStorage.getItem('amn-seq') === '1';
-    } catch (e) {
-      /* Navigation privée, stockage refusé : on joue la séquence.
-         Un refus de stockage ne doit rien casser. */
-    }
-
-    if (dejaVue) {
-      seq.classList.add('seq--vue');
-    } else {
-      try {
-        sessionStorage.setItem('amn-seq', '1');
-      } catch (e) { /* voir ci-dessus */ }
-
-      /* Ce qui a VRAIMENT été chargé depuis un autre domaine. */
-      var tiers = 0;
-      try {
-        var ressources = performance.getEntriesByType('resource');
-        for (var r = 0; r < ressources.length; r++) {
-          var u = new URL(ressources[r].name, location.href);
-          if (u.origin !== location.origin && u.protocol !== 'data:') tiers++;
-        }
-      } catch (e) {
-        tiers = null;
-      }
-      var cookies = document.cookie ? document.cookie.split(';').filter(function (c) {
-        return c.trim();
-      }).length : 0;
-
-      var poser = function (cle, valeur) {
-        if (valeur === null) return;
-        var el = seq.querySelector('[data-mesure="' + cle + '"]');
-        if (el) el.textContent = String(valeur);
-      };
-      poser('tiers', tiers);
-      poser('cookies', cookies);
-
-      /* Passer : n'importe quelle touche, n'importe quel clic. La
-         tabulation aussi — sinon un visiteur au clavier se retrouve à
-         déplacer le focus derrière un panneau qu'il ne voit pas. */
-      var passer = function () {
-        seq.classList.add('seq--vue');
-        document.removeEventListener('keydown', passer);
-      };
-      document.addEventListener('keydown', passer);
-      seq.addEventListener('click', passer, { once: true });
-      /* Filet : si une animation ne se déclenche pas (onglet en
-         arrière-plan au chargement, par exemple), le panneau ne doit
-         pas rester en travers de la page. */
-      setTimeout(passer, 3800);
-    }
-  }
-
-  /* ================================================================
      LA PIÈCE JOINTE — le mot de l'émetteur
      ================================================================
      Aucune synthèse vocale, ni embarquée ni distante : le site passe
@@ -316,7 +240,7 @@
       { cles: ['acces', 'inscrire', 'inscription', 'demander', 'commencer', 'demarrer', 'compte', 'ouvrir', 'essayer'],
         rep: 'Par le formulaire : quatre champs, deux minutes. On lit, on répond sous 48 h ouvrées, et si ça correspond on prépare votre espace. Aucun accès ne s\'ouvre automatiquement.' + VERS_CONTACT },
       { cles: ['donnees', 'rgpd', 'confidentialite', 'privee', 'cookie', 'cookies', 'traceur', 'tracking', 'personnelles'],
-        rep: 'Aucun cookie, aucun traceur, aucune mesure d\'audience, et les polices sont servies depuis ce site. La seule chose écrite sur votre appareil est une note qui dit que l\'animation d\'accueil a déjà été vue, effacée à la fermeture de l\'onglet. Tout est détaillé dans la <a href="/confidentialite">politique de confidentialité</a>.' },
+        rep: 'Aucun cookie, aucun traceur, aucune mesure d\'audience, et les polices sont servies depuis ce site. Rien n\'est écrit sur votre appareil, pas même en stockage de session. Tout est détaillé dans la <a href="/confidentialite">politique de confidentialité</a>.' },
       { cles: ['paiement', 'payer', 'carte', 'bancaire', 'cb', 'prelevement', 'facturer', 'checkout', 'panier'],
         rep: 'Il n\'y a <b>rien à payer sur ce site</b>, et aucun bouton pour le faire. On regarde d\'abord si votre situation est de celles qu\'on sait traiter.' },
       { cles: ['ia', 'intelligence artificielle', 'robot', 'bot', 'chatgpt', 'vraie', 'humain', 'automatique', 'genere'],

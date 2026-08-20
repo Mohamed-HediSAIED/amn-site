@@ -236,6 +236,33 @@ if (!existsSync(join(RACINE, 'assets', 'og.png'))) {
     );
   }
 
+  /* La capture du produit est une VRAIE copie d'écran de
+     l'application, ce qui est tout l'intérêt. Elle porte donc les
+     données de test qui étaient à l'écran ce jour-là — « Site de
+     test », la même note écrite deux fois, un prénom. Ça se voit, et
+     ça se refait en dix minutes avec un jeu de données présentable. */
+  if (existsSync(join(RACINE, 'assets', 'produit-registre.jpg'))) {
+    todo(
+      'La capture du produit montre les données de TEST de l\'application.\n' +
+        '     On y lit « Site de test », une note en double et un prénom. Refaire la\n' +
+        '     capture avec un jeu de données présentable avant l\'ouverture publique,\n' +
+        '     puis relancer :  node scripts/verifier-signes-ia.mjs'
+    );
+  }
+
+  /* Le signe de crédibilité le plus cité dans les inventaires de sites
+     fabriqués par une IA : personne n'est nommé. Le code ne peut pas
+     inventer un nom, mais il peut refuser d'oublier la question. */
+  if (!Object.values(html).some((src) => /class="[^"]*signature/.test(src))) {
+    todo(
+      'Aucune personne n\'est nommée sur le site.\n' +
+        '     C\'est le manque de crédibilité le plus souvent relevé sur les sites\n' +
+        '     d\'entreprise : ni nom, ni photo, ni adresse, ni date. Une signature sur\n' +
+        '     la page À propos (prénom, rôle, et la ville) coûte une ligne et change\n' +
+        '     ce qu\'un visiteur croit de la page.'
+    );
+  }
+
   const audio = ['accueil.m4a', 'accueil.mp3']
     .some((f) => existsSync(join(RACINE, 'assets', 'audio', f)));
   const branche = Object.values(html).some((src) => /<body[^>]*data-piece=/.test(src));
