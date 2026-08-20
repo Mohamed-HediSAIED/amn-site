@@ -1126,7 +1126,6 @@ html:has(.console[open]) { overflow: hidden; }
    laissait sinon un grand vide sous son contenu. */
 .split-col { padding: 24px; display: flex; flex-direction: column; }
 @media (min-width: 720px) { .split-col { padding: 30px; } }
-.split-col > .split-note { margin-top: auto; }
 .split-col + .split-col { border-top: 1px solid var(--line); }
 @media (min-width: 860px) {
   .split-col + .split-col { border-top: 0; border-left: 1px solid var(--line); }

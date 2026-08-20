@@ -56,7 +56,7 @@
         <span class="console-balai" aria-hidden="true"></span>
         <div class="console-scene">
           <p class="console-tag mono">Sommaire du dossier</p>
-          <p class="sommaire-tete">six feuillets — partie A remplie par AMN</p>
+          <p class="sommaire-tete">six feuillets, partie A remplie par AMN</p>
           <ul class="plaques">
           <li><a class="plaque arrondi" href="/">
             <span class="plaque-n">01</span>
@@ -104,7 +104,7 @@
 
     <p class="mono">Demander un accès</p>
     <h1>Dites-nous où vous en êtes</h1>
-    <p class="lead">Quatre champs, deux minutes. Quelqu'un lira votre message en entier : il n'y a ni robot de tri, ni file d'attente. Réponse écrite sous 48 h ouvrées, y compris quand c'est non.</p>
+    <p class="lead">Quatre champs. Quelqu'un lira votre message en entier et vous répondra par écrit sous 48 h ouvrées.</p>
   </section>
 
   <section class="wrap section">
@@ -114,7 +114,7 @@
       <div>
         <div class="msg msg-ok" id="form-ok" hidden role="status">
           <h2>C'est parti.</h2>
-          <p>Votre demande est arrivée. Vous recevrez une réponse écrite à l'adresse indiquée, sous 48 h ouvrées. Inutile de renvoyer le formulaire.</p>
+          <p>Votre demande est arrivée. Vous recevrez une réponse à l'adresse indiquée sous 48 h ouvrées.</p>
         </div>
 
         <div class="msg msg-err" id="form-err" hidden role="alert">
@@ -159,7 +159,7 @@
 
           <p class="field">
             <label class="lbl" for="besoin">Ce que vous cherchez à régler <span aria-hidden="true">*</span>
-              <span class="hint">Quelques lignes suffisent. Ce que vous utilisez aujourd'hui, ce qui vous coûte du temps, ce qui vous inquiète.</span>
+              <span class="hint">Ce que vous utilisez aujourd'hui, ce qui vous coûte du temps.</span>
             </label>
             <textarea id="besoin" name="besoin" required maxlength="4000" minlength="10"></textarea>
           </p>
@@ -177,17 +177,17 @@
           <ol>
             <li>Votre message arrive directement dans notre boîte. Personne d'autre ne le lit.</li>
             <li>On répond par écrit sous 48 h ouvrées, à l'adresse que vous avez indiquée.</li>
-            <li>Si votre situation demande une mise au point, on propose un échange court avant de s'engager sur quoi que ce soit.</li>
+            <li>Si votre situation demande une mise au point, on propose un échange court.</li>
           </ol>
         </div>
 
         <div class="aside-panel arrondi">
           <h2>Ce qu'on ne vous demande pas</h2>
           <ul>
-            <li>Aucun moyen de paiement. Il n'y a rien à payer sur ce site.</li>
+            <li>Aucun moyen de paiement.</li>
             <li>Aucun mot de passe, aucun accès à un compte existant.</li>
-            <li>Aucune pièce jointe : n'envoyez pas de document à ce stade.</li>
-            <li>Aucun numéro de SIRET ni justificatif — ça viendra si on travaille ensemble, pas pour un premier message.</li>
+            <li>Aucune pièce jointe.</li>
+            <li>Aucun numéro de SIRET ni justificatif à ce stade.</li>
           </ul>
         </div>
       </aside>
@@ -215,22 +215,22 @@
       </span>
       <span class="ajm-invite-txt">
         <b>Une question ? Les réponses sont déjà écrites.</b>
-        <span class="ajm-invite-p">Prix, délais, ce qu'on surveille, vos données. Pas une intelligence artificielle : des réponses préparées à l'avance.</span>
+        <span class="ajm-invite-p">Prix, délais, ce qu'on surveille, vos données.</span>
         <span class="etq">Aucun modèle · aucune donnée envoyée</span>
       </span>
       <span class="ajm-invite-btn"><span class="ajm-ferme">Ouvrir</span><span class="ajm-ouvert">Fermer</span></span>
     </summary>
     <div class="ajm-panel">
-      <p class="ajm-tete">Réponses écrites à l'avance, pas une intelligence artificielle. Si votre question sort de ce qui est prévu, je vous envoie vers le formulaire.</p>
+      <p class="ajm-tete">Les réponses sont écrites à l'avance. Hors de ce cadre, je renvoie au formulaire.</p>
       <div class="ajm-fil" role="log" aria-live="polite" aria-label="Conversation">
-        <p class="ajm-bulle ajm-bulle--lui">Bonjour. Je peux répondre sur les prix, les délais, ce qu'on surveille, les données personnelles et la marche à suivre pour demander un accès.</p>
+        <p class="ajm-bulle ajm-bulle--lui">Bonjour. Je réponds sur les prix, les délais, ce qu'on surveille et vos données.</p>
       </div>
       <form class="ajm-form" action="/contact" method="get">
         <label class="hp" for="ajm-q">Votre question</label>
         <input type="text" id="ajm-q" name="q" autocomplete="off" placeholder="Votre question…" maxlength="300">
         <button type="submit">Demander</button>
       </form>
-      <p class="ajm-sansjs">Sans JavaScript, ce champ vous emmène simplement au <a href="/contact">formulaire de demande d'accès</a>.</p>
+      <p class="ajm-sansjs">Sans JavaScript, ce champ vous emmène au <a href="/contact">formulaire</a>.</p>
     </div>
   </details>
   </section>
@@ -245,7 +245,7 @@
           <img class="logo-mark" src="/assets/logo.svg" alt="AMN DevSec" width="104" height="40">
           <span class="logo-sub">DEVSEC</span>
         </span>
-        <p>Poste de travail et supervision de sécurité pour les structures qui n'ont personne dont c'est le métier.</p>
+        <p>Poste de travail et supervision de sécurité pour les petites structures sans équipe technique.</p>
       </div>
       <div>
         <h2>Le site</h2>

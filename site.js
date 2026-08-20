@@ -270,7 +270,7 @@
 
     var BANQUE = [
       { cles: ['prix', 'tarif', 'tarifs', 'combien', 'cout', 'coute', 'couter', 'cher', 'budget', 'euros'],
-        rep: 'Les prix sont publics, et ils suivent l\'effectif : <b>35 € par mois</b> pour une personne, <b>109 €</b> de deux à cinq, et <b>sur devis à partir de six</b>. Le forfait agence, <b>249 €</b>, ne se range pas par effectif : il est pour ceux qui gèrent des accès pour leurs propres clients. Hors taxes, l\'option commerce ajoute 25 €. Le détail est sur la <a href="/prix">page prix</a>.' },
+        rep: 'Les prix suivent l\'effectif : <b>35 € par mois</b> pour une personne, <b>109 €</b> de deux à cinq, <b>sur devis à partir de six</b>. Le forfait agence, <b>249 €</b>, s\'adresse à ceux qui gèrent des accès pour leurs propres clients. Hors taxes ; l\'option commerce ajoute 25 €. Détail sur la <a href="/prix">page prix</a>.' },
       /* v7 — L'ANGLE MORT DES EFFECTIFS.
          Un visiteur a demandé « j'ai une équipe de 24 personnes, quel
          abonnement ? ». L'assistant a refusé d'inventer, ce qui était le
@@ -290,56 +290,57 @@
                'seul', 'seule', 'solo', 'independant', 'independante', 'unique',
                'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'dix',
                'douze', 'quinze', 'vingt', 'trentaine', 'on est', 'nous sommes'],
-        rep: 'Ça dépend de combien vous êtes. <b>Une personne</b> : 35 € par mois. <b>De deux à cinq</b> : 109 €. <b>À partir de six</b>, c\'est sur devis — pas par prudence, mais parce qu\'un prix affiché serait faux pour la moitié des structures de cette taille. Trois choses font le montant : combien vous êtes, combien de choses il y a à surveiller derrière (domaines, boîtes mail, certificats), et ce qu\'il y a à reprendre d\'un existant. Dites ces trois choses dans votre message, vous aurez un chiffre dans la réponse. À part : le forfait <b>agence à 249 €</b> ne dépend pas de l\'effectif, il est pour ceux qui gèrent des accès pour leurs propres clients.' + VERS_CONTACT },
+        rep: 'Ça dépend de combien vous êtes. <b>Une personne</b> : 35 € par mois. <b>De deux à cinq</b> : 109 €. <b>À partir de six</b> : sur devis. Trois choses font alors le montant : combien vous êtes, combien il y a à surveiller derrière, et ce qu\'il y a à reprendre d\'un existant. Donnez-les dans votre message, vous aurez un chiffre en réponse. Le forfait <b>agence à 249 €</b> est à part : il s\'adresse à ceux qui gèrent des accès pour leurs propres clients.' + VERS_CONTACT },
       /* v7 — le forfait AGENCE n'avait aucune réponse à lui : une agence
          qui demandait « et moi ? » tombait dans le défaut, alors que la
          page prix répond depuis le début. */
       { cles: ['agence', 'agences', 'revendeur', 'prestataire', 'sous traitant',
                'mes clients', 'pour mes clients', 'pour des clients', 'parc', 'parcs',
                'plusieurs clients', 'plusieurs sites', 'infogerance'],
-        rep: 'Le forfait <b>agence, 249 € par mois</b>, est fait pour ça : vous avez vos propres clients, et ce qui tourne pour eux tourne sous votre nom. Il ne dépend pas de votre effectif — c\'est le seul forfait qui se définit par le métier et pas par le nombre de personnes. Il couvre votre équipe et les organisations que vous suivez, avec la supervision de plusieurs parcs à la fois. Le détail est sur la <a href="/prix">page prix</a>.' },
+        rep: 'Le forfait <b>agence, 249 € par mois</b>, est fait pour ça : vous avez vos propres clients, et ce qui tourne pour eux tourne sous votre nom. Il s\'applique quel que soit votre effectif, et couvre votre équipe comme les organisations que vous suivez. Détail sur la <a href="/prix">page prix</a>.' },
       /* v7 — l'option commerce était citée dans la réponse « prix » mais
          n'avait pas d'entrée : « je vends en ligne » tombait dans le
          défaut, ou pire, sur « il n'y a rien à payer sur ce site ». */
       { cles: ['commerce', 'boutique', 'ecommerce', 'e commerce', 'vends', 'vendre',
                'vente', 'ventes', 'vends en ligne', 'boutique en ligne', 'vente en ligne',
                'shopify', 'prestashop', 'woocommerce', 'acheteurs'],
-        rep: 'Si vous vendez en ligne, il y a une surface de plus à surveiller : la boutique, les paiements, ce qui touche aux données de vos acheteurs. C\'est l\'<b>option commerce, + 25 € par mois</b>. Elle <b>s\'ajoute</b> au forfait que vous avez — ce n\'est pas un forfait à part, et elle ne remplace rien. Le détail est sur la <a href="/prix">page prix</a>.' },
+        rep: 'Si vous vendez en ligne, la boutique et les paiements font une surface de plus à surveiller. C\'est l\'<b>option commerce, + 25 € par mois</b>, qui <b>s\'ajoute</b> à votre forfait. Détail sur la <a href="/prix">page prix</a>.' },
       { cles: ['association', 'associatif', 'asso', 'loi 1901', 'remise', 'reduction', 'interet general'],
         rep: 'Associations et structures d\'intérêt général : <b>de 30 à 50 % de remise</b>, selon la taille et les moyens, sur simple justificatif (récépissé ou numéro RNA). Dites-le dans votre message, la remise est appliquée avant qu\'on vous annonce un chiffre.' },
       { cles: ['delai', 'delais', 'reponse', 'repondez', 'repondre', 'combien de temps', 'attendre', 'rapidite', '48'],
         rep: 'Réponse <b>écrite sous 48 h ouvrées</b>, par quelqu\'un qui a lu votre message en entier. Y compris quand la réponse est non.' },
       { cles: ['surveille', 'surveillez', 'supervision', 'supervise', 'monitoring', 'regardez', 'controle', 'certificat', 'disponibilite', 'anomalie'],
-        rep: 'Quatre choses, plus l\'hygiène de ce qui est exposé publiquement : <b>disponibilité</b> (ce qui ne répond plus), <b>certificats</b> (les échéances), <b>accès</b> (chaque ouverture de votre espace est journalisée côté serveur) et <b>anomalies</b> (ce qui sort de l\'ordinaire, lu par quelqu\'un). Le détail est sur <a href="/service">Ce qu\'on fait</a>.' },
+        rep: 'Cinq axes : <b>disponibilité</b> (ce qui ne répond plus), <b>certificats</b> (les échéances), <b>accès</b> (chaque ouverture de votre espace est enregistrée côté serveur), <b>anomalies</b> (lues par quelqu\'un) et l\'hygiène de ce qui est exposé publiquement. Détail sur <a href="/service">Ce qu\'on fait</a>.' },
       { cles: ['module', 'modules', 'fonctionnalite', 'fonctionnalites', 'agenda', 'facture', 'facturation', 'devis', 'client', 'coffre', 'contient'],
-        rep: 'Dix modules, les mêmes pour tout le monde quel que soit le forfait : accueil, agenda, clients, facturation, tâches, notes, médias, rapports, coffre-fort, paramètres. Rien n\'est bridé pour vendre le forfait au-dessus. La liste complète est sur <a href="/service">Ce qu\'on fait</a>.' },
+        rep: 'Dix modules, les mêmes quel que soit le forfait : accueil, agenda, clients, facturation, tâches, notes, médias, rapports, coffre-fort, paramètres. Détail sur <a href="/service">Ce qu\'on fait</a>.' },
       { cles: ['acces', 'inscrire', 'inscription', 'demander', 'commencer', 'demarrer', 'compte', 'ouvrir', 'essayer'],
         rep: 'Par le formulaire : quatre champs, deux minutes. On lit, on répond sous 48 h ouvrées, et si ça correspond on prépare votre espace. Aucun accès ne s\'ouvre automatiquement.' + VERS_CONTACT },
       { cles: ['donnees', 'rgpd', 'confidentialite', 'privee', 'cookie', 'cookies', 'traceur', 'tracking', 'personnelles'],
         rep: 'Aucun cookie, aucun traceur, aucune mesure d\'audience, et les polices sont servies depuis ce site. La seule chose écrite sur votre appareil est une note qui dit que l\'animation d\'accueil a déjà été vue, effacée à la fermeture de l\'onglet. Tout est détaillé dans la <a href="/confidentialite">politique de confidentialité</a>.' },
       { cles: ['paiement', 'payer', 'carte', 'bancaire', 'cb', 'prelevement', 'facturer', 'checkout', 'panier'],
-        rep: 'Il n\'y a <b>rien à payer sur ce site</b>, et aucun bouton pour le faire. C\'est une décision, pas une étape qui manque : on regarde d\'abord si votre situation est de celles qu\'on sait traiter.' },
+        rep: 'Il n\'y a <b>rien à payer sur ce site</b>, et aucun bouton pour le faire. On regarde d\'abord si votre situation est de celles qu\'on sait traiter.' },
       { cles: ['ia', 'intelligence artificielle', 'robot', 'bot', 'chatgpt', 'vraie', 'humain', 'automatique', 'genere'],
-        rep: 'Non. Je réponds avec des <b>réponses préparées à l\'avance</b>, choisies par mots-clés — pas un modèle qui invente. Si votre question sort de ce que je connais, je vous le dis et je vous envoie écrire à quelqu\'un.' },
+        rep: 'Non. Mes réponses sont <b>préparées à l\'avance</b> et choisies par mots-clés. Aucun modèle de langage ne tourne derrière, et rien de ce que vous tapez ne quitte votre navigateur. Si votre question sort de ce que je connais, je vous le dis et je vous envoie écrire à quelqu\'un.' },
       { cles: ['windows', 'mac', 'telephone', 'mobile', 'application', 'installer', 'navigateur', 'appareil', 'android', 'iphone'],
         rep: 'Ça s\'ouvre dans le navigateur, sur ordinateur comme sur téléphone, avec les mêmes données des deux côtés. On peut l\'ajouter à l\'écran d\'accueil comme une application. Une application Windows existe aussi, avec le même compte.' },
       { cles: ['securise', 'securite', 'garantie', 'garantit', 'risque', 'piratage', 'hack', '100'],
-        rep: 'On ne dit jamais « 100 % sécurisé » : personne ne peut le dire sérieusement. Ce qu\'on annonce, c\'est ce qu\'on surveille, à quelle fréquence, et ce qu\'on fait quand ça sonne.' },
+        rep: 'On ne dit jamais « 100 % sécurisé ». On annonce ce qu\'on surveille, à quelle fréquence, et ce qu\'on fait quand ça sonne.' },
       { cles: ['outil', 'outils', 'revendre', 'licence', 'acheter vos outils', 'scanner'],
-        rep: 'Nos outils de supervision ne sont pas vendus, ni en licence ni en accès direct. Ils restent chez nous et ne sont pas installés dans votre espace. Ce qu\'on vend, c\'est le fait de les opérer pour vous.' },
-      /* Sujets NON TRANCHÉS : on dit qu'on ne sait pas. C'est le
-         contraire d'un aveu de faiblesse — c'est ce qui empêche ce
-         composant de promettre quelque chose que personne n'a validé. */
+        rep: 'Nos outils de supervision ne sont vendus ni en licence ni en accès direct. Ils restent chez nous, et nous les opérons pour vous.' },
+      /* Sujets NON TRANCHÉS : on dit qu'on ne sait pas. C'est ce qui
+         empêche ce composant de promettre quelque chose que personne
+         n'a validé. Un contrôle vérifie que ces mots-clés continuent
+         de renvoyer au formulaire (verifier-navigateur.mjs, § 3 quater). */
       { cles: ['engagement', 'resilier', 'resiliation', 'preavis', 'duree', 'gratuit', 'essai', 'remboursement', 'rembourse', 'annuler'],
-        rep: 'Là-dessus je n\'ai pas de réponse préparée, et je préfère ne rien inventer : ce sont des conditions qui vous engagent. Posez la question dans le message, elle sera traitée par écrit.' + VERS_CONTACT },
+        rep: 'Là-dessus je n\'ai pas de réponse préparée, et je ne vais pas en inventer une : ce sont des conditions qui vous engagent. Posez la question dans le message, elle sera traitée par écrit.' + VERS_CONTACT },
       { cles: ['bonjour', 'salut', 'bonsoir', 'hello', 'coucou', 'hey'],
-        rep: 'Bonjour. Posez votre question — prix, délais, ce qu\'on surveille, données personnelles, ou comment demander un accès.' },
+        rep: 'Bonjour. Posez votre question : prix, délais, ce qu\'on surveille, vos données, ou comment demander un accès.' },
       { cles: ['merci', 'super', 'parfait', 'ok', 'daccord'],
         rep: 'Avec plaisir. S\'il reste quelque chose, le formulaire est là :' + VERS_CONTACT }
     ];
 
     var DEFAUT =
-      "Je n'ai pas de réponse préparée pour ça, et je ne vais pas en inventer une — surtout s'il s'agit d'un prix, d'un délai ou d'un engagement. Écrivez-le par le formulaire, quelqu'un vous répondra par écrit." +
+      "Je n'ai pas de réponse préparée pour ça, et je ne vais pas en inventer une, surtout s'il s'agit d'un prix, d'un délai ou d'un engagement. Écrivez-le par le formulaire, quelqu'un vous répondra par écrit." +
       VERS_CONTACT;
 
     var repondre = function (question) {

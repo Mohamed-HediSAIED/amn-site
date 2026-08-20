@@ -779,7 +779,9 @@ for (const chemin of ['/service', '/methode', '/confidentialite']) {
 
   const nature = await demander('es-tu une vraie IA ?');
   t('Assistant : honnête sur sa nature',
-    /pr[ée]par[ée]/i.test(nature) && /(pas un mod|invente)/i.test(nature), nature.slice(0, 90));
+    /pr[ée]par[ée]/i.test(nature)
+      && /(aucun mod[eè]l|pas un mod[eè]l|n'est pas un mod|invente)/i.test(nature),
+    nature.slice(0, 90));
 
   const inconnu = await demander('quelle est la capitale de la Mongolie');
   t('Assistant : renvoie au formulaire quand il ne sait pas',
