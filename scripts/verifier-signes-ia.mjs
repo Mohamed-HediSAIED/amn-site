@@ -365,6 +365,23 @@ console.log('4. Le remplissage\n');
   t('Aucune promesse déjà démentie par le code du produit',
     revenues.length === 0, revenues.join(' · '));
 
+  /* LES MÊMES CHOSES COMPTÉES DEUX FOIS.
+
+     L'accueil montrait quatre axes de supervision, la page « ce qu'on
+     fait » en listait cinq, et l'assistant en annonçait « cinq ». Rien
+     n'était faux à la lettre — l'accueil ne donnait pas de nombre —
+     mais un visiteur qui compare les deux pages voit une liste
+     rétrécir sans raison. Les listes doivent porter les mêmes entrées. */
+  const axes = (src) => [...src.matchAll(/<b>([A-ZÀ-Ý][^<]{2,30})<\/b>/g)]
+    .map((m) => m[1].split(/\s+et\s+|\s+à\s+/)[0].trim().toLowerCase())
+    .filter((x) => ['disponibilité', 'certificats', 'accès', 'anomalies', 'hygiène'].includes(x));
+  const surAccueil = new Set(axes(lire('index.html')));
+  const surService = new Set(axes(lire('service.html')));
+  const manquants = [...surService].filter((a2) => !surAccueil.has(a2));
+  t("L'accueil et « ce qu'on fait » listent les mêmes axes de supervision",
+    manquants.length === 0,
+    `accueil : ${[...surAccueil].join(', ')} — manquant(s) : ${manquants.join(', ')}`);
+
   /* Le site qui parle de lui-même. « Ce qu'on ne fait pas », « ce qui
      n'y est pas », « ce qu'on ne promet pas » : chacune prise seule est
      honnête, mais trois sections de méta-discours sur trois pages
