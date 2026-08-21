@@ -10,7 +10,7 @@
        Aucune page HTML, aucune règle CSS ne connaît son contenu — la
        hauteur est imposée par `.logo-mark` dans site.css, la largeur
        suit toute seule. Si le nouveau fichier n'a pas le même rapport
-       largeur/hauteur, ajuster `width`/`height` sur les huit balises
+       largeur/hauteur, ajuster `width`/`height` sur toutes les balises
        <img class="logo-mark"> (elles ne servent qu'à réserver la place
        avant chargement, voir README §Logo).
        ================================================================ -->

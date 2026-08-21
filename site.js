@@ -69,7 +69,7 @@
   /* ================================================================
      LA CONSOLE
      ================================================================
-     Le <details> s'ouvre et se ferme tout seul, et ses cinq liens
+     Le <details> s'ouvre et se ferme tout seul, et ses six liens
      fonctionnent sans une ligne de ce qui suit. Ce bloc n'ajoute que
      du confort : Échap, le clic sur le fond, le focus qui entre puis
      revient, le reste de la page mis hors d'atteinte, et l'inclinaison
@@ -193,7 +193,7 @@
       ' <a href="/contact">Demander un accès</a>, quatre champs, réponse écrite sous 48 h ouvrées.';
 
     var BANQUE = [
-      { cles: ['prix', 'tarif', 'tarifs', 'combien', 'cout', 'coute', 'couter', 'cher', 'budget', 'euros'],
+      { cles: ['prix', 'tarif', 'tarifs', 'cout', 'coute', 'couter', 'cher', 'budget', 'euros'],
         rep: 'Les prix suivent l\'effectif : <b>35 € par mois</b> pour une personne, <b>109 €</b> de deux à cinq, <b>sur devis à partir de six</b>. Le forfait agence, <b>249 €</b>, s\'adresse à ceux qui gèrent des accès pour leurs propres clients. Hors taxes ; l\'option commerce ajoute 25 €. Détail sur la <a href="/prix">page prix</a>.' },
       /* v7 — L'ANGLE MORT DES EFFECTIFS.
          Un visiteur a demandé « j'ai une équipe de 24 personnes, quel
@@ -239,6 +239,9 @@
         rep: 'Onze modules, les mêmes quel que soit le forfait : accueil, agenda, clients, facturation, projets, tâches, notes, médias, rapports, paramètres, coffre-fort. Détail sur <a href="/service">Ce qu\'on fait</a>.' },
       { cles: ['acces', 'inscrire', 'inscription', 'demander', 'commencer', 'demarrer', 'compte', 'ouvrir', 'essayer'],
         rep: 'Par le formulaire : quatre champs, deux minutes. On lit, on répond sous 48 h ouvrées, et si ça correspond on prépare votre espace. Aucun accès ne s\'ouvre automatiquement.' + VERS_CONTACT },
+      { cles: ['export', 'exporter', 'recuperer', 'partir', 'quitter', 'reversibilite',
+               'migrer', 'migration', 'sauvegarde', 'emporter'],
+        rep: 'Vos données s\'exportent depuis les paramètres de votre espace, quand vous voulez, sans nous le demander et sans frais. Ce que l\'export contient est décrit sur <a href="/service">Ce qu\'on fait</a>.' },
       { cles: ['donnees', 'rgpd', 'confidentialite', 'privee', 'cookie', 'cookies', 'traceur', 'tracking', 'personnelles'],
         rep: 'Aucun cookie, aucun traceur, aucune mesure d\'audience, et les polices sont servies depuis ce site. Rien n\'est écrit sur votre appareil, pas même en stockage de session. Tout est détaillé dans la <a href="/confidentialite">politique de confidentialité</a>.' },
       { cles: ['paiement', 'payer', 'carte', 'bancaire', 'cb', 'prelevement', 'facturer', 'checkout', 'panier'],

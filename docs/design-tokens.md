@@ -300,8 +300,8 @@ C'est un élément d'identité du produit **que le site n'avait pas du tout**.
 | --- | --- | --- | --- |
 | Accent | `#ededed` blanc cassé | `#ffb224` ambre | **à supprimer** |
 | Rayons | 4 à 16 px, pilules | 0 partout + coin coupé | **à corriger** |
-| Police texte | Space Grotesk | Archivo | **à remettre** |
-| Police mono | JetBrains Mono | Martian Mono | **à remettre** |
+| Police texte | Space Grotesk | Space Grotesk | ✓ remise en v6 |
+| Police mono | JetBrains Mono | JetBrains Mono | ✓ remise en v6 |
 | Grain | présent, 9 % | absent | **à ajouter** |
 | Élévation | 3 niveaux + filet clair | filet clair seul | **à compléter** |
 | Survol de carte | `translateY(-1px)` | néant | **à ajouter** |
@@ -355,3 +355,40 @@ dégradées et quatre natures de signal — pour **moins** de mémoire qu'avant.
 > Mesuré en rendu logiciel (conteneur sans carte graphique), ce qui **majore**
 > le coût de composition par rapport à un vrai appareil. Les chiffres valent
 > donc comme comparaison avant/après, pas comme valeur absolue.
+
+
+---
+
+## 11. Le seul jeton que le site ne prend PAS au produit : la police de titre
+
+`--f-titre: Spectral, 'Iowan Old Style', Georgia, serif`
+
+Ce document dit ailleurs que le site n'invente pas son identité, qu'il
+porte celle du produit, et que la v3 avait eu tort de remplacer les
+polices. C'est toujours vrai — **sauf pour les deux premiers niveaux de
+titre**, et voici pourquoi.
+
+Space Grotesk est devenue, en deux ans, la police que choisit tout
+générateur à qui l'on demande « moderne et un peu caractériel ». Elle
+figure aujourd'hui dans les inventaires publiés des signes qui trahissent
+un site fabriqué par une IA, au même rang qu'Inter. Sur l'écran d'une
+application, aucune conséquence : personne ne juge un logiciel à sa
+police. En gros titre sur une page de présentation, c'est une signature,
+et c'est exactement le reproche qui a lancé la v9.
+
+Le partage est donc :
+
+| Rôle | Police | Raison |
+| --- | --- | --- |
+| `h1`, `h2` | **Spectral** (Production Type, Paris) | ce que le site dit en son nom |
+| texte courant, boutons, mosaïque, `h3` | Space Grotesk | ce par quoi il cite le produit |
+| étiquettes, chiffres, code | JetBrains Mono | idem |
+
+Coût mesuré : 12,4 Ko en latin, sous-ensemble maison. Le repli
+`Iowan Old Style` a les mêmes métriques : si Spectral ne se charge pas,
+le titre garde exactement la même hauteur, ce qui explique le CLS à zéro.
+
+Deux contrôles tiennent la règle : `verifier-navigateur.mjs` vérifie que
+`h1` est en Spectral et que le texte courant reste en Space Grotesk ;
+`verifier-signes-ia.mjs` refuse toute police de titre figurant dans la
+liste des polices par défaut des générateurs.

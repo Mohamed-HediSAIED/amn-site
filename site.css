@@ -701,6 +701,9 @@ html:has(.console[open]) { overflow: hidden; }
 .console[open] li:nth-child(3) .plaque { animation-delay: .22s; }
 .console[open] li:nth-child(4) .plaque { animation-delay: .28s; }
 .console[open] li:nth-child(5) .plaque { animation-delay: .34s; }
+/* La cascade s'arrêtait à cinq ; le sommaire compte six feuillets
+   depuis la v5, et la sixième plaque arrivait donc la PREMIÈRE. */
+.console[open] li:nth-child(6) .plaque { animation-delay: .40s; }
 
 .console-pied {
   display: block;
@@ -2090,7 +2093,12 @@ section[id] { scroll-margin-top: 84px; }
 }
 .ajm-sugg button:hover { background: var(--surface-hi); color: var(--text); border-color: var(--text-4); }
 
-.ajm-form { display: flex; border-top: 1px solid var(--line); }
+/* `min-width: 0` : sans lui, l'élément de grille garde son plancher
+   `auto` et le bouton d'envoi sortait du panneau à 320 px — le libellé
+   s'affichait « Demande », sans que la page déborde, donc invisible
+   pour le contrôle de débordement. */
+.ajm-form {
+  min-width: 0; display: flex; border-top: 1px solid var(--line); }
 .ajm-form input {
   flex: 1 1 auto;
   min-width: 0;
@@ -2107,7 +2115,10 @@ section[id] { scroll-margin-top: 84px; }
    3,19:1 sur le fond de la page. --text-3 est le plancher accessible
    retenu par ce dépôt depuis la v6. */
 .ajm-form input::placeholder { color: var(--text-3); }
-.ajm-form input:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent-line); }
+/* `--accent-line` est du rgba(255,255,255,.30) : composé sur le fond du
+   champ il donne 2,6:1, sous le minimum de 3:1 pour un indicateur de
+   focus. L'anneau du reste du site est à 17,4:1. */
+.ajm-form input:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent); }
 .ajm-form button[type='submit'] {
   flex: none;
   background: transparent;
