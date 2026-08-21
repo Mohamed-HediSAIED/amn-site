@@ -11,8 +11,19 @@
    Passer par le navigateur plutôt que par un SVG évite le piège
    classique : un SVG qui contient du <text> dépend d'une police
    installée sur la machine qui l'affiche, et retombe sur autre chose
-   ailleurs. Ici le texte est rendu une fois, avec Space Grotesk, et
-   figé en pixels.
+   ailleurs. Ici le texte est rendu une fois et figé en pixels.
+
+   ⚠ LE GABARIT CI-DESSOUS EST DU CONTENU, PAS DE L'OUTILLAGE. Il porte
+   le titre de l'accueil et les couleurs de la charte. Il était resté
+   figé à la v1 pendant huit versions : l'aperçu de partage montrait
+   encore l'ancien titre et l'AMBRE #ffb224, la couleur qu'Aaron avait
+   fait retirer de tout le site en v6. Le contrôle « monochrome » ne
+   l'avait jamais vu parce qu'il lit les couleurs calculées du DOM, et
+   qu'une image est opaque à ce genre de mesure.
+
+   Depuis, verifier-signes-ia.mjs ÉCHANTILLONNE LES PIXELS de og.png et
+   refuse toute couleur saturée. Si tu changes le titre de l'accueil,
+   change-le ici aussi et relance ce script.
 
      node scripts/generer-images.mjs
    ------------------------------------------------------------------ */
@@ -42,6 +53,8 @@ const POLICES = `
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{width:100%;height:100%}
   body{background:#0a0a0a;font-family:'Space Grotesk',sans-serif;-webkit-font-smoothing:antialiased}
+  /* Spectral porte les titres du site depuis la v9 : l'aperçu de
+     partage doit montrer la même typographie que la page. */
 </style>`;
 
 /* --- Monogramme carré, repris de LogoMark côté produit --- */
@@ -75,14 +88,9 @@ const og = `<!doctype html><html><head><meta charset="utf-8">${POLICES}
 <style>
   body{width:1200px;height:630px;padding:56px;display:flex}
   .carte{
-    flex:1;background:#131313;border:1px solid #262626;
+    flex:1;background:#131313;border:1px solid #262626;border-radius:16px;
     padding:56px 60px;display:flex;flex-direction:column;justify-content:space-between;
-    clip-path:polygon(0 0, calc(100% - 46px) 0, 100% 46px, 100% 100%, 0 100%);
     position:relative;
-  }
-  .carte::after{
-    content:'';position:absolute;top:0;right:0;width:66px;height:66px;
-    background:linear-gradient(225deg,#ffb224 0 2px,transparent 2px);
   }
   .marque{display:flex;flex-direction:column;gap:3px;line-height:1}
   .mot{
@@ -92,10 +100,16 @@ const og = `<!doctype html><html><head><meta charset="utf-8">${POLICES}
   }
   .sub{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;letter-spacing:.46em;color:#616160;padding-left:2px}
   h1{
-    font-size:60px;font-weight:500;letter-spacing:-.04em;line-height:1.04;
-    color:#f2f2f0;max-width:20ch;
+    font-family:Spectral,Georgia,serif;
+    font-size:62px;font-weight:600;letter-spacing:-.02em;line-height:1.1;
+    color:#ededed;max-width:19ch;
   }
-  h1 em{font-style:normal;color:#ffb224;box-shadow:inset 0 -3px 0 rgba(255,178,36,.35)}
+  h1 em{
+    font-style:normal;
+    text-decoration:underline;text-decoration-color:#5a5a58;
+    text-decoration-thickness:3px;text-underline-offset:.14em;
+    text-decoration-skip-ink:none;
+  }
   .pied{
     font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:500;
     letter-spacing:.12em;text-transform:uppercase;color:#9a9a97;
@@ -104,8 +118,8 @@ const og = `<!doctype html><html><head><meta charset="utf-8">${POLICES}
 </style></head><body>
   <div class="carte">
     <div class="marque"><span class="mot">AMN</span><span class="sub">DEVSEC</span></div>
-    <h1>Vous n'avez pas d'équipe technique. Vous en avez une <em>quand même</em>.</h1>
-    <p class="pied">Supervision &amp; gestion d'activité — PME et indépendants</p>
+    <h1>Votre activité dans <em>un seul outil</em>, surveillé par nous.</h1>
+    <p class="pied">Poste de travail et supervision de sécurité</p>
   </div>
 </body></html>`;
 

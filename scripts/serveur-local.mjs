@@ -52,7 +52,19 @@ const TYPES = {
   '.woff2': 'font/woff2',
   '.png': 'image/png',
   '.svg': 'image/svg+xml',
-  '.ico': 'image/x-icon'
+  '.ico': 'image/x-icon',
+  /* Ajoutés avec la capture du produit. Sans eux le serveur répondait
+     `application/octet-stream` pour un JPEG : les 469 contrôles tournent
+     contre CE serveur, ils validaient donc un type que Vercel n'enverra
+     jamais. Un contrôle qui ne reproduit pas la production ne protège
+     que lui-même. */
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp',
+  '.avif': 'image/avif',
+  '.m4a': 'audio/mp4',
+  '.mp3': 'audio/mpeg',
+  '.webmanifest': 'application/manifest+json'
 };
 
 function entetesCommunes() {
@@ -155,6 +167,10 @@ export function demarrer({ port = 4173, racine = RACINE, silencieux = false } = 
   });
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+/* `process.argv[1]` est absent quand le module est importé depuis un
+   `node --input-type=module -e`, et `pathToFileURL(undefined)` lève.
+   Le module devenait alors impossible à importer depuis un contexte
+   d'évaluation — c'est-à-dire depuis un contrôle jetable. */
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   await demarrer({ port: Number(process.argv[2]) || 4173 });
 }

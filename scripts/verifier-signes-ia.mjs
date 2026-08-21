@@ -37,6 +37,7 @@
      node scripts/verifier-signes-ia.mjs
    ------------------------------------------------------------------ */
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
+import { inflateSync } from 'node:zlib';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -148,6 +149,157 @@ console.log('3. La mise en page\n');
   const uniques = new Set(ctas.map(([, h]) => h.trim()));
   t('Les appels à l\'action ne sont pas le même bloc recopié',
     uniques.size === ctas.length, `${ctas.length} blocs pour ${uniques.size} formulations`);
+}
+
+/* ── 3 bis. Les couleurs DANS LES IMAGES ───────────────────────────
+   Le contrôle « monochrome » du navigateur lit les couleurs calculées du
+   DOM. Une image lui est opaque : elle traverse la mesure sans être vue.
+
+   C'est exactement ce qui s'est produit. assets/og.png — l'aperçu qui
+   s'affiche quand on partage le lien — datait de la v1 et portait encore
+   l'AMBRE #ffb224, la couleur qu'Aaron avait fait retirer de tout le
+   site en v6, plus l'ancien titre de l'accueil. Huit versions sans que
+   personne le voie, parce que personne ne regardait les pixels.
+
+   Ici on décode le PNG et on échantillonne. Un gris est un pixel dont
+   les trois composantes se tiennent ; au-delà, c'est une teinte. */
+console.log('3 bis. Les couleurs dans les images\n');
+
+/* Décodeur PNG minimal : 8 bits, couleur vraie, avec ou sans alpha —
+   ce que produit generer-images.mjs. Assez pour compter des teintes. */
+function pixels(chemin) {
+  const d = readFileSync(chemin);
+  let pos = 8;
+  let idat = [];
+  let l = 0;
+  let h = 0;
+  let bits = 0;
+  let type = 0;
+  while (pos < d.length) {
+    const taille = d.readUInt32BE(pos);
+    const nom = d.toString('latin1', pos + 4, pos + 8);
+    if (nom === 'IHDR') {
+      l = d.readUInt32BE(pos + 8);
+      h = d.readUInt32BE(pos + 12);
+      bits = d[pos + 16];
+      type = d[pos + 17];
+    } else if (nom === 'IDAT') {
+      idat.push(d.subarray(pos + 8, pos + 8 + taille));
+    }
+    pos += 12 + taille;
+  }
+  const canaux = { 0: 1, 2: 3, 4: 2, 6: 4 }[type];
+  if (bits !== 8 || !canaux) return null;      /* format non géré : on le dira */
+  const brut = inflateSync(Buffer.concat(idat));
+  const pas = l * canaux;
+  const sortie = [];
+  let prec = Buffer.alloc(pas);
+  let i = 0;
+  for (let y = 0; y < h; y++) {
+    const f = brut[i++];
+    const ligne = Buffer.from(brut.subarray(i, i + pas));
+    i += pas;
+    for (let x = 0; x < pas; x++) {
+      const a = x >= canaux ? ligne[x - canaux] : 0;
+      const b = prec[x];
+      const c = x >= canaux ? prec[x - canaux] : 0;
+      if (f === 1) ligne[x] = (ligne[x] + a) & 255;
+      else if (f === 2) ligne[x] = (ligne[x] + b) & 255;
+      else if (f === 3) ligne[x] = (ligne[x] + ((a + b) >> 1)) & 255;
+      else if (f === 4) {
+        const p = a + b - c;
+        const pa = Math.abs(p - a);
+        const pb = Math.abs(p - b);
+        const pc = Math.abs(p - c);
+        ligne[x] = (ligne[x] + (pa <= pb && pa <= pc ? a : pb <= pc ? b : c)) & 255;
+      }
+    }
+    prec = ligne;
+    if (canaux >= 3) {
+      for (let x = 0; x < l; x++) {
+        const o = x * canaux;
+        if (canaux === 4 && ligne[o + 3] < 8) continue;   /* transparent */
+        sortie.push([ligne[o], ligne[o + 1], ligne[o + 2]]);
+      }
+    }
+  }
+  return { largeur: l, hauteur: h, px: sortie };
+}
+
+for (const img of ['assets/og.png', 'assets/icon-512.png', 'assets/apple-touch-icon.png',
+                   'assets/favicon-32.png', 'assets/produit-registre.jpg']) {
+  const chemin = join(RACINE, img);
+  if (!existsSync(chemin)) { t(`${img} existe`, false); continue; }
+  if (img.endsWith('.jpg')) {
+    /* La capture est une copie d'écran du produit : on ne lui demande
+       pas d'être grise, le produit ne l'est pas partout (les gravités
+       du scanner sont en rouge). On vérifie seulement son poids. */
+    t(`${img} reste sous 60 Ko`, statSync(chemin).size < 60 * 1024,
+      `${(statSync(chemin).size / 1024).toFixed(0)} Ko`);
+    continue;
+  }
+  const img_ = pixels(chemin);
+  const px = img_ && img_.px;
+  if (!px) { t(`${img} est décodable`, false, 'format PNG non géré par le contrôle'); continue; }
+
+  /* CE QU'ON MESURE, ET POURQUOI CE N'EST PAS « LE POURCENTAGE DE
+     PIXELS COLORÉS ».
+
+     Une image de texte rendue par un navigateur contient toujours des
+     pixels colorés : le lissage sous-pixel borde chaque lettre de
+     liserés bleutés et jaunâtres. Sur l'aperçu de partage propre, ils
+     représentent 0,26 % de l'image. Avec l'ambre remise dans le
+     soulignement du titre, on passe à 0,39 %. Aucun seuil en
+     pourcentage ne sépare proprement ces deux-là — j'ai essayé.
+
+     Ce qui les sépare, c'est la FORME DE LA DISTRIBUTION. Les liserés
+     d'anticrénelage s'étalent sur des centaines de teintes voisines,
+     toutes à peu près aussi rares : sur l'aperçu propre, la plus
+     fréquente revient 99 fois et la suivante 94. Une couleur de charte
+     est au contraire une valeur exacte posée en aplat, donc une
+     VALEUR ABERRANTE : avec l'ambre, la première revenait 945 fois et
+     la suivante 99.
+
+     On compare donc la couleur saturée la plus fréquente à la
+     deuxième. Un rapport proche de 1 est du lissage ; un rapport de 9
+     est une décision graphique. Ce test ne dépend pas de la taille de
+     l'image, ce qu'aucun seuil en pourcentage ne permettait :
+     3 pixels sur une icône de 32 px valent 0,3 % et ne veulent rien
+     dire. Mesuré sur les quatre images du site, ci-dessous. */
+  const compte = new Map();
+  let satures = 0;
+  for (const [r, v, b] of px) {
+    if (Math.max(r, v, b) - Math.min(r, v, b) <= 24) continue;
+    satures++;
+    const cle = (r << 16) | (v << 8) | b;
+    compte.set(cle, (compte.get(cle) || 0) + 1);
+  }
+  const classees = [...compte.entries()].sort((a, b) => b[1] - a[1]);
+  const [picCle, pic] = classees[0] || [0, 0];
+  const second = classees[1] ? classees[1][1] : 0;
+  const hex = '#' + picCle.toString(16).padStart(6, '0');
+  /* En dessous de vingt pixels, aucune image n'a d'aplat : c'est du
+     bruit, quelle que soit sa proportion. */
+  const aplat = pic >= 20 && pic > 3 * Math.max(second, 1);
+  t(`${img} ne porte aucun aplat de couleur`, !aplat,
+    `dominante ${hex} ×${pic}, suivante ×${second} (rapport ${(pic / Math.max(second, 1)).toFixed(1)}) ; ` +
+    `${satures} pixels saturés au total (${(100 * satures / px.length).toFixed(2)} %), ` +
+    `c'est-à-dire les liserés d'anticrénelage`);
+}
+
+/* Le gabarit qui produit ces images est du CONTENU : il porte le titre
+   de l'accueil. S'il diverge, l'aperçu de partage annonce autre chose
+   que la page. */
+{
+  const gen = readFileSync(join(RACINE, 'scripts', 'generer-images.mjs'), 'utf8');
+  const titreOg = (gen.match(/<h1>([\s\S]*?)<\/h1>/) || [])[1] || '';
+  const titrePage = ((lire('index.html').match(/<h1>([\s\S]*?)<\/h1>/) || [])[1] || '');
+  const nu = (x) => x.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  t("Le titre de l'aperçu de partage est celui de l'accueil",
+    nu(titreOg) === nu(titrePage), `og : « ${nu(titreOg)} » · page : « ${nu(titrePage)} »`);
+  const genSansCom = gen.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/^\s*\/\/.*$/gm, ' ');
+  t("Le gabarit de l'aperçu ne contient plus d'ambre",
+    !/ffb224|255,\s*178,\s*36/i.test(genSansCom));
 }
 
 /* ── 4. Le remplissage ─────────────────────────────────────────────

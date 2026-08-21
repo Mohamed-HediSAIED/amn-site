@@ -52,7 +52,12 @@ const js = readFileSync(join(RACINE, 'site.js'), 'utf8')
   .replace(/\(function \(\) \{/, 'window.AMN_INIT = function () {')
   .replace(/\}\)\(\);\s*$/, '};\n');
 
-/* ---- Les neuf pages ---- */
+/* ---- Les neuf pages ----
+   `<` est échappé en \u003c au moment de l'injection : si une page
+   contenait un jour la suite `</script>` dans son corps, l'analyseur du
+   navigateur refermerait le bloc au milieu des données et le fichier
+   d'aperçu se briserait sans un mot. Aucune page ne le fait aujourd'hui ;
+   c'est le genre de chose qu'on découvre trois mois plus tard. */
 const pages = {};
 for (const f of readdirSync(RACINE).filter((x) => x.endsWith('.html')).sort()) {
   const src = readFileSync(join(RACINE, f), 'utf8');
@@ -95,7 +100,7 @@ body.apercu-ouvert{padding-bottom:64px}
 <script>
 ${js}
 (function () {
-  var PAGES = ${JSON.stringify(pages)};
+  var PAGES = ${JSON.stringify(pages).replace(/</g, '\\u003c')};
   var ecran = document.getElementById('ecran');
   var bandeau = document.getElementById('apercu-bandeau');
 
