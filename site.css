@@ -323,9 +323,17 @@ p + p { margin-top: 1em; }
 .mono-sm { font-family: var(--f-mono); font-size: .68rem; letter-spacing: .01em; color: var(--text-3); line-height: 1.65; }
 
 /* Le seul emploi « inline » de l'accent : souligner UN mot. */
+/* Le surlignage du titre. `box-shadow: inset` sur un élément EN LIGNE
+   se dessine sur la boîte entière et non ligne par ligne : dès que le
+   titre passait à la ligne, le filet se retrouvait sous les mots
+   voisins. `text-decoration` est fait pour ça et suit le texte. */
 .mark {
   color: var(--accent);
-  box-shadow: inset 0 -2px 0 var(--accent-line);
+  text-decoration: underline;
+  text-decoration-color: var(--accent-line);
+  text-decoration-thickness: 2px;
+  text-underline-offset: .14em;
+  text-decoration-skip-ink: none;
 }
 
 /* ---------- En-tête ---------- */
