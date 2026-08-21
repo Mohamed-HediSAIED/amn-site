@@ -266,7 +266,7 @@ async function sendViaResend(d) {
   if (!key || !to) return null;
 
   const from = process.env.CONTACT_FROM || 'AMN DevSec <onboarding@resend.dev>';
-  const subject = `Demande d'accès — ${d.structure}`.slice(0, 180);
+  const subject = `${d.douteux ? '[à vérifier] ' : ''}Demande d'accès — ${d.structure}`.slice(0, 180);
 
   const text = [
     `Nom       : ${d.nom}`,
@@ -276,6 +276,7 @@ async function sendViaResend(d) {
     'Besoin :',
     d.besoin,
     '',
+    ...(d.douteux ? [`⚠ Ressemble à du pourriel (${d.douteux}) — acheminé quand même.`, ''] : []),
     `— Envoyé depuis le formulaire du site, le ${d.recu}.`
   ].join('\n');
 
@@ -287,6 +288,7 @@ async function sendViaResend(d) {
   <hr style="border:none;border-top:1px solid #ddd;margin:16px 0">
   <p style="margin:0 0 6px"><strong>Besoin&nbsp;:</strong></p>
   <p style="white-space:pre-wrap;margin:0">${esc(d.besoin)}</p>
+  ${d.douteux ? `<p style="margin:16px 0 0;padding:10px 12px;background:#fff6e5;border-left:3px solid #d19a2a;font-size:13px;color:#6b4d0e">Ressemble à du pourriel (${esc(d.douteux)})&nbsp;— acheminé quand même, à vous de trancher.</p>` : ''}
   <hr style="border:none;border-top:1px solid #ddd;margin:16px 0">
   <p style="font-size:12px;color:#777;margin:0">Formulaire du site AMN DevSec — ${esc(d.recu)}.
   Répondre à ce message écrit directement à ${esc(d.email)}.</p>
@@ -335,7 +337,8 @@ async function sendViaWebhook(d) {
         nom: d.nom,
         structure: d.structure,
         email: d.email,
-        besoin: d.besoin
+        besoin: d.besoin,
+        douteux: d.douteux || null
       }),
       signal: t.signal
     });
@@ -437,13 +440,26 @@ module.exports = async function handler(req, res) {
     return invalide('Décrivez votre besoin en quelques mots de plus.');
   }
 
-  /* --- Heuristique de pourriel : un message truffé de liens n'est pas
-         une demande d'accès. Réponse « merci », rien n'est envoyé. --- */
+  /* --- Heuristique de pourriel : un message truffé de liens ressemble
+         à du pourriel. IL EST QUAND MÊME ACHEMINÉ, marqué comme
+         douteux.
+
+         Avant, il était jeté : réponse « c'est envoyé », et rien ne
+         partait. Ça tenait tant qu'on pensait au robot. Le seuil est à
+         DEUX liens : un artisan qui écrit « voici mon site, ma boutique
+         et le prestataire actuel » en met trois, et disparaissait en
+         lisant « votre demande est arrivée ». Le site promet ailleurs
+         que rien ne se perd en silence ; il faut que ce soit vrai.
+
+         Le visiteur reçoit la même réponse dans les deux cas : un
+         robot n'apprend donc rien de son passage. C'est la personne qui
+         relève la boîte qui tranche, sur un message étiqueté. --- */
   const links = (besoin.match(/https?:\/\//gi) || []).length;
-  if (links > LIMITS.MAX_LINKS || /\[url[=\]]|<a\s+href/i.test(besoin)) {
-    console.warn('[contact] message écarté :', links, 'liens');
-    return respond(req, res, 200, OK);
-  }
+  const douteux =
+    links > LIMITS.MAX_LINKS || /\[url[=\]]|<a\s+href/i.test(besoin)
+      ? `${links} lien(s)${/\[url[=\]]|<a\s+href/i.test(besoin) ? ', balises de lien' : ''}`
+      : '';
+  if (douteux) console.warn('[contact] message marqué douteux :', douteux);
 
   /* --- Limite de fréquence --- */
   const limited = rateLimit(originKey(req));
@@ -465,6 +481,7 @@ module.exports = async function handler(req, res) {
     structure,
     email,
     besoin,
+    douteux,
     recu: new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })
   };
 

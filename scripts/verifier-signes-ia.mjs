@@ -332,6 +332,39 @@ console.log('4. Le remplissage\n');
   }
   t('Aucune formule de remplissage', trouves.length === 0, trouves.join(' · '));
 
+  /* LES PROMESSES ABSOLUES DÉJÀ DÉMENTIES PAR LE CODE DU PRODUIT.
+
+     Le site a affirmé pendant huit versions qu'on exportait « une copie
+     complète de votre espace ». La fonction de sauvegarde du produit
+     (src/lib/backup.ts) ramène neuf collections sur la vingtaine que
+     déclare son type SyncedCollection : ni les factures, ni l'agenda,
+     ni les notes, ni les médias, ni les rapports, ni les projets, ni le
+     registre des sites. La phrase était fausse aux trois endroits où
+     elle apparaissait.
+
+     Chaque entrée ci-dessous est une tournure RETIRÉE après vérification
+     dans le code. Elle est interdite tant que le produit ne la rend pas
+     vraie. Si un jour il la rend vraie, on retire la ligne — et on écrit
+     pourquoi. */
+  const DEMENTIES = [
+    { re: /copie\s+complète\s+de\s+votre\s+espace/i,
+      pourquoi: "l'export du produit omet factures, agenda, notes, médias, rapports, projets" },
+    { re: /exporte[rz]?\s+(?:tout|l['’]intégralité)/i,
+      pourquoi: "même raison : l'export est partiel" },
+    { re: /100\s*%\s*(?:de\s+)?(?:vos\s+)?données/i,
+      pourquoi: 'aucune mesure ne soutient un tel chiffre' },
+  ];
+  const revenues = [];
+  for (const f of pages) {
+    const tt = texte(lire(f));
+    for (const d of DEMENTIES) {
+      const m = tt.match(d.re);
+      if (m) revenues.push(`${f} : « ${m[0]} » — ${d.pourquoi}`);
+    }
+  }
+  t('Aucune promesse déjà démentie par le code du produit',
+    revenues.length === 0, revenues.join(' · '));
+
   /* Le site qui parle de lui-même. « Ce qu'on ne fait pas », « ce qui
      n'y est pas », « ce qu'on ne promet pas » : chacune prise seule est
      honnête, mais trois sections de méta-discours sur trois pages

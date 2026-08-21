@@ -884,7 +884,14 @@ contact.reinitialiserCompteurs();
   t("Aucun en-tête CORS permissif renvoyé", r.headers.get('access-control-allow-origin') === null);
 }
 
-/* 3.8 — message truffé de liens */
+/* 3.8 — message truffé de liens : MARQUÉ, PAS JETÉ.
+
+   Il était jeté : réponse « c'est envoyé », et rien ne partait. Le seuil
+   est à deux liens, or un artisan qui donne son site, sa boutique et le
+   prestataire actuel en met trois — il disparaissait en lisant « votre
+   demande est arrivée ». Le message est maintenant acheminé, étiqueté
+   douteux ; la réponse au visiteur ne change pas, donc un robot
+   n'apprend toujours rien. */
 contact.reinitialiserCompteurs();
 {
   const avant = recus.length;
@@ -899,7 +906,36 @@ contact.reinitialiserCompteurs();
     })
   });
   await new Promise((r2) => setTimeout(r2, 200));
-  t('Message truffé de liens écarté', r.status === 200 && recus.length === avant);
+  t('Message truffé de liens : réponse identique au visiteur', r.status === 200);
+  t('Message truffé de liens : acheminé quand même', recus.length === avant + 1,
+    `${recus.length - avant} reçu(s)`);
+  const dernier = recus[recus.length - 1];
+  t('Message truffé de liens : étiqueté douteux',
+    !!(dernier && dernier.douteux), JSON.stringify(dernier && dernier.douteux));
+  t('Message truffé de liens : le texte est intact',
+    !!(dernier && dernier.besoin && dernier.besoin.includes('d.example')));
+}
+
+/* 3.8 bis — trois liens, message parfaitement légitime : il DOIT arriver. */
+contact.reinitialiserCompteurs();
+{
+  const avant = recus.length;
+  const r = await fetch(`${BASE}/api/contact`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Origin: BASE },
+    body: JSON.stringify({
+      nom: 'Claire Vasseur',
+      structure: 'Atelier Vasseur',
+      email: 'claire@atelier-vasseur.fr',
+      besoin:
+        'Bonjour, je suis ébéniste. Mon site est https://atelier-vasseur.fr, ma boutique ' +
+        'https://boutique.atelier-vasseur.fr et mon prestataire actuel est https://exemple-hebergeur.fr. ' +
+        "J'aimerais savoir si vous pouvez reprendre tout ça."
+    })
+  });
+  await new Promise((r2) => setTimeout(r2, 200));
+  t('Demande légitime à trois liens : reçue', r.status === 200 && recus.length === avant + 1,
+    `${recus.length - avant} reçue(s)`);
 }
 
 /* 3.9 — limite de fréquence */

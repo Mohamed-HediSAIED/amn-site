@@ -263,6 +263,17 @@ if (!existsSync(join(RACINE, 'assets', 'og.png'))) {
     );
   }
 
+  /* Une dette qui appartient au PRODUIT, pas au site, mais que le site
+     paie : sa promesse anti-verrouillage vaut ce que vaut l'export. */
+  todo(
+    "L'export du produit est PARTIEL (dette côté amn-desktop).\n" +
+      '     src/lib/backup.ts ramène neuf collections sur la vingtaine que déclare\n' +
+      '     SyncedCollection : ni les factures, ni l\'agenda, ni les notes, ni les\n' +
+      '     médias, ni les rapports, ni les projets, ni le registre des sites.\n' +
+      '     Le site a cessé de promettre une « copie complète » — mais c\'est\n' +
+      '     l\'export qu\'il faudrait compléter, pas la phrase qu\'il fallait réduire.'
+  );
+
   const audio = ['accueil.m4a', 'accueil.mp3']
     .some((f) => existsSync(join(RACINE, 'assets', 'audio', f)));
   const branche = Object.values(html).some((src) => /<body[^>]*data-piece=/.test(src));
