@@ -13,8 +13,8 @@
 
      node scripts/verifier-avant-mise-en-ligne.mjs
    ------------------------------------------------------------------ */
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -234,6 +234,35 @@ for (const [f, src] of Object.entries(html)) {
   if (ogT && ogT !== titre) ko(`${f} : <title> et og:title diffèrent.\n     titre  : ${titre}\n     og     : ${ogT}`);
   const ogD = (src.match(/property="og:description" content="([^"]*)"/) || [])[1];
   if (ogD && ogD.length > 200) todo(`${f} : og:description de ${ogD.length} caractères.`);
+}
+
+/* Le plan du site datait faux : sept entrées figées au 11 août alors
+   que les huit pages avaient été réécrites depuis, et une huitième sans
+   date du tout. Un moteur qui lit une date ancienne ne revient pas. */
+{
+  const sm = readFileSync(join(RACINE, 'sitemap.xml'), 'utf8');
+  const perimees = [];
+  for (const bloc of sm.match(/<url>[\s\S]*?<\/url>/g) || []) {
+    const loc = (bloc.match(/<loc>([^<]+)<\/loc>/) || [])[1] || '';
+    const chemin = new URL(loc).pathname;
+    const fichier = chemin === '/' ? 'index.html' : chemin.replace(/^\//, '') + '.html';
+    const annonce = (bloc.match(/<lastmod>([^<]+)<\/lastmod>/) || [])[1];
+    let reel = null;
+    try {
+      reel = execFileSync('git', ['log', '-1', '--format=%cs', '--', fichier],
+        { cwd: RACINE, encoding: 'utf8' }).trim();
+    } catch { /* hors dépôt git : on ne peut rien dire */ }
+    if (!reel) continue;
+    if (!annonce) perimees.push(`${fichier} : aucune date`);
+    else if (annonce < reel) perimees.push(`${fichier} : annonce ${annonce}, modifiée le ${reel}`);
+  }
+  if (perimees.length) {
+    todo(
+      `Le plan du site date faux sur ${perimees.length} entrée(s) :\n     ` +
+        perimees.join('\n     ') +
+        '\n     Corriger :  node scripts/dater-sitemap.mjs'
+    );
+  }
 }
 
 if (!existsSync(join(RACINE, 'assets', 'og.png'))) {

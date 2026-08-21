@@ -1337,6 +1337,30 @@ console.log('3 quater. L’assistant simulé, question par question');
 /* ================= 4. En-têtes de sécurité ================= */
 
 console.log('4. En-têtes de sécurité réellement servis');
+
+/* Le verrou de la préversion, vérifié pour de bon.
+
+   Il ne l'était pas : le serveur local n'appliquait qu'UN bloc
+   d'en-têtes de vercel.json (`.find()` au lieu de `.filter()`), et
+   `X-Robots-Tag` vit dans un second bloc sur la même source. Il n'était
+   donc jamais servi ici — c'est-à-dire que le seul verrou lu quand
+   robots.txt interdit l'exploration n'avait jamais été mesuré. Tout
+   serait passé au vert en local avec un site indexable en production. */
+{
+  const modeApercu = readFileSync(join(RACINE, 'robots.txt'), 'utf8').includes('Disallow: /\n');
+  const r = await fetch(BASE + '/');
+  const robots = r.headers.get('x-robots-tag') || '';
+  const meta = (await r.text()).includes('content="noindex,nofollow"');
+  t("Le mode d'indexation est cohérent entre robots.txt, l'en-tête et la balise",
+    modeApercu ? /noindex/.test(robots) && meta : !robots && !meta,
+    `robots.txt ${modeApercu ? 'fermé' : 'ouvert'}, en-tête « ${robots || 'absent'} », balise ${meta}`);
+
+  const police = await fetch(BASE + '/assets/fonts/spectral-600-latin.woff2');
+  t('Les polices sont servies avec un cache long',
+    /max-age=\d{6,}/.test(police.headers.get('cache-control') || ''),
+    police.headers.get('cache-control') || 'aucun');
+}
+
 {
   const r = await fetch(BASE + '/');
   const csp = r.headers.get('content-security-policy') || '';

@@ -208,6 +208,7 @@ l'hôte fournit déjà son propre `<head>`.
 node scripts/polices.mjs            # les trois polices, sous-ensembles latin
 node scripts/generer-images.mjs     # favicons + aperçu de partage
 python3 scripts/marque.py           # le logo AMN DEVSEC en SVG (non branché)
+node scripts/dater-sitemap.mjs      # les <lastmod> du plan, depuis git
 ```
 
 `scripts/carte-du-monde.py` a produit la carte en pointillés du bandeau de la
@@ -470,10 +471,14 @@ pas de texte laissé en police) avant de remplacer le fichier.
   pendant le défilement, et il ferait du bandeau le bloc conteneur de ses
   descendants `position: fixed` — le panneau de la console se retrouverait
   dimensionné sur les 64 px du bandeau au lieu de la fenêtre.
-- **Le rouge est réservé aux alertes** (`--alert`), jamais décoratif. Une seule
-  couleur d'accent : l'ambre. Elle ne prend toute la place qu'à **un seul
-  endroit par page**, le bloc d'appel de fin (`.cta--ambre`) — c'est ce qui
-  fait qu'elle accentue encore quelque chose.
+- **Aucune couleur saturée, nulle part**, sauf `--alert` pour les alertes.
+  L'accent est `#ededed`, un blanc cassé. Il ne prend toute la place qu'à **un
+  seul endroit par page**, le bloc d'appel de fin (`.cta--plein`).
+  Cette règle est vérifiée deux fois : `verifier-navigateur.mjs` §3 bis lit la
+  teinte de chaque couleur rendue, et `verifier-signes-ia.mjs` §3 bis décode
+  les PNG. L'ambre `#ffb224` était la couleur d'accent jusqu'à la v6 ; elle a
+  survécu quatre versions dans l'aperçu de partage parce que rien ne regardait
+  les images. Ne la remettez pas.
 - **L'assistant ne répond jamais autre chose que ce qui est écrit dans
   `site.js`.** Pas de modèle, pas d'appel réseau. Tout sujet non tranché
   (essai, engagement, résiliation, remboursement) a une entrée qui dit qu'on

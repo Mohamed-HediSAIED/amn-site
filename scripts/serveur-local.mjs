@@ -67,27 +67,50 @@ const TYPES = {
   '.webmanifest': 'application/manifest+json'
 };
 
-function entetesCommunes() {
+/* Vercel applique TOUS les blocs dont la source correspond au chemin
+   demandé. Ce serveur n'en appliquait qu'UN : `.find()` au lieu de
+   `.filter()`, et le premier trouvé gagnait.
+
+   Conséquence, mesurée : vercel.json déclare deux blocs sur `/(.*)`,
+   celui des en-têtes de sécurité et celui de `X-Robots-Tag`. Seul le
+   premier était servi. Les contrôles tournaient donc contre un serveur
+   qui n'envoyait JAMAIS X-Robots-Tag — c'est-à-dire précisément le
+   verrou que preversion.mjs appelle « le seul qui compte vraiment »,
+   le seul lu quand robots.txt interdit l'exploration. Personne ne
+   vérifiait que la préversion tenait. Les deux règles `Cache-Control`
+   étaient invisibles pour la même raison.
+
+   Les sources de vercel.json sont des motifs : on les compare comme
+   tels, par requête. */
+function reglesEntetes() {
   const vercel = JSON.parse(readFileSync(join(RACINE, 'vercel.json'), 'utf8'));
-  const bloc = vercel.headers.find((h) => h.source === '/(.*)');
-  const out = {};
-  for (const { key, value } of bloc.headers) {
+  return vercel.headers.map((b) => ({
+    motif: new RegExp('^' + b.source + '$'),
+    source: b.source,
     /* HSTS n'a pas de sens en HTTP local et ferait basculer le
        navigateur en HTTPS pour tout localhost. */
-    if (key === 'Strict-Transport-Security') continue;
-    out[key] = value;
+    entetes: b.headers.filter(({ key }) => key !== 'Strict-Transport-Security')
+  }));
+}
+
+function entetesPour(regles, chemin) {
+  const out = {};
+  for (const r of regles) {
+    if (!r.motif.test(chemin)) continue;
+    for (const { key, value } of r.entetes) out[key] = value;
   }
   return out;
 }
 
 export function demarrer({ port = 4173, racine = RACINE, silencieux = false } = {}) {
-  const communes = entetesCommunes();
+  const regles = reglesEntetes();
   const require = createRequire(pathToFileURL(join(racine, 'scripts/')).href);
 
   const serveur = createServer(async (req, res) => {
-    for (const [k, v] of Object.entries(communes)) res.setHeader(k, v);
-
     const url = new URL(req.url, 'http://localhost');
+    for (const [k, v] of Object.entries(entetesPour(regles, url.pathname))) {
+      res.setHeader(k, v);
+    }
     let chemin = decodeURIComponent(url.pathname);
 
     if (chemin.startsWith('/api/')) {
