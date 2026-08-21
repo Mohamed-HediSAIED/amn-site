@@ -1539,10 +1539,20 @@ section[id] { scroll-margin-top: 84px; }
 /* ---------- Mouvement réduit ---------- */
 
 @media (prefers-reduced-motion: reduce) {
+  /* Le RETARD manquait à cette liste, et c'est lui qui échelonne.
+     Les six plaques du sommaire portent `animation: plaque-in .34s …
+     backwards` : avec `backwards`, l'état de départ (opacité nulle) est
+     tenu pendant tout le retard. En annulant la seule durée, on
+     obtenait six surgissements secs étalés sur 340 ms — un
+     clignotement en cascade, c'est-à-dire l'inverse exact de ce que le
+     réglage demande. Un retard négatif place l'animation à sa fin :
+     l'état final est là dès la première image. */
   *, *::before, *::after {
     animation-duration: .001ms !important;
+    animation-delay: -1ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: .001ms !important;
+    transition-delay: 0s !important;
   }
   /* La parallaxe est aussi coupée côté JavaScript (site.js ne l'installe
      pas). Cette règle couvre le cas où le réglage change alors que la
@@ -2019,6 +2029,16 @@ section[id] { scroll-margin-top: 84px; }
    pousse la page comme n'importe quel contenu. Le plafond reste, pour
    qu'une longue conversation ne repousse pas le pied de page hors de
    portée — mais il est plus généreux que les 460 px de l'onglet. */
+/* Le fil défile verticalement dès la troisième réponse. C'est le même
+   défaut que le cadre de la capture, sur l'élément d'à côté : un
+   conteneur défilable doit pouvoir recevoir le focus, sinon la
+   personne au clavier ne peut plus relire les réponses précédentes.
+   Chromium le rattrape tant que le fil ne contient aucun lien — et les
+   réponses en contiennent. */
+.ajm-fil:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
 .ajm-fil {
   padding: 16px;
   max-height: min(520px, 65vh);
@@ -2076,7 +2096,12 @@ section[id] { scroll-margin-top: 84px; }
   font-size: .9rem;
   padding: 13px 14px;
 }
-.ajm-form input::placeholder { color: var(--text-4); }
+/* Le vrai libellé est masqué visuellement (.hp) : ce texte indicatif
+   est donc le seul repère à l'écran, et --text-4 est déclaré plus haut
+   « décoratif uniquement, ne doit jamais porter de sens » — mesuré à
+   3,19:1 sur le fond de la page. --text-3 est le plancher accessible
+   retenu par ce dépôt depuis la v6. */
+.ajm-form input::placeholder { color: var(--text-3); }
 .ajm-form input:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent-line); }
 .ajm-form button[type='submit'] {
   flex: none;

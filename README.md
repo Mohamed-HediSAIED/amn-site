@@ -153,10 +153,28 @@ pour recharger la fonction à chaque appel pendant qu'on l'édite.
 
 ```sh
 node scripts/verifier-avant-mise-en-ligne.mjs   # 1 s, sans dépendance
-node scripts/verifier-navigateur.mjs            # ~3 min, Chromium réel
+node scripts/verifier-prose.mjs                 # 1 s, sans dépendance
+node scripts/verifier-signes-ia.mjs             # 1 s, sans dépendance
+node scripts/verifier-navigateur.mjs            # ~4 min, Chromium réel
 ```
 
-Le second lance **462 contrôles** : 9 pages × 5 largeurs (console du
+Les trois premiers ne demandent rien et vont vite ; le dernier lance un vrai
+navigateur. Les quatre échouent au lieu d'avertir : un défaut qu'on se
+contente de signaler revient au chantier suivant.
+
+**`verifier-prose.mjs`** compte la longueur de chaque page et les tournures
+qui trahissent une machine — l'antithèse « X, pas Y » d'abord, que le site
+répétait vingt-deux fois. Il couvre aussi les réponses préparées de
+`site.js`, qui échappaient au comptage.
+
+**`verifier-signes-ia.mjs`** regarde ce dont un lecteur de DOM ne peut rien
+dire : que l'accueil montre une vraie capture du produit et pas du décor
+abstrait, que la police de titre n'est aucune de celles que choisit un
+générateur, qu'aucune image ne porte d'aplat de couleur (l'aperçu de partage
+a gardé l'ambre pendant huit versions sans que personne le voie), et que les
+listes de modules du site correspondent, nom pour nom, à celles du produit.
+
+**`verifier-navigateur.mjs`** lance **486 contrôles** : 9 pages × 5 largeurs (console du
 navigateur, requêtes en échec, débordement horizontal, appels à des tiers),
 accessibilité (lien d'évitement, focus, contrastes calculés sur les couleurs
 réellement rendues, y compris sur la page prix), **le monochrome** (la teinte
@@ -171,6 +189,30 @@ règle de section, **le formulaire réellement envoyé** (cas nominal, sans
 JavaScript, piège à robots, piège temporel, champ manquant, limite de
 fréquence, origine étrangère, corps démesuré, injection HTML), et les en-têtes
 de sécurité tels qu'ils sortent du serveur.
+
+### Montrer le site sans le déployer
+
+```sh
+node scripts/paquet-apercu.mjs apercu.html
+```
+
+Emballe les neuf pages, la feuille de style, le script, les trois polices et
+les images dans un seul fichier HTML autonome : aucune requête réseau une fois
+chargé. C'est une copie, pas le site déployé — un bandeau le dit, et le
+formulaire ne peut rien envoyer faute de serveur. Ajouter `--fragment` quand
+l'hôte fournit déjà son propre `<head>`.
+
+### Générer
+
+```sh
+node scripts/polices.mjs            # les trois polices, sous-ensembles latin
+node scripts/generer-images.mjs     # favicons + aperçu de partage
+python3 scripts/marque.py           # le logo AMN DEVSEC en SVG (non branché)
+```
+
+`scripts/carte-du-monde.py` a produit la carte en pointillés du bandeau de la
+v7. Le bandeau a été retiré en v9 au profit d'une capture du produit : le
+script est conservé pour mémoire, il n'est plus appelé.
 
 Il a besoin de Playwright. S'il n'est pas déjà là :
 

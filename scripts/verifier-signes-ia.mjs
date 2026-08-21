@@ -382,6 +382,58 @@ console.log('4. Le remplissage\n');
     manquants.length === 0,
     `accueil : ${[...surAccueil].join(', ')} — manquant(s) : ${manquants.join(', ')}`);
 
+  /* LES MODULES, COMPARÉS AU PRODUIT LUI-MÊME.
+
+     Le site annonçait DIX modules. L'édition livrée aux organisations
+     clientes en compte ONZE : « Projets » manquait, et le site
+     s'appauvrissait tout seul. Trois listes circulaient en plus —
+     celle de la page prix ajoutait « devis », qui n'est pas un module
+     mais une partie de Clients, et oubliait « Accueil » ; la
+     description de service.html annonçait dix noms et en donnait neuf.
+
+     Le produit est la source. Quand il est là, on compare ; sinon on
+     compare au moins les listes du site entre elles. */
+  const NOMS = ['accueil', 'agenda', 'clients', 'facturation', 'projets', 'tâches',
+                'notes', 'médias', 'rapports', 'paramètres', 'coffre-fort'];
+  const listeDe = (txt) => NOMS.filter((n) => new RegExp(`\\b${n}\\b`, 'i').test(txt));
+
+  const grille = [...lire('service.html').matchAll(/<b class="mod-nom">([^<]+)<\/b>/g)].map((m) => m[1].toLowerCase());
+  t('La grille des modules en compte onze', grille.length === 11, `${grille.length} tuiles`);
+  t('La grille suit l\'ordre du produit', grille.join('|') === NOMS.join('|'), grille.join(', '));
+
+  const puces = [...lire('index.html').matchAll(/<span class="chip">([^<]+)<\/span>/g)].map((m) => m[1].toLowerCase());
+  t("Les puces de l'accueil reprennent la grille", puces.join('|') === NOMS.join('|'), puces.join(', '));
+
+  const bank2 = readFileSync(join(RACINE, 'site.js'), 'utf8');
+  const repModules = (bank2.match(/Onze modules[^']*/) || [''])[0];
+  t("L'assistant énumère les onze mêmes modules",
+    listeDe(repModules).length === 11, `${listeDe(repModules).length} reconnus`);
+
+  const descService = (lire('service.html').match(/name="description" content="([^"]*)"/) || [])[1] || '';
+  t('La description de « ce qu\'on fait » énumère bien onze modules',
+    listeDe(descService).length === 11, `${listeDe(descService).length} nommés`);
+
+  /* Le produit, s'il est à côté. Sur une autre machine, ce contrôle se
+     tait plutôt que d'échouer pour une raison qui ne regarde pas le site. */
+  const produit = join(RACINE, '..', '..', 'home', 'user', 'amn-desktop',
+                       'src', 'edition', 'modules.business.ts');
+  const produitAbs = '/home/user/amn-desktop/src/edition/modules.business.ts';
+  const chemin = existsSync(produitAbs) ? produitAbs : existsSync(produit) ? produit : null;
+  if (chemin) {
+    /* Ne retenir que les entrées qui MÈNENT quelque part : les autres
+       `label:` sont les titres de section de la barre latérale
+       (« Activité », « Système »), pas des modules. */
+    const mods = [...readFileSync(chemin, 'utf8')
+      .matchAll(/label: '([^']+)',\s*to: '/g)].map((m) => m[1].toLowerCase());
+    const absents = mods.filter((m) => !grille.includes(m));
+    t('Aucun module du produit ne manque sur le site', absents.length === 0,
+      `absents du site : ${absents.join(', ')}`);
+    const inventes = grille.filter((g) => !mods.includes(g));
+    t('Le site n\'invente aucun module', inventes.length === 0, `inconnus du produit : ${inventes.join(', ')}`);
+  } else {
+    console.log('  (le produit n\'est pas à côté : comparaison au produit sautée)');
+  }
+
   /* Le site qui parle de lui-même. « Ce qu'on ne fait pas », « ce qui
      n'y est pas », « ce qu'on ne promet pas » : chacune prise seule est
      honnête, mais trois sections de méta-discours sur trois pages

@@ -1176,6 +1176,94 @@ console.log('3 ter. La capture du produit');
 }
 
 
+/* ================= 3 quinquies. Mouvement réduit et paquet d'aperçu ===
+   Deux angles qu'aucun contrôle ne regardait.
+
+   Le premier : le dépôt n'ouvrait jamais le navigateur en mode
+   « moins de mouvement ». La réinitialisation annulait les DURÉES et
+   pas les RETARDS ; les six plaques du sommaire, animées avec
+   `backwards`, restaient donc invisibles pendant leur retard puis
+   surgissaient l'une après l'autre sur 340 ms. Un clignotement en
+   cascade est précisément ce que le réglage sert à éviter.
+
+   Le second : le fichier d'aperçu — le seul moyen actuel de montrer le
+   site sur un téléphone — n'était pas un document HTML valide. Sans
+   doctype il s'ouvrait en mode « quirks », avec une fenêtre virtuelle
+   de 980 px sur un écran de 390, c'est-à-dire la mise en page de
+   bureau réduite de moitié. Sans <meta charset>, chaque accent
+   devenait « activitÃ© » dès que le fichier était servi sans en-tête.
+   ==================================================================== */
+
+console.log('3 quinquies. Mouvement réduit et paquet d’aperçu');
+{
+  const ctx = await navigateur.newContext({
+    viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce'
+  });
+  const page = await ctx.newPage();
+  await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  await page.locator('.console > summary').click();
+  await page.waitForTimeout(60);
+  const op = await page.evaluate(() =>
+    [...document.querySelectorAll('.plaque')].map((p) => +getComputedStyle(p).opacity));
+  t('Mouvement réduit : les plaques sont visibles tout de suite, sans cascade',
+    op.length > 0 && op.every((o) => o > 0.99), op.join(' '));
+
+  /* Le retard doit être neutralisé, pas seulement la durée. */
+  const regles = await page.evaluate(() => {
+    const el = document.querySelector('.plaque');
+    const c = getComputedStyle(el);
+    return { delai: c.animationDelay, duree: c.animationDuration };
+  });
+  t('Mouvement réduit : le retard d’animation est neutralisé',
+    parseFloat(regles.delai) <= 0, `délai ${regles.delai}, durée ${regles.duree}`);
+  await ctx.close();
+}
+
+{
+  const { execFileSync } = await import('node:child_process');
+  const { tmpdir } = await import('node:os');
+  const fichier = join(tmpdir(), `amn-apercu-controle-${process.pid}.html`);
+  execFileSync('node', [join(RACINE, 'scripts', 'paquet-apercu.mjs'), fichier], { stdio: 'ignore' });
+
+  const ctx = await navigateur.newContext({
+    viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true
+  });
+  const page = await ctx.newPage();
+  const erreurs = [];
+  page.on('pageerror', (e) => erreurs.push(String(e).slice(0, 120)));
+  await page.goto('file://' + fichier, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(700);
+  const p = await page.evaluate(() => ({
+    mode: document.compatMode,
+    viewport: !!document.querySelector('meta[name="viewport"]'),
+    charset: document.characterSet,
+    largeur: window.innerWidth,
+    accents: document.querySelector('h1').textContent.includes('activité'),
+    pages: document.querySelectorAll('a[href^="/"]').length,
+    externes: performance.getEntriesByType('resource')
+      .filter((r) => !r.name.startsWith('file:') && !r.name.startsWith('data:')).length,
+  }));
+  t('Paquet : document en mode standard', p.mode === 'CSS1Compat', p.mode);
+  t('Paquet : meta viewport présente', p.viewport);
+  t('Paquet : encodage UTF-8 et accents intacts', p.charset === 'UTF-8' && p.accents,
+    `${p.charset}, accents ${p.accents}`);
+  t('Paquet : largeur réelle du téléphone, pas 980 px', p.largeur === 390, `${p.largeur} px`);
+  t('Paquet : aucune requête vers l’extérieur', p.externes === 0, `${p.externes} requête(s)`);
+  t('Paquet : aucune erreur au chargement', erreurs.length === 0, erreurs.join(' | '));
+
+  /* Il doit aussi NAVIGUER : c'est tout l'intérêt du fichier. */
+  await page.locator('.ftr a[href="/prix"]').click();
+  await page.waitForTimeout(600);
+  const apres = await page.evaluate(() => ({
+    titre: document.title, tarifs: document.querySelectorAll('.tarif').length
+  }));
+  t('Paquet : la navigation entre pages fonctionne',
+    /Prix/.test(apres.titre) && apres.tarifs === 4, JSON.stringify(apres));
+  await ctx.close();
+  const { unlinkSync } = await import('node:fs');
+  try { unlinkSync(fichier); } catch { /* peu importe */ }
+}
+
 /* ================= 3 quater. L'assistant, question par question =======
    Un visiteur a demandé « j'ai une équipe de 24 personnes, quel
    abonnement ? ». L'assistant a refusé d'inventer — bon réflexe — mais

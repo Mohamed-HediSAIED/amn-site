@@ -236,7 +236,7 @@
       { cles: ['surveille', 'surveillez', 'supervision', 'supervise', 'monitoring', 'regardez', 'controle', 'certificat', 'disponibilite', 'anomalie'],
         rep: 'Cinq axes : <b>disponibilité</b> (ce qui ne répond plus), <b>certificats</b> (les échéances), <b>accès</b> (chaque ouverture de votre espace est enregistrée côté serveur), <b>anomalies</b> (lues par quelqu\'un) et l\'hygiène de ce qui est exposé publiquement. Détail sur <a href="/service">Ce qu\'on fait</a>.' },
       { cles: ['module', 'modules', 'fonctionnalite', 'fonctionnalites', 'agenda', 'facture', 'facturation', 'devis', 'client', 'coffre', 'contient'],
-        rep: 'Dix modules, les mêmes quel que soit le forfait : accueil, agenda, clients, facturation, tâches, notes, médias, rapports, coffre-fort, paramètres. Détail sur <a href="/service">Ce qu\'on fait</a>.' },
+        rep: 'Onze modules, les mêmes quel que soit le forfait : accueil, agenda, clients, facturation, projets, tâches, notes, médias, rapports, paramètres, coffre-fort. Détail sur <a href="/service">Ce qu\'on fait</a>.' },
       { cles: ['acces', 'inscrire', 'inscription', 'demander', 'commencer', 'demarrer', 'compte', 'ouvrir', 'essayer'],
         rep: 'Par le formulaire : quatre champs, deux minutes. On lit, on répond sous 48 h ouvrées, et si ça correspond on prépare votre espace. Aucun accès ne s\'ouvre automatiquement.' + VERS_CONTACT },
       { cles: ['donnees', 'rgpd', 'confidentialite', 'privee', 'cookie', 'cookies', 'traceur', 'tracking', 'personnelles'],

@@ -17,13 +17,27 @@
    questions fréquentes — est le contenu réel, tel quel.
 
      node scripts/paquet-apercu.mjs [fichier-de-sortie]
+     node scripts/paquet-apercu.mjs [fichier] --fragment
+
+   Par défaut le fichier produit est un DOCUMENT COMPLET : doctype,
+   <html lang="fr">, <meta charset>, <meta viewport>. Sans eux le
+   navigateur ouvrait le fichier en mode « quirks », posait une fenêtre
+   virtuelle de 980 px sur un téléphone — soit exactement la mise en
+   page de bureau réduite que trois passes venaient de corriger — et
+   affichait « activitÃ© » dès que le fichier était servi sans
+   `charset=utf-8`. Mesuré, pas supposé.
+
+   `--fragment` produit la même chose sans l'enveloppe, pour un hôte qui
+   fournit déjà son propre <head> (c'est le cas d'un artefact publié).
    ------------------------------------------------------------------ */
 import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';
 import { join, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const RACINE = join(dirname(fileURLToPath(import.meta.url)), '..');
-const SORTIE = process.argv[2] || join(RACINE, '.apercu.html');
+const args = process.argv.slice(2);
+const FRAGMENT = args.includes('--fragment');
+const SORTIE = args.find((a) => !a.startsWith('--')) || join(RACINE, '.apercu.html');
 
 const TYPES = {
   '.woff2': 'font/woff2', '.svg': 'image/svg+xml', '.jpg': 'image/jpeg',
@@ -74,11 +88,22 @@ for (const f of readdirSync(RACINE).filter((x) => x.endsWith('.html')).sort()) {
   };
 }
 
-/* Le <title> doit être la PREMIÈRE chose du fichier : l'hébergeur ne
-   lit que les 8 premiers Ko pour le trouver, et la feuille de style
-   qui suit pèse à elle seule plus de cent Ko de polices intégrées. */
-const enveloppe = `<title>AMN DevSec</title>
-<style>
+/* Le <title> doit rester dans les 8 premiers Ko : un hôte ne lit que
+   ce début pour le trouver, et la feuille de style qui suit pèse à elle
+   seule plus de cent Ko de polices intégrées. */
+const TETE = `<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>AMN DevSec</title>
+</head>
+<body>
+`;
+const PIED = '\n</body>\n</html>\n';
+
+const corpsPaquet = `${FRAGMENT ? '<title>AMN DevSec</title>\n' : ''}<style>
 ${css}
 /* ---- Le bandeau d'aperçu : il n'appartient pas au site ---- */
 #apercu-bandeau{position:fixed;left:0;right:0;bottom:0;z-index:400;display:flex;gap:12px;
@@ -130,17 +155,20 @@ ${js}
   }, true);
 
   window.addEventListener('popstate', function () {
-    /* Filet : si la page hôte n'a pas posé de meta viewport, le rendu
-     mobile serait celui d'un écran de bureau réduit. */
+    afficher(location.hash.slice(1) || '/', false);
+  });
+
+  /* Filet pour le mode fragment : si l'hôte n'a pas posé de meta
+     viewport, le rendu sur téléphone serait celui d'un écran de bureau
+     réduit. Sans ce filet, le bloc était enfermé dans l'écouteur
+     ci-dessus et ne s'exécutait qu'après un retour arrière — c'est-à-dire
+     jamais au moment où il servait. */
   if (!document.querySelector('meta[name="viewport"]')) {
     var mv = document.createElement('meta');
     mv.name = 'viewport';
     mv.content = 'width=device-width, initial-scale=1';
     document.head.appendChild(mv);
   }
-
-  afficher(location.hash.slice(1) || '/', false);
-  });
 
   afficher(location.hash.slice(1) || '/', false);
 
@@ -163,7 +191,8 @@ ${js}
 </script>
 `;
 
-writeFileSync(SORTIE, enveloppe);
+writeFileSync(SORTIE, FRAGMENT ? corpsPaquet : TETE + corpsPaquet + PIED);
 const ko = statSync(SORTIE).size / 1024;
 console.log(`\n${SORTIE}`);
-console.log(`  ${Object.keys(pages).length} pages · ${cache.size} fichiers intégrés · ${ko.toFixed(0)} Ko\n`);
+console.log(`  ${Object.keys(pages).length} pages · ${cache.size} fichiers intégrés · ${ko.toFixed(0)} Ko` +
+            `${FRAGMENT ? ' · fragment (l\'hôte fournit le <head>)' : ' · document complet'}\n`);
