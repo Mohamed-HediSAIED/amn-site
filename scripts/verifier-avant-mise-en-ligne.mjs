@@ -211,6 +211,31 @@ for (const [f, src] of Object.entries(html)) {
   }
 }
 
+/* Longueur des métadonnées. Un titre trop long est coupé au milieu dans
+   les résultats de recherche et dans l'aperçu de partage ; une
+   description trop longue l'est aussi. Les pages en noindex sont hors
+   sujet : elles ne paraîtront jamais dans un résultat. */
+for (const [f, src] of Object.entries(html)) {
+  /* Écarter « toutes les pages en noindex » aurait été juste en mode
+     public et VIDE en préversion, où le mode met justement TOUTES les
+     pages en noindex : le contrôle n'aurait rien regardé pendant tout
+     le temps où il sert. La 404 est la seule page à écarter — elle est
+     en noindex pour sa propre raison, et le restera. */
+  if (f === '404.html') continue;
+  const titre = (src.match(/<title>([^<]*)<\/title>/) || [])[1] || '';
+  const desc = (src.match(/name="description" content="([^"]*)"/) || [])[1] || '';
+  if (titre.length > 62) todo(`${f} : titre de ${titre.length} caractères — coupé au-delà de ~60.`);
+  if (desc.length > 160) todo(`${f} : description de ${desc.length} caractères — coupée au-delà de ~160.`);
+  if (desc.length < 70) todo(`${f} : description de ${desc.length} caractères — trop courte pour dire quelque chose.`);
+  /* Le titre de l'onglet et celui du partage disaient deux choses
+     différentes sur l'accueil — « supervisée » d'un côté, « supervisé »
+     de l'autre. Personne ne lit les deux côte à côte. */
+  const ogT = (src.match(/property="og:title" content="([^"]*)"/) || [])[1];
+  if (ogT && ogT !== titre) ko(`${f} : <title> et og:title diffèrent.\n     titre  : ${titre}\n     og     : ${ogT}`);
+  const ogD = (src.match(/property="og:description" content="([^"]*)"/) || [])[1];
+  if (ogD && ogD.length > 200) todo(`${f} : og:description de ${ogD.length} caractères.`);
+}
+
 if (!existsSync(join(RACINE, 'assets', 'og.png'))) {
   ko('assets/og.png absent — lancer : node scripts/generer-images.mjs');
 }
