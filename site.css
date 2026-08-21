@@ -2178,27 +2178,31 @@ section[id] { scroll-margin-top: 84px; }
    ================================================================== */
 
 /* ---------- La grille du feuillet ----------
-   Trois colonnes au-dessus de 1100 px : la réglure qui numérote, le
-   contenu, le cartouche. En dessous, une seule colonne et le
-   cartouche remonte sous l'en-tête. */
+   Elle avait trois colonnes au-dessus de 1100 px : une réglure qui
+   numérotait à gauche (`.art-n`), le contenu, un cartouche à droite
+   (`.cartouche`). Les deux éléments de bord ont disparu des pages —
+   plus une seule ne les porte, vérifié — mais leurs colonnes étaient
+   restées.
 
-.dossier { --regle: 46px; --cartouche: 226px; }
+   Conséquence, mesurée à 1440 px : le contenu occupait 252 → 1008 dans
+   une coquille allant de 144 à 1296. Soit 108 px de marge à gauche et
+   288 px à droite. Tout le texte du site était décalé de 90 px vers la
+   gauche, avec un vide à droite, sur les neuf pages.
+
+   La mesure de la colonne ne change pas — 756 px, proche des 768 px de
+   la colonne du produit, et c'est elle qui fixe la largeur de la
+   mosaïque des modules comme de la grille tarifaire. Seules les deux
+   marges deviennent égales. */
+
+.dossier { --mesure: 756px; }
 
 @media (min-width: 1100px) {
   .dossier > .wrap {
     display: grid;
-    grid-template-columns: var(--regle) minmax(0, 1fr) var(--cartouche);
+    grid-template-columns: 1fr minmax(0, var(--mesure)) 1fr;
     column-gap: 30px;
-    /* La largeur totale NE BOUGE PAS : les deux colonnes de chrome
-       sont prises DANS la mesure existante, elles ne s'ajoutent pas
-       à côté. Sinon le bloc déborde sur la règle de section, qui est
-       en `position: fixed` et ne se pousse pas. Effet secondaire
-       heureux : la colonne de texte descend à ~78 ch, une mesure plus
-       confortable que les 68 ch pleine largeur d'avant. */
   }
   .dossier > .wrap > * { grid-column: 2; }
-  .dossier > .wrap > .art-n { grid-column: 1; }
-  .dossier > .wrap > .cartouche { grid-column: 3; grid-row: 1 / span 40; }
 }
 
 /* ---------- Le cartouche ----------
