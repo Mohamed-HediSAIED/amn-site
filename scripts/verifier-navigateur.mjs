@@ -1115,6 +1115,43 @@ console.log('3 ter. La capture du produit');
     (c?.naturelle || 0) >= (c?.affichee || 0) && (c?.naturelle || 0) <= (c?.affichee || 0) * 2.4,
     `${c?.naturelle}px servis pour ${c?.affichee}px affichés`);
 
+  /* Sur téléphone la capture défile horizontalement. Un conteneur qui
+     défile et qu'on ne peut pas atteindre au clavier est un mur pour
+     qui n'utilise pas l'écran tactile — et c'est invisible dans un
+     rapport Lighthouse, qui donne 100 sur cette page. */
+  {
+    const ctxTel = await navigateur.newContext({ viewport: { width: 390, height: 844 } });
+    const tel = await ctxTel.newPage();
+    await tel.goto(BASE + '/', { waitUntil: 'networkidle' });
+    const cadre = await tel.evaluate(() => {
+      const el = document.querySelector('.capture-cadre');
+      if (!el) return null;
+      return {
+        defile: el.scrollWidth > el.clientWidth + 1,
+        tabindex: el.getAttribute('tabindex'),
+        role: el.getAttribute('role'),
+        label: (el.getAttribute('aria-label') || '').length,
+      };
+    });
+    t('Téléphone : la capture défile bien horizontalement', !!cadre && cadre.defile);
+    t('Téléphone : le cadre défilable est atteignable au clavier',
+      cadre && cadre.tabindex === '0', `tabindex=${cadre && cadre.tabindex}`);
+    t('Téléphone : le cadre défilable est annoncé',
+      !!cadre && !!cadre.role && cadre.label > 10, `role=${cadre && cadre.role}`);
+    await tel.keyboard.press('Tab');
+    const atteint = await tel.evaluate(() => {
+      for (let i = 0; i < 40; i++) {
+        if (document.activeElement && document.activeElement.classList.contains('capture-cadre')) return true;
+        const suiv = document.activeElement;
+        if (!suiv) break;
+        suiv.blur();
+      }
+      return document.querySelector('.capture-cadre').matches(':enabled, [tabindex]');
+    });
+    t('Téléphone : le cadre accepte le focus', atteint);
+    await ctxTel.close();
+  }
+
   /* Le fond décoratif ne doit pas revenir par une passe d'« amélioration ». */
   const restes = await page.evaluate(() =>
     ['.carte', '.veille', '.fond', '.stats', '.seq'].filter((s) => document.querySelector(s)));

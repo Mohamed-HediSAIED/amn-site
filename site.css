@@ -979,6 +979,12 @@ html:has(.console[open]) { overflow: hidden; }
     scrollbar-width: none;
   }
   .capture-cadre::-webkit-scrollbar { display: none; }
+  /* Le cadre reçoit le focus au clavier : il doit le montrer. */
+  .capture-cadre:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: var(--r-xl);
+  }
   .capture img {
     width: 760px;
     max-width: none;

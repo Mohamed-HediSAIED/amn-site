@@ -137,7 +137,13 @@
          l'application, capture d'écran non retouchée, avec ses données
          de test — voir le rappel dans verifier-avant-mise-en-ligne. -->
     <figure class="capture">
-      <div class="capture-cadre">
+      <!-- `tabindex="0"` n'est pas décoratif : sur téléphone ce cadre
+           défile horizontalement, et un conteneur qui défile sans être
+           atteignable au clavier est inutilisable pour qui n'a pas de
+           doigt sur l'écran. Le rôle et l'étiquette disent au lecteur
+           d'écran ce qu'il tient. -->
+      <div class="capture-cadre" tabindex="0" role="group"
+           aria-label="Capture de l'application, défilement horizontal">
       <img src="/assets/produit-registre.jpg" width="1120" height="512" loading="eager" decoding="async" fetchpriority="high"
            srcset="/assets/produit-registre-560.jpg 560w, /assets/produit-registre.jpg 1120w"
            sizes="(min-width: 1200px) 1088px, calc(100vw - 32px)"
