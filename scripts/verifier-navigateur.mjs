@@ -1384,6 +1384,20 @@ await navigateur.close();
 serveur.close();
 sink.close();
 
+/* Le README annonce un nombre de contrôles. Il annonçait 462 pendant
+   que la suite en comptait 486, et se contredisait lui-même d'une
+   section à l'autre. Un document qui donne un chiffre faux sur le
+   travail fait décrédibilise les chiffres justes qui l'entourent. */
+{
+  const readme = readFileSync(join(RACINE, 'README.md'), 'utf8');
+  const annonces = [...readme.matchAll(/(\d{3})\s+contrôles/g)].map((m) => Number(m[1]));
+  /* +1 : ce contrôle-ci n'est pas encore compté quand il s'exécute. */
+  const attendu = ok + echecs.length + 1;
+  const faux = annonces.filter((n) => n !== attendu);
+  t('Le README annonce le bon nombre de contrôles', faux.length === 0,
+    `suite : ${attendu} · README : ${annonces.join(', ') || 'aucun chiffre'}`);
+}
+
 console.log(`\n${'─'.repeat(58)}`);
 if (echecs.length === 0) {
   console.log(`✓ ${ok} contrôles passés, aucun échec.`);

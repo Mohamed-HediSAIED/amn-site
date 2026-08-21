@@ -864,7 +864,12 @@ html:has(.console[open]) { overflow: hidden; }
    12 px sur les boîtes d'icône, pilule sur les puces, 6 px sur les
    petites étiquettes mono. Les boutons et les champs restent CARRÉS. */
 .mod-n, .ico { border-radius: var(--r-xl); }
-.pastille, .puce, .rail a, .led { border-radius: 9999px; }
+/* `.led` ne correspondait à rien : le HTML écrit `instr-led`. Les cinq
+   voyants de « ce qu'on fait » étaient donc rendus CARRÉS, alors que la
+   règle existait pour les arrondir et que le produit les arrondit
+   (StatusBadge.tsx : `rounded-full`). `.pastille` et `.puce` sont mortes
+   elles aussi — plus aucune page ne les porte. */
+.rail a, .instr-led { border-radius: 9999px; }
 .etq, .badge { border-radius: var(--r-md); }
 
 /* Survol de carte — la valeur exacte du produit : `whileHover={{ y: -3 }}`

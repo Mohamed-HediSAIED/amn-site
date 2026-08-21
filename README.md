@@ -18,10 +18,11 @@ de navigation est du CSS et une centaine de lignes dans `site.js`.
 > v3 : **`docs/direction-v3.md`** — dont le tableau qui explique pourquoi
 > chaque prix vaut ce qu'il vaut, et la liste de ce qui reste à compléter.
 >
-> **La hiérarchie visuelle, la séquence d'ouverture, le contenu dépliable et
-> l'assistant** sont en v4 : **`docs/direction-v4.md`**. À lire avant de
-> toucher à l'échelle typographique ou à la séquence — les deux ont des
-> raisons chiffrées.
+> **La hiérarchie visuelle, le contenu dépliable et l'assistant** sont en
+> v4 : **`docs/direction-v4.md`**. À lire avant de toucher à l'échelle
+> typographique, qui a des raisons chiffrées. La séquence d'ouverture qu'il
+> décrit a été retirée en v9 : un faux terminal avant la page est un effet,
+> pas une preuve (**`docs/direction-v9.md`**).
 >
 > **Le site porte l'identité du produit, il ne s'en invente pas une.**
 > Toutes les valeurs viennent de `amn-desktop` et sont recopiées dans
@@ -32,10 +33,10 @@ de navigation est du CSS et une centaine de lignes dans `site.js`.
 > `mask-image` coûtait 30 % des images, et le seul écart volontaire avec le
 > produit (le grain) avec son chiffrage : **`docs/direction-v6.md`**.
 >
-> Le fond du bandeau — une carte du monde presque noire, immobile, avec
-> huit points qui respirent — remplace les nappes de télémétrie, jugées
-> trop lumineuses. Pourquoi le prix par personne au-delà de cinq n'a PAS
-> été publié (il croise le forfait agence à treize personnes), et les
+> Le fond du bandeau était alors une carte du monde presque noire ; elle a
+> laissé la place en v9 à une vraie capture du produit, le décor abstrait
+> étant l'un des signes les plus cités des sites fabriqués par une IA.
+> Pourquoi le prix par personne au-delà de cinq n'a PAS été publié (il croise le forfait agence à treize personnes), et les
 > trois trous de l'assistant trouvés en cherchant les questions voisines :
 > **`docs/direction-v7.md`**.
 > L'historique des directions précédentes reste dans `docs/direction-v2…v5.md`.
@@ -52,7 +53,7 @@ temps à dire qu'il n'est pas fabriqué par une machine.
 
 ### Ce qui n'est PAS vérifié : les autres moteurs
 
-Les 462 contrôles tournent sur **Chromium uniquement**. Firefox et WebKit —
+Les 489 contrôles tournent sur **Chromium uniquement**. Firefox et WebKit —
 le moteur de Safari, donc de tous les navigateurs iPhone — ne sont pas
 installables dans l'environnement de développement : le proxy sortant bloque
 le domaine de téléchargement de Playwright.
@@ -106,8 +107,20 @@ dans les deux sens : 69 en préversion, 100 en public.
 
 ### Les polices
 
-**Space Grotesk et JetBrains Mono** — celles du produit — auto-hébergées,
-régénérables :
+**Trois**, toutes auto-hébergées, aucune requête vers un tiers.
+
+**Space Grotesk et JetBrains Mono** sont celles du PRODUIT : elles habillent
+le texte courant, les étiquettes, la mosaïque des modules, les boutons — tout
+ce par quoi le site cite l'application.
+
+**Spectral** (Production Type, Paris) porte les TITRES, et eux seuls. Space
+Grotesk en gros titre sur une page de présentation est devenue l'une des
+signatures des pages générées, au même rang qu'Inter ; sur l'écran d'une
+application c'est sans conséquence, sur une page de vente c'est une
+signature. Le partage est vérifié par `verifier-navigateur.mjs` : le titre
+doit être en Spectral, le texte courant en Space Grotesk.
+
+Régénérables :
 
 ```sh
 pip install fonttools brotli      # une fois
@@ -174,7 +187,7 @@ générateur, qu'aucune image ne porte d'aplat de couleur (l'aperçu de partage
 a gardé l'ambre pendant huit versions sans que personne le voie), et que les
 listes de modules du site correspondent, nom pour nom, à celles du produit.
 
-**`verifier-navigateur.mjs`** lance **486 contrôles** : 9 pages × 5 largeurs (console du
+**`verifier-navigateur.mjs`** lance **489 contrôles** : 9 pages × 5 largeurs (console du
 navigateur, requêtes en échec, débordement horizontal, appels à des tiers),
 accessibilité (lien d'évitement, focus, contrastes calculés sur les couleurs
 réellement rendues, y compris sur la page prix), **le monochrome** (la teinte
@@ -251,8 +264,8 @@ Derniers relevés (v4, serveur compressé comme en production) :
 | Ordinateur, 6 pages | **100** | 100 | 100 | 100 | 0 |
 
 LCP mobile : 1,52 s sur l'accueil, 1,59 à 1,68 s sur les pages intérieures.
-La v6 ajoute ~10 Ko par page (le tracé des six nappes de télémétrie) et 80 à
-170 ms de LCP sur les pages intérieures. Le score reste à 100 et le CLS à 0,
+La v9 ajoute ~30 Ko à l'accueil (la capture du produit) et environ 300 ms de
+LCP sur téléphone bridé — le prix assumé pour montrer ce qu'on vend. Le score reste à 100 et le CLS à 0,
 mais **c'est une dégradation réelle, et elle est déclarée** : elle n'apparaît
 pas dans la note.
 
