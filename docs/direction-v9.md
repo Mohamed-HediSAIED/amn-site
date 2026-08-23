@@ -33,12 +33,50 @@ la police du **produit** — d'où le partage retenu plus bas.
 ### La preuve, à la place du décor
 
 La carte du monde et le bandeau « 10 / 5 / 48 h » sont partis. À leur
-place, **une vraie capture de l'application** — le registre des sites,
-avec ses notes internes, son horodatage et son auteur.
+place, **une vraie capture de l'application**.
 
 Sur téléphone, réduite à 358 px, elle devenait une tache grise : une
 image de logiciel illisible ne prouve rien, elle redevient du décor.
 Elle garde donc une largeur lisible et se balaye du doigt.
+
+**La première capture montrait le mauvais logiciel.** C'était le
+registre des sites — un écran de la console **interne** d'AMN, avec ses
+notes de supervision, son horodatage et son auteur. Un visiteur qui vient
+acheter voyait donc l'outil de celui qui vend, pas celui qu'il recevrait.
+Le produit a deux éditions (`src/edition/modules.business.ts` contre
+`modules.internal.ts`) et « Sites » n'existe que dans l'interne.
+
+La capture montre maintenant **l'accueil de l'édition Business** : les
+rendez-vous du jour, les tâches, les fiches clients, les raccourcis. Les
+cinq modules épinglés dans la colonne ne sont pas un choix de mise en
+scène — ce sont les `DEFAULT_FAVORITES` de l'édition Business, donc
+exactement ce qu'un client voit à sa première ouverture. Les six autres
+sont derrière « Tous les modules », comme chez lui.
+
+### Une capture qu'on peut refaire
+
+Une copie d'écran prise à la main est un fichier orphelin : personne ne
+sait comment elle a été obtenue, donc personne ne la refait, donc elle
+ment dès que l'écran change. `scripts/capture-produit.mjs` la reconstruit
+de bout en bout :
+
+1. un faux `amn-api` sur un port dédié, chargé d'une journée de
+   démonstration (Atelier Vasseur, trois clients, deux rendez-vous) ;
+2. la construction de l'édition Business du produit
+   (`AMN_EDITION=business`), puis `check-business-bundle.mjs` pour
+   vérifier qu'aucun écran interne n'a fuité dans le paquet ;
+3. le service du `dist/` obtenu, puis Chromium à 1400 × 745 avec
+   **l'horloge figée** à 8 h 45 — sans quoi « dans 45 min » et l'ordre
+   des rendez-vous changeraient à chaque exécution ;
+4. les deux JPEG, 1120 px et 560 px.
+
+Aucun fichier du produit n'est modifié. Le jeu de démonstration vit dans
+le script du site, pas dans le dépôt du logiciel.
+
+Les noms sont inventés et la légende le dit. Publier la vraie journée
+d'un vrai client serait une fuite de données, pas une preuve — c'est
+pour ça que `verifier-avant-mise-en-ligne.mjs` refuse désormais que la
+mention « démonstration » disparaisse de la légende.
 
 ### La séquence d'ouverture
 
@@ -105,20 +143,46 @@ contente de signaler revient au chantier suivant.
 
 ## Mesuré
 
-| | v8 | v9 |
-| --- | --- | --- |
-| Contrôles navigateur | 462 | **469** |
-| Contrôles de prose | 13 | 13 |
-| Contrôles « signes IA » | — | **16** |
-| Mots dans le contenu | 5 333 | **4 717** |
-| Performance / accessibilité / bonnes pratiques | 100 | **100** |
-| CLS | 0 | **0** |
-| LCP mobile — accueil | 1 517 ms | **1 817 ms** |
-| Poids de l'accueil | 105 Ko | **135 Ko** |
+| | v8 | v9 | v9 + capture client |
+| --- | --- | --- | --- |
+| Contrôles navigateur | 462 | 469 | **491** |
+| Contrôles de prose | 13 | 13 | **13** |
+| Contrôles « signes IA » | — | 16 | **32** |
+| Mots dans le contenu | 5 333 | **4 717** | 4 717 |
+| Performance / accessibilité / bonnes pratiques | 100 | 100 | **100** |
+| CLS | 0 | 0 | **0** |
+| LCP mobile — accueil | 1 517 ms | 1 817 ms | **1 811 ms** |
+| Poids de l'accueil (mobile) | 105 Ko | 135 Ko | **131 Ko** |
 
-Les 300 ms et les 30 Ko sont le prix de la capture du produit. C'est un
-échange assumé : le site montrait 0 image et pesait moins ; il montre
-maintenant ce qu'il vend.
+Les 300 ms sont le prix de la capture du produit. C'est un échange
+assumé : le site montrait 0 image et pesait moins ; il montre maintenant
+ce qu'il vend.
+
+### Un `srcset` qui ne servait à rien
+
+En remplaçant la capture, l'accueil est passé à 144 Ko sur mobile et la
+performance à **99**. La cause n'était pas les 6 Ko de plus du nouveau
+fichier : c'est que la version 560 px n'était jamais servie.
+
+La capture s'affiche sur ~358 px CSS au téléphone, mais un écran courant
+a 2 ou 3 pixels physiques par pixel CSS. Le navigateur cherche donc une
+source de 716 à 1074 px, et entre 560 et 1120 il prenait toujours la
+grande. Les 560 px ne servaient qu'aux densités 1 — c'est-à-dire à
+presque personne.
+
+Un palier à 800 px a ramené la performance à 100 et l'accueil à 131 Ko,
+soit **moins qu'avant l'ajout du palier**. Mesuré, densité par densité :
+
+| Densité | Avant | Après |
+| --- | --- | --- |
+| 1 | 560 | 560 |
+| 1,75 | 1120 | **800** |
+| 2 | 1120 | **800** |
+| 3 | 1120 | 1120 |
+
+La leçon tient en une ligne : une déclaration `srcset` peut être
+syntaxiquement juste et n'avoir aucun effet. Seul le fichier réellement
+demandé le dit — deux contrôles du navigateur le vérifient maintenant.
 
 Essai fait dans l'autre sens, pour ne pas payer deux fois : retirer le
 préchargement de JetBrains Mono libère 28 Ko pour l'image et gagne 43 ms
@@ -133,8 +197,6 @@ préchargement reste.
    partout.
 3. **Les sept champs des mentions légales**, quand la structure sera
    immatriculée.
-4. **Refaire la capture** avec un jeu de données présentable : on y lit
-   « Site de test » et la même note écrite deux fois.
 
 ## Sources
 

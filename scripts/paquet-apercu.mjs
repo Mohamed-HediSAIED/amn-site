@@ -79,7 +79,16 @@ for (const f of readdirSync(RACINE).filter((x) => x.endsWith('.html')).sort()) {
   let corps = src.slice(src.indexOf('>', src.indexOf('<body')) + 1, src.lastIndexOf('</body>'));
   corps = corps
     .replace(/<script[^>]*><\/script>/g, '')
-    .replace(/(?:src|srcset)="([^"]*\/assets\/[^"]*)"/g, (m, v) =>
+    /* `srcset` et `sizes` sont retirés AVANT l'intégration.
+
+       Dans un fichier autonome il n'y a plus de réseau : chaque candidat
+       serait recopié en base64 dans le document, et le navigateur en
+       choisirait un seul. La capture du produit était ainsi présente
+       quatre fois — la 1120 deux fois (src + srcset), plus la 800 et la
+       560 — soit 139 Ko de base64 pour une image affichée une fois.
+       Sans elles, 47 Ko, et le rendu est identique. */
+    .replace(/\s+(?:srcset|sizes)="[^"]*"/g, '')
+    .replace(/src="([^"]*\/assets\/[^"]*)"/g, (m, v) =>
       m.replace(v, v.replace(/\/assets\/[a-zA-Z0-9@._-]+/g, (a) => donnee(a))))
     .replace(/<!--[\s\S]*?-->/g, '');
   pages[chemin] = {

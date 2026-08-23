@@ -133,9 +133,16 @@
          par une IA : la machine n'a pas de produit à photographier,
          donc elle dessine des formes.
 
-         Ici il y a un produit. C'est le registre des sites de
-         l'application, capture d'écran non retouchée, avec ses données
-         de test — voir le rappel dans verifier-avant-mise-en-ligne. -->
+         C'est l'ÉDITION CLIENTE, celle qu'on livre — pas la console
+         interne. La première version de cette capture montrait le
+         registre des sites, qui vit dans modules.internal.ts : le site
+         affichait donc en grand l'outil qu'il promet deux pages plus
+         loin de ne PAS livrer.
+
+         Elle est produite en lançant le vrai build Business contre un
+         dos factice, sans modifier une ligne du produit
+         (scripts/capture-produit.mjs). Les données sont une journée de
+         démonstration, et la légende le dit. -->
     <figure class="capture">
       <!-- `tabindex="0"` n'est pas décoratif : sur téléphone ce cadre
            défile horizontalement, et un conteneur qui défile sans être
@@ -144,12 +151,12 @@
            d'écran ce qu'il tient. -->
       <div class="capture-cadre" tabindex="0" role="group"
            aria-label="Capture de l'application, défilement horizontal">
-      <img src="/assets/produit-registre.jpg" width="1120" height="512" loading="eager" decoding="async" fetchpriority="high"
-           srcset="/assets/produit-registre-560.jpg 560w, /assets/produit-registre.jpg 1120w"
+      <img src="/assets/produit-accueil.jpg" width="1120" height="596" loading="eager" decoding="async" fetchpriority="high"
+           srcset="/assets/produit-accueil-560.jpg 560w, /assets/produit-accueil-800.jpg 800w, /assets/produit-accueil.jpg 1120w"
            sizes="(min-width: 1200px) 1088px, calc(100vw - 32px)"
-           alt="Notre console de supervision : le registre des sites suivis, avec les notes internes et le score de chacun.">
+           alt="L'accueil de l'application : les deux rendez-vous du jour, les tâches en cours, les fiches clients et les raccourcis.">
       </div>
-      <figcaption>Notre console de supervision, celle qui reste chez nous. Votre espace, c'est <a href="/service">les onze modules</a>.</figcaption>
+      <figcaption>Votre espace, un matin ordinaire. Journée de démonstration&nbsp;: aucune donnée réelle.</figcaption>
     </figure>
     <div class="wrap colonne">
 

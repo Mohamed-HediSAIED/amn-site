@@ -227,7 +227,7 @@ function pixels(chemin) {
 }
 
 for (const img of ['assets/og.png', 'assets/icon-512.png', 'assets/apple-touch-icon.png',
-                   'assets/favicon-32.png', 'assets/produit-registre.jpg']) {
+                   'assets/favicon-32.png', 'assets/produit-accueil.jpg']) {
   const chemin = join(RACINE, img);
   if (!existsSync(chemin)) { t(`${img} existe`, false); continue; }
   if (img.endsWith('.jpg')) {

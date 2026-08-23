@@ -30,6 +30,14 @@ const html = Object.fromEntries(pages.map((p) => [p, readFileSync(join(RACINE, p
 /* Route publique correspondant à un fichier (cleanUrls). */
 const route = (f) => (f === 'index.html' ? '/' : '/' + f.replace(/\.html$/, ''));
 
+/* La légende de la capture, commentaires HTML retirés.
+
+   Sans ce retrait, un commentaire qui EXPLIQUE la règle suffit à la
+   faire passer : le mot cherché est dans le fichier, mais pas dans ce
+   que le visiteur lit. C'est arrivé ici même. */
+const legendeCapture = (src) =>
+  (src.replace(/<!--[\s\S]*?-->/g, '').match(/<figcaption[^>]*>([\s\S]*?)<\/figcaption>/i) || [, ''])[1];
+
 const origine = (html['index.html'].match(/<link rel="canonical" href="(https?:\/\/[^/"]+)/) || [])[1];
 
 /* Le MODE, lu une fois et tout de suite : il conditionne la sévérité de
@@ -291,17 +299,33 @@ if (!existsSync(join(RACINE, 'assets', 'og.png'))) {
   }
 
   /* La capture du produit est une VRAIE copie d'écran de
-     l'application, ce qui est tout l'intérêt. Elle porte donc les
-     données de test qui étaient à l'écran ce jour-là — « Site de
-     test », la même note écrite deux fois, un prénom. Ça se voit, et
-     ça se refait en dix minutes avec un jeu de données présentable. */
-  if (existsSync(join(RACINE, 'assets', 'produit-registre.jpg'))) {
-    todo(
-      'La capture du produit montre les données de TEST de l\'application.\n' +
-        '     On y lit « Site de test », une note en double et un prénom. Refaire la\n' +
-        '     capture avec un jeu de données présentable avant l\'ouverture publique,\n' +
-        '     puis relancer :  node scripts/verifier-signes-ia.mjs'
-    );
+     l'application, ce qui est tout l'intérêt — et le piège. Une image
+     réelle vieillit : le jour où l'accueil de l'application change, la
+     capture ment sans que rien ne casse. Elle se refait avec
+     scripts/capture-produit.mjs, qui reconstruit l'édition Business,
+     la sert, et la photographie sur une journée de démonstration.
+
+     Deux choses restent donc à vérifier ici : que l'image existe, et
+     qu'elle dit toujours qu'elle montre une démonstration. Une capture
+     de produit prise pour une vraie journée de travail d'un vrai
+     client serait une fuite de données, pas une preuve. */
+  {
+    const capture = join(RACINE, 'assets', 'produit-accueil.jpg');
+    if (!existsSync(capture)) {
+      todo(
+        'La capture du produit manque (assets/produit-accueil.jpg).\n' +
+          '     La refaire :  node scripts/capture-produit.mjs\n' +
+          '     Le script construit l\'édition Business du produit, la sert avec un\n' +
+          '     faux amn-api de démonstration, et photographie l\'accueil.'
+      );
+    } else if (!/démonstration/i.test(legendeCapture(html['index.html'] || ''))) {
+      todo(
+        'La capture du produit ne dit plus qu\'elle montre une démonstration.\n' +
+          '     La légende doit rester explicite : ce n\'est pas la journée d\'un\n' +
+          '     vrai client. Sans cette mention, l\'image se lit comme des données\n' +
+          '     réelles affichées en public.'
+      );
+    }
   }
 
   /* Le signe de crédibilité le plus cité dans les inventaires de sites

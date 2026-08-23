@@ -954,7 +954,7 @@ html:has(.console[open]) { overflow: hidden; }
 .capture img {
   width: 100%;
   height: auto;
-  aspect-ratio: 1120 / 512;
+  aspect-ratio: 1120 / 596;
   border: 1px solid var(--line);
   border-bottom: 0;
   border-radius: var(--r-2xl) var(--r-2xl) 0 0;
@@ -996,7 +996,7 @@ html:has(.console[open]) { overflow: hidden; }
   .capture img {
     width: 760px;
     max-width: none;
-    aspect-ratio: 1120 / 512;
+    aspect-ratio: 1120 / 596;
     -webkit-mask-image: none;
     mask-image: none;
     border: 1px solid var(--line);

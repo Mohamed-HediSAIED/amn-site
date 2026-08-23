@@ -53,7 +53,7 @@ temps à dire qu'il n'est pas fabriqué par une machine.
 
 ### Ce qui n'est PAS vérifié : les autres moteurs
 
-Les 489 contrôles tournent sur **Chromium uniquement**. Firefox et WebKit —
+Les 491 contrôles tournent sur **Chromium uniquement**. Firefox et WebKit —
 le moteur de Safari, donc de tous les navigateurs iPhone — ne sont pas
 installables dans l'environnement de développement : le proxy sortant bloque
 le domaine de téléchargement de Playwright.
@@ -187,7 +187,7 @@ générateur, qu'aucune image ne porte d'aplat de couleur (l'aperçu de partage
 a gardé l'ambre pendant huit versions sans que personne le voie), et que les
 listes de modules du site correspondent, nom pour nom, à celles du produit.
 
-**`verifier-navigateur.mjs`** lance **489 contrôles** : 9 pages × 5 largeurs (console du
+**`verifier-navigateur.mjs`** lance **491 contrôles** : 9 pages × 5 largeurs (console du
 navigateur, requêtes en échec, débordement horizontal, appels à des tiers),
 accessibilité (lien d'évitement, focus, contrastes calculés sur les couleurs
 réellement rendues, y compris sur la page prix), **le monochrome** (la teinte
@@ -198,7 +198,10 @@ seule par son URL, ouverture au clic et au clavier, Échap, retour du focus,
 reste de la page rendu inerte, défilement bloqué puis rendu, fonctionnement
 sans JavaScript jusqu'à la navigation effective, parallaxe absente sur écran
 tactile, mouvement réduit respecté, contrastes dans le panneau ouvert), la
-règle de section, **le formulaire réellement envoyé** (cas nominal, sans
+règle de section, **la capture du produit** (servie, décrite, légendée, et
+surtout dimensionnée — une image sans `width`/`height` fait sauter la page
+entière à son arrivée, et son cadre défilant doit être atteignable au clavier),
+**le formulaire réellement envoyé** (cas nominal, sans
 JavaScript, piège à robots, piège temporel, champ manquant, limite de
 fréquence, origine étrangère, corps démesuré, injection HTML), et les en-têtes
 de sécurité tels qu'ils sortent du serveur.
@@ -210,19 +213,31 @@ node scripts/paquet-apercu.mjs apercu.html
 ```
 
 Emballe les neuf pages, la feuille de style, le script, les trois polices et
-les images dans un seul fichier HTML autonome : aucune requête réseau une fois
-chargé. C'est une copie, pas le site déployé — un bandeau le dit, et le
-formulaire ne peut rien envoyer faute de serveur. Ajouter `--fragment` quand
+les images dans un seul fichier HTML autonome (~436 Ko) : aucune requête réseau
+une fois chargé. C'est une copie, pas le site déployé — un bandeau le dit, et
+le formulaire ne peut rien envoyer faute de serveur. Ajouter `--fragment` quand
 l'hôte fournit déjà son propre `<head>`.
+
+Les attributs `srcset` et `sizes` sont retirés à l'emballage. Sans réseau,
+chaque candidat serait recopié en base64 dans le document pour qu'un seul soit
+affiché : la capture du produit y figurait quatre fois, 139 Ko au lieu de 47.
 
 ### Générer
 
 ```sh
 node scripts/polices.mjs            # les trois polices, sous-ensembles latin
 node scripts/generer-images.mjs     # favicons + aperçu de partage
+node scripts/capture-produit.mjs    # la copie d'écran de l'accueil du produit
 python3 scripts/marque.py           # le logo AMN DEVSEC en SVG (non branché)
 node scripts/dater-sitemap.mjs      # les <lastmod> du plan, depuis git
 ```
+
+`capture-produit.mjs` demande le dépôt du produit à côté (`../amn-desktop`).
+Il construit **l'édition Business** — celle que reçoit un client, pas la console
+interne d'AMN —, la sert avec un faux `amn-api` chargé d'une journée de
+démonstration, fige l'horloge à 8 h 45 et photographie l'accueil. Aucun fichier
+du produit n'est touché. Refaire la capture le jour où l'accueil de
+l'application change : sinon l'image montre une version qui n'existe plus.
 
 `scripts/carte-du-monde.py` a produit la carte en pointillés du bandeau de la
 v7. Le bandeau a été retiré en v9 au profit d'une capture du produit : le
@@ -256,18 +271,31 @@ l'inclinaison au pointeur. Une image au-delà de 32 ms est une image sautée.
 Chaque geste est joué trois fois et toutes les images sont mises en commun :
 sur une seule passe, la pire image varie du simple au double.
 
-Derniers relevés (v4, serveur compressé comme en production) :
+Derniers relevés (serveur compressé comme en production) :
 
 | | Perf | A11y | Bonnes pratiques | SEO | CLS |
 | --- | --- | --- | --- | --- | --- |
-| Mobile, 6 pages | **100** | 100 | 100 | 100 | 0 |
-| Ordinateur, 6 pages | **100** | 100 | 100 | 100 | 0 |
+| Mobile, 6 pages | **100** | 100 | 100 | 69 | 0 |
+| Ordinateur, 6 pages | **100** | 100 | 100 | 69 | 0 |
 
-LCP mobile : 1,52 s sur l'accueil, 1,59 à 1,68 s sur les pages intérieures.
-La v9 ajoute ~30 Ko à l'accueil (la capture du produit) et environ 300 ms de
-LCP sur téléphone bridé — le prix assumé pour montrer ce qu'on vend. Le score reste à 100 et le CLS à 0,
-mais **c'est une dégradation réelle, et elle est déclarée** : elle n'apparaît
-pas dans la note.
+Le SEO à 69 est **voulu** : le site est en préversion, donc `noindex`. Il
+remonte à 100 avec `node scripts/preversion.mjs off`.
+
+LCP mobile : 1,81 s sur l'accueil, 1,51 à 1,66 s sur les pages intérieures.
+La capture du produit coûte ~300 ms de LCP sur téléphone bridé — le prix
+assumé pour montrer ce qu'on vend. Le score reste à 100 et le CLS à 0, mais
+**c'est une dégradation réelle, et elle est déclarée** : elle n'apparaît pas
+dans la note.
+
+**Piège vérifié, puis corrigé.** La capture n'avait que deux tailles, 560 et
+1120 px. Un téléphone l'affiche sur ~358 px CSS, mais son écran a 2 ou 3
+pixels physiques par pixel CSS : il lui faut 716 à 1074 px de source, et faute
+de palier intermédiaire il prenait toujours le 1120. L'accueil pesait 144 Ko
+sur mobile et la performance était tombée à 99. Un palier à 800 px l'a ramenée
+à 100 et l'accueil à **131 Ko** — plus léger qu'avant l'ajout du palier. Deux
+contrôles du navigateur mesurent maintenant le fichier réellement demandé aux
+densités 2 et 3 : une déclaration `srcset` peut avoir l'air juste et ne rien
+changer.
 
 **Règle apprise en v5, à ne pas réapprendre :** ne jamais faire de fondu
 d'opacité sur un bloc contenant du texte. Pendant le fondu, tout ce qu'il

@@ -1082,7 +1082,7 @@ console.log('3 ter. La capture du produit');
 {
   const page = await navigateur.newPage({ viewport: { width: 1440, height: 900 } });
   const codes = [];
-  page.on('response', (r) => { if (/produit-registre/.test(r.url())) codes.push(r.status()); });
+  page.on('response', (r) => { if (/produit-accueil/.test(r.url())) codes.push(r.status()); });
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
 
   const c = await page.evaluate(() => {
@@ -1107,13 +1107,39 @@ console.log('3 ter. La capture du produit');
   t('La capture a une légende', (c?.legende || 0) > 20, `${c?.legende} caractères`);
   t('La capture déclare ses dimensions', !!c?.largeurDeclaree && !!c?.hauteurDeclaree,
     `${c?.largeurDeclaree}x${c?.hauteurDeclaree}`);
-  t('La capture réserve sa place (aspect-ratio)', /1120\s*\/\s*512/.test(c?.ratioCss || ''), c?.ratioCss);
+  t('La capture réserve sa place (aspect-ratio)', /1120\s*\/\s*596/.test(c?.ratioCss || ''), c?.ratioCss);
   /* Servir 1120 px pour en afficher 400 serait du poids gaspillé ; en
      servir 600 pour en afficher 1100 serait flou. On vérifie que la
      source est au moins aussi large que l'affichage, sans excès. */
   t('La capture est servie à une taille raisonnable',
     (c?.naturelle || 0) >= (c?.affichee || 0) && (c?.naturelle || 0) <= (c?.affichee || 0) * 2.4,
     `${c?.naturelle}px servis pour ${c?.affichee}px affichés`);
+
+  /* Le `srcset` sert-il vraiment une image plus légère au téléphone ?
+
+     Piège mesuré ici : la capture avait deux tailles, 560 et 1120. Un
+     téléphone l'affiche sur ~358 px CSS, mais son écran a 2 ou 3 pixels
+     physiques par pixel CSS — il lui faut donc 716 à 1074 px de source,
+     et faute de palier intermédiaire il prenait TOUJOURS le 1120. La
+     petite version ne servait qu'aux densités 1, c'est-à-dire presque
+     personne, et Lighthouse mobile téléchargeait bien les 36 Ko.
+
+     Une déclaration `srcset` qui a l'air correcte peut donc n'avoir
+     aucun effet. Seul le fichier réellement demandé le dit, densité par
+     densité. */
+  for (const dpr of [2, 3]) {
+    const ctxD = await navigateur.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: dpr });
+    const pD = await ctxD.newPage();
+    const demandes = [];
+    pD.on('response', (r) => { if (/produit-accueil/.test(r.url())) demandes.push(r.url().split('/').pop()); });
+    await pD.goto(BASE + '/', { waitUntil: 'networkidle' });
+    /* À densité 3 la plus grande est légitime : 358 × 3 = 1074 px. À
+       densité 2 il faut 716 px, et servir 1120 est du gaspillage. */
+    const attendu = dpr === 3 ? /produit-accueil\.jpg/ : /produit-accueil-800\.jpg/;
+    t(`La capture sert la bonne taille à densité ${dpr}`,
+      demandes.length === 1 && attendu.test(demandes[0]), demandes.join(', ') || '(aucune)');
+    await ctxD.close();
+  }
 
   /* Sur téléphone la capture défile horizontalement. Un conteneur qui
      défile et qu'on ne peut pas atteindre au clavier est un mur pour
