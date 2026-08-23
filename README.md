@@ -165,11 +165,19 @@ pour recharger la fonction à chaque appel pendant qu'on l'édite.
 ### Vérifier avant de pousser
 
 ```sh
-node scripts/verifier-avant-mise-en-ligne.mjs   # 1 s, sans dépendance
+node scripts/verifier-avant-mise-en-ligne.mjs   # 1 s, lit aussi ../amn-desktop
 node scripts/verifier-prose.mjs                 # 1 s, sans dépendance
 node scripts/verifier-signes-ia.mjs             # 1 s, sans dépendance
 node scripts/verifier-navigateur.mjs            # ~4 min, Chromium réel
 ```
+
+`verifier-avant-mise-en-ligne.mjs` relit en plus le dépôt du produit quand il
+est à côté. Le site est le seul endroit où la promesse « vos données
+s'exportent » est ÉCRITE, donc le seul endroit d'où l'on remarque qu'elle a
+cessé d'être vraie — et elle l'avait été : `collectBackup` ne sauvegardait que
+neuf collections sur vingt et une. Le contrôle échoue si `backup.ts` cesse de
+dériver de `SYNCED_COLLECTIONS` ou perd sa restauration. Sans le dépôt sous la
+main, il le dit au lieu de conclure.
 
 Les trois premiers ne demandent rien et vont vite ; le dernier lance un vrai
 navigateur. Les quatre échouent au lieu d'avertir : un défaut qu'on se

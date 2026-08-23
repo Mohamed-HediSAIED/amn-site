@@ -341,16 +341,45 @@ if (!existsSync(join(RACINE, 'assets', 'og.png'))) {
     );
   }
 
-  /* Une dette qui appartient au PRODUIT, pas au site, mais que le site
-     paie : sa promesse anti-verrouillage vaut ce que vaut l'export. */
-  todo(
-    "L'export du produit est PARTIEL (dette côté amn-desktop).\n" +
-      '     src/lib/backup.ts ramène neuf collections sur la vingtaine que déclare\n' +
-      '     SyncedCollection : ni les factures, ni l\'agenda, ni les notes, ni les\n' +
-      '     médias, ni les rapports, ni les projets, ni le registre des sites.\n' +
-      '     Le site a cessé de promettre une « copie complète » — mais c\'est\n' +
-      '     l\'export qu\'il faudrait compléter, pas la phrase qu\'il fallait réduire.'
-  );
+  /* La promesse anti-verrouillage du site vaut ce que vaut l'export du
+     PRODUIT. Elle a déjà été fausse : `collectBackup` tenait sa propre liste
+     de collections, recopiée à la main, et elle avait cessé de suivre — neuf
+     collections sauvegardées sur vingt et une, dont six lues dans les
+     magasins d'avant la migration.
+
+     C'est corrigé côté produit, et gardé là-bas (`npm run check:backup`).
+     Ici on relit quand même le dépôt voisin quand il est présent : le site
+     est le seul endroit où la promesse est ÉCRITE, donc le seul endroit d'où
+     l'on remarque qu'elle a cessé d'être vraie. Sans le dépôt sous la main,
+     on le dit plutôt que de conclure. */
+  {
+    const promet = Object.values(html).some((src) => /s['’]exportent|export de vos données/i.test(src));
+    const voisin = ['/home/user/amn-desktop', join(RACINE, '..', 'amn-desktop')]
+      .find((d) => existsSync(join(d, 'src/lib/backup.ts')));
+    if (promet && !voisin) {
+      todo(
+        'Le site promet que les données s\'exportent — invérifiable d\'ici.\n' +
+          '     Le dépôt du produit n\'est pas à côté. Pour contrôler :\n' +
+          '     cd ../amn-desktop && npm run check:backup'
+      );
+    } else if (promet && voisin) {
+      const src = readFileSync(join(voisin, 'src/lib/backup.ts'), 'utf8');
+      /* Les deux motifs cherchent l'USAGE, pas le mot. Premiers essais :
+         `/SYNCED_COLLECTIONS/` était satisfait par la seule ligne d'import, et
+         `/export async function restoreBackup/` acceptait
+         `restoreBackupDESACTIVE`. Les deux versions cassées passaient. */
+      const derive = /SYNCED_COLLECTIONS\s*\.\s*map\b/.test(src);
+      const restaure = /export async function restoreBackup\s*\(/.test(src);
+      if (!derive || !restaure) {
+        ko(
+          'La promesse d\'export du site n\'est plus tenue par le produit : ' +
+            (derive ? '' : 'backup.ts ne dérive plus de SYNCED_COLLECTIONS ; ') +
+            (restaure ? '' : 'aucune restauration ; ') +
+            'voir amn-desktop, npm run check:backup.'
+        );
+      }
+    }
+  }
 
   const audio = ['accueil.m4a', 'accueil.mp3']
     .some((f) => existsSync(join(RACINE, 'assets', 'audio', f)));
