@@ -109,23 +109,30 @@
     <h1>Mentions légales</h1>
     <p class="lead">Informations prévues par l'article 6 de la loi n°&nbsp;2004-575 du 21 juin 2004 pour la confiance dans l'économie numérique.</p>
 
-    <!-- ⚠️ À COMPLÉTER PAR AARON AVANT LA MISE EN LIGNE PUBLIQUE.
+    <!-- ⚠️ NE PAS REMPLIR CETTE PAGE À LA MAIN.
+         Les valeurs vivent dans identite.json, à la racine, et sont posées
+         ici par :  node scripts/definir-identite.mjs --ecrire
+         Le script vérifie ce qu'il écrit — clé de contrôle du SIREN, cohérence
+         du numéro de TVA avec ce SIREN, champs exigés selon la forme juridique.
+         Écrit à la main, un SIREN faux passerait sans que rien ne le voie.
+
          Tant que les marqueurs .todo sont là, le site n'est pas conforme :
          c'est une obligation légale, et un gabarit visible en production est
          le premier signal de négligence pour un studio qui vend de la rigueur.
-         scripts/verifier-avant-mise-en-ligne.mjs les détecte. -->
+         scripts/verifier-avant-mise-en-ligne.mjs les détecte, les tolère en
+         préversion et les REFUSE dès que le site devient indexable. -->
 
     <h2>Éditeur du site</h2>
     <dl>
-      <dt>Raison sociale</dt><dd><span class="todo">à compléter</span></dd>
-      <dt>Forme juridique</dt><dd><span class="todo">à compléter</span></dd>
-      <dt>Siège social</dt><dd><span class="todo">à compléter</span></dd>
-      <dt>SIREN / SIRET</dt><dd><span class="todo">à compléter</span></dd>
-      <dt>Capital social</dt><dd><span class="todo">à compléter, ou « sans objet » pour une entreprise individuelle</span></dd>
-      <dt>TVA intracommunautaire</dt><dd><span class="todo">à compléter, ou « non applicable »</span></dd>
-      <dt>Directeur de la publication</dt><dd><span class="todo">à compléter</span></dd>
-      <dt>Téléphone</dt><dd><span class="todo">à compléter</span></dd>
-      <dt>Contact</dt><dd><span class="todo">adresse email à compléter</span> — en attendant, le <a href="/contact">formulaire de demande d'accès</a> est le canal de contact du site.</dd>
+      <dt>Raison sociale</dt><dd data-champ="raisonSociale"><span class="todo">à compléter</span> (le nom exact déposé, ou vos nom et prénom pour une entreprise individuelle)</dd>
+      <dt>Forme juridique</dt><dd data-champ="forme"><span class="todo">à compléter</span> (SASU, SARL, EURL, entreprise individuelle…)</dd>
+      <dt>Siège social</dt><dd data-champ="siege"><span class="todo">à compléter</span> (adresse complète, code postal et ville)</dd>
+      <dt>Immatriculation</dt><dd data-champ="immatriculation"><span class="todo">à compléter</span> (SIREN à 9 chiffres, et la ville du greffe pour une société)</dd>
+      <dt>Capital social</dt><dd data-champ="capital"><span class="todo">à compléter</span> (le montant statutaire, ou « sans objet » pour une entreprise individuelle)</dd>
+      <dt>TVA intracommunautaire</dt><dd data-champ="tva"><span class="todo">à compléter</span> (FR + clé + SIREN, ou la mention de franchise si vous n'y êtes pas assujetti)</dd>
+      <dt>Directeur de la publication</dt><dd data-champ="directeurPublication"><span class="todo">à compléter</span> (la personne physique responsable du contenu)</dd>
+      <dt>Téléphone</dt><dd data-champ="telephone"><span class="todo">à compléter</span> (un numéro réellement joignable)</dd>
+      <dt>Contact</dt><dd data-champ="email"><span class="todo">adresse email à compléter</span> — en attendant, le <a href="/contact">formulaire de demande d'accès</a> est le canal de contact du site.</dd>
       <dt>Données personnelles</dt><dd>L'éditeur ci-dessus est le responsable du traitement au sens du RGPD. Les demandes d'accès, de rectification ou d'effacement se font à la même adresse&nbsp;; le détail est dans la <a href="/confidentialite">politique de confidentialité</a>.</dd>
     </dl>
 

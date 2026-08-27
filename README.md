@@ -230,6 +230,27 @@ Les attributs `srcset` et `sizes` sont retirés à l'emballage. Sans réseau,
 chaque candidat serait recopié en base64 dans le document pour qu'un seul soit
 affiché : la capture du produit y figurait quatre fois, 139 Ko au lieu de 47.
 
+### Remplir l'identité légale
+
+Trois pages attendent des informations que le code ne peut pas inventer : les
+mentions légales, la signature de la page À propos, et le fondement juridique
+de deux transferts hors UE. Tout tient dans `identite.json`, à la racine.
+
+```sh
+node scripts/definir-identite.mjs            # dit ce qui manque, n'écrit rien
+node scripts/definir-identite.mjs --ecrire   # pose les valeurs dans les pages
+```
+
+Le script **vérifie ce qu'il écrit** : clé de contrôle du SIREN (algorithme de
+Luhn), cohérence du numéro de TVA avec ce SIREN, format du téléphone et du code
+postal, capital exigé pour une société et refusé pour une entreprise
+individuelle, mention « EI » ajoutée d'office, formule exacte de la franchise en
+base. À la main, un SIREN dont deux chiffres sont inversés part en production
+sans que rien ne le regarde.
+
+Mode d'emploi champ par champ, et où trouver chaque information :
+[`docs/identite.md`](docs/identite.md).
+
 ### Générer
 
 ```sh

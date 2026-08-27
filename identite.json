@@ -1,0 +1,67 @@
+{
+  "_lisezmoi": [
+    "LE SEUL FICHIER À REMPLIR pour rendre le site conforme.",
+    "Remplissez, puis :  node scripts/definir-identite.mjs        (dit ce qui manque, n'écrit rien)",
+    "                    node scripts/definir-identite.mjs --ecrire (pose les valeurs dans les pages)",
+    "Le script vérifie ce qu'il écrit : clé de contrôle du SIREN, cohérence du numéro de TVA",
+    "avec ce SIREN, champs exigés selon la forme juridique. Un SIREN faux ne passe pas.",
+    "Où trouver ces informations : docs/identite.md"
+  ],
+
+  "editeur": {
+    "_forme": "Une valeur parmi : SASU, SAS, SARL, EURL, SCI, entreprise individuelle, micro-entreprise",
+    "forme": "",
+
+    "_raisonSociale": "Société : la dénomination exacte des statuts, SANS la forme juridique. Entreprise individuelle : vos prénom et nom.",
+    "raisonSociale": "",
+
+    "_capitalEuros": "Société : le montant statutaire en euros, un nombre (ex. 1000). Entreprise individuelle : laissez null.",
+    "capitalEuros": null,
+
+    "_siren": "9 chiffres, sans espaces. Sur l'avis de situation INSEE, ou annuaire-entreprises.data.gouv.fr",
+    "siren": "",
+
+    "_rcsVille": "Société : la ville du greffe (ex. Lille). Entreprise individuelle NON commerçante : laissez vide.",
+    "rcsVille": "",
+
+    "_tva": "Le numéro complet (ex. FR40123456824). Si vous êtes en franchise en base, mettez exactement : franchise",
+    "tva": "",
+
+    "_siege": "L'adresse du siège. Le pays n'est à changer que si le siège n'est pas en France.",
+    "siege": { "voie": "", "codePostal": "", "ville": "", "pays": "France" },
+
+    "_telephone": "Un numéro RÉELLEMENT joignable, format français (ex. 03 20 00 00 00) ou international (+33 3 20 00 00 00).",
+    "telephone": "",
+
+    "_email": "L'adresse de contact publiée. Elle recevra aussi les demandes RGPD.",
+    "email": "",
+
+    "_directeurPublication": "La personne physique responsable du contenu. Souvent le dirigeant. Prénom et nom.",
+    "directeurPublication": ""
+  },
+
+  "_signature": "Page À propos. Le manque de nom est le défaut de crédibilité le plus cité sur les sites d'entreprise — ces quatre lignes comptent autant que les mentions légales.",
+  "signature": {
+    "_qui": "Prénom et nom de la personne qui répond réellement aux demandes.",
+    "qui": "",
+    "_role": "Ce qu'elle fait, en trois mots. Ex. : supervision et développement.",
+    "role": "",
+    "_ou": "La ville. Ex. : Lille.",
+    "ou": "",
+    "_depuis": "L'année de début d'activité. Ex. : 2024.",
+    "depuis": ""
+  },
+
+  "_sousTraitants": [
+    "Page confidentialité, transferts hors UE. À RELEVER dans le contrat de sous-traitance (DPA)",
+    "de chaque prestataire, pas à deviner. Valeurs acceptées :",
+    "  ccts     — clauses contractuelles types de la Commission européenne",
+    "  dpf      — adhésion au cadre de protection des données UE–États-Unis (Data Privacy Framework)",
+    "  dpf+ccts — les deux",
+    "Vercel : vercel.com/legal/dpa   ·   Resend : resend.com/legal/dpa"
+  ],
+  "sousTraitants": {
+    "vercel": "",
+    "resend": ""
+  }
+}
